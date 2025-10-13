@@ -1,0 +1,19 @@
+.home_search {
+  display: flex;
+  height: 12vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  min-height: 120px;
+  .description {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  .search-bar {
+    max-width: 600px;
+    width: 100%;
+  }
+}

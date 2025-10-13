@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import "./styles/globals.css";
+import "@/styles/globals.css";
 import { I18nProvider } from "@/lib/i18n/i18n";
 import { ConfigProvider } from "antd";
 
