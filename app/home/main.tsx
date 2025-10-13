@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Spin, Empty } from "antd";
+import { Spin, Empty, Tabs, TabsProps, List } from "antd";
 import { SpaceCard } from "@/components/space/card";
-import { Space, SpaceState, FrequencyInterval } from "@/lib/std/space";
-import styles from "@/styles/space_card.module.scss";
+import {
+  Space,
+  SpaceState,
+  FrequencyInterval,
+  SpaceType,
+} from "@/lib/std/space";
+import styles from "@/styles/home_main.module.scss";
 
 // Mock data for demonstration
 const mockSpaces: Space[] = [
@@ -27,10 +32,10 @@ const mockSpaces: Space[] = [
     online_count: 45,
     url: "https://example.com/space1",
     images: [],
-    is_public: true,
+    ty: SpaceType.Tech,
   },
   {
-    id: "2", 
+    id: "2",
     name: "创业分享会",
     desc: "创业经验分享，投资人见面会，商业模式讨论。适合创业者、投资人和对创业感兴趣的朋友。",
     created_at: Date.now() / 1000,
@@ -46,9 +51,9 @@ const mockSpaces: Space[] = [
     state: SpaceState.Waiting,
     sub_count: 580,
     online_count: 0,
-    url: "https://example.com/space2", 
+    url: "https://example.com/space2",
     images: [],
-    is_public: false,
+    ty: SpaceType.Meeting,
   },
   {
     id: "3",
@@ -61,14 +66,14 @@ const mockSpaces: Space[] = [
       interval: FrequencyInterval.Daily,
     },
     fee: 0,
-    owner_id: "user3", 
+    owner_id: "user3",
     owner_name: "王五",
     state: SpaceState.Active,
     sub_count: 890,
     online_count: 67,
     url: "https://example.com/space3",
     images: [],
-    is_public: true,
+    ty: SpaceType.Class,
   },
   {
     id: "4",
@@ -88,14 +93,14 @@ const mockSpaces: Space[] = [
     online_count: 0,
     url: "https://example.com/space4",
     images: [],
-    is_public: false,
+    ty: SpaceType.Hobbies,
   },
   {
     id: "5",
     name: "语言学习角",
     desc: "多语言学习交流，包括英语、日语、韩语等，与native speaker对话练习。",
     created_at: Date.now() / 1000,
-    start_at: Date.now() / 1000 + 600, // 10 minutes from now  
+    start_at: Date.now() / 1000 + 600, // 10 minutes from now
     end_at: Date.now() / 1000 + 4200, // 70 minutes from now
     freq: {
       interval: FrequencyInterval.Flexible,
@@ -109,7 +114,7 @@ const mockSpaces: Space[] = [
     online_count: 12,
     url: "https://example.com/space5",
     images: ["/images/language-space.jpg"],
-    is_public: true,
+    ty: SpaceType.Class,
   },
   {
     id: "6",
@@ -130,7 +135,7 @@ const mockSpaces: Space[] = [
     online_count: 0,
     url: "https://example.com/space6",
     images: ["/images/fitness-space.jpg"],
-    is_public: false,
+    ty: SpaceType.Hobbies,
   },
 ];
 
@@ -143,7 +148,7 @@ export function DisplaySpaces() {
     const loadSpaces = async () => {
       setLoading(true);
       // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setSpaces(mockSpaces);
       setLoading(false);
     };
@@ -151,33 +156,89 @@ export function DisplaySpaces() {
     loadSpaces();
   }, []);
 
+  const onChange = (key: string) => {
+    console.log(key);
+  };
+
+  const items: TabsProps["items"] = [
+    {
+      key: "all",
+      label: "全部",
+      children: (
+        <List
+          grid={{ gutter: 20, column: 3 }}
+          dataSource={spaces}
+          renderItem={(space) => (
+            <List.Item>
+                <SpaceCard key={space.id} {...space} />
+            </List.Item>
+          )}
+        ></List>
+      ),
+    },
+    {
+      key: SpaceType.Meeting,
+      label: "会议",
+      children: (
+        <div className={styles.spaceGrid}>
+          {spaces.map((space) => (
+            <SpaceCard key={space.id} {...space} />
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: SpaceType.Class,
+      label: "课程",
+      children: (
+        <div className={styles.spaceGrid}>
+          {spaces.map((space) => (
+            <SpaceCard key={space.id} {...space} />
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: SpaceType.Hobbies,
+      label: "兴趣",
+      children: <div className={styles.spaceGrid}></div>,
+    },
+    {
+      key: SpaceType.Tech,
+      label: "技术",
+      children: <div className={styles.spaceGrid}></div>,
+    },
+  ];
+
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '200px' 
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "200px",
+        }}
+      >
         <Spin size="large" />
       </div>
     );
   }
 
   if (spaces.length === 0) {
-    return (
-      <Empty 
-        description="暂无空间"
-        style={{ margin: '40px 0' }}
-      />
-    );
+    return <Empty description="暂无空间" style={{ margin: "40px 0" }} />;
   }
 
   return (
-    <div className={styles.spaceGrid}>
-      {spaces.map((space) => (
-        <SpaceCard key={space.id} {...space} />
-      ))}
+    <div className={styles.space}>
+      <div className={styles.space_tabs}>
+        <Tabs
+        size="large"
+        defaultActiveKey="1"
+        items={items}
+        onChange={onChange}
+      />
+      </div>
     </div>
   );
 }

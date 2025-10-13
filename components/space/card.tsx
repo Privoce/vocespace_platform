@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "antd";
+import { Button, Card, Tag } from "antd";
 import {
   UserOutlined,
   EyeOutlined,
@@ -29,16 +29,14 @@ export function SpaceCard({
   online_count,
   url,
   images,
-  is_public,
 }: SpaceCardProps) {
-  
   const formatFrequency = (frequency: any) => {
     switch (frequency.interval) {
       case FrequencyInterval.Daily:
         return "每天";
       case FrequencyInterval.Weekly:
-        return frequency.in_week?.length > 1 
-          ? `每周${frequency.in_week.length}天` 
+        return frequency.in_week?.length > 1
+          ? `每周${frequency.in_week.length}天`
           : "每周";
       case FrequencyInterval.Monthly:
         return "每月";
@@ -62,7 +60,7 @@ export function SpaceCard({
     const duration = end_at - start_at;
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration % 3600) / 60);
-    
+
     if (hours > 0) {
       return minutes > 0 ? `${hours}小时${minutes}分钟` : `${hours}小时`;
     }
@@ -72,48 +70,42 @@ export function SpaceCard({
   const handleJoinSpace = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Handle join space logic
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   const handleCardClick = () => {
     // Navigate to space detail page
-    console.log('Navigate to space:', id);
+    console.log("Navigate to space:", id);
   };
 
-  const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' font-family='Arial, sans-serif' font-size='14' fill='%23999'%3E空间封面图%3C/text%3E%3C/svg%3E";
-  const spaceImage = images && images.length > 0 ? images[0] : defaultImage;
+  const defaultImage =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' font-family='Arial, sans-serif' font-size='14' fill='%23999'%3E空间封面图%3C/text%3E%3C/svg%3E";
+  const spaceImage =
+    images && images.length > 0 ? images[0] : "/images/default_intro.png";
 
   return (
-    <div className={styles.spaceCard} onClick={handleCardClick}>
+    <Card
+      className={styles.spaceCard}
+      onClick={handleCardClick}
+      styles={{ body: { padding: 0 } }}
+    >
       <div className={styles.imageSection}>
-        <img 
-          src={spaceImage} 
+        <img
+          src={spaceImage}
           alt={name}
           onError={(e) => {
             e.currentTarget.src = defaultImage;
           }}
         />
-        
-        <div className={`${styles.statusBadge} ${styles[state.toLowerCase()]}`}>
-          {state === SpaceState.Active ? "活跃" : "等待中"}
-        </div>
-        
-        <div className={`${styles.feeTag} ${is_public && fee === 0 ? styles.free : ""}`}>
-          {is_public && fee === 0 ? "免费" : `¥${fee}`}
+
+        <div className={`${styles.feeTag} ${fee === 0 ? styles.free : ""}`}>
+          {fee === 0 ? "免费" : `¥${fee}`}
         </div>
       </div>
 
       <div className={styles.content}>
         <div className={styles.header}>
           <h3 className={styles.spaceName}>{name}</h3>
-          <Button 
-            type="primary" 
-            size="small"
-            className={styles.joinButton}
-            onClick={handleJoinSpace}
-          >
-            加入空间
-          </Button>
         </div>
 
         <p className={styles.description}>{desc}</p>
@@ -125,7 +117,8 @@ export function SpaceCard({
           </div>
           <div className={styles.timeInfo}>
             <ClockCircleOutlined className={styles.icon} />
-            {formatTime(start_at)} - {formatTime(end_at)} (持续 {formatDuration()})
+            {formatTime(start_at)} - {formatTime(end_at)} (持续{" "}
+            {formatDuration()})
           </div>
         </div>
 
@@ -140,18 +133,26 @@ export function SpaceCard({
             <span className={styles.value}>{online_count}</span>
             <span>在线</span>
           </div>
-          {!is_public && (
-            <div className={styles.statItem}>
-              <DollarOutlined className={styles.icon} />
-              <span className={styles.value}>¥{fee}</span>
-            </div>
-          )}
+          <div className={styles.statItem}>
+            <DollarOutlined className={styles.icon} />
+            <span className={styles.value}>¥{fee}</span>
+          </div>
         </div>
 
         <div className={styles.owner}>
           空间所有者: <span className={styles.ownerName}>{owner_name}</span>
         </div>
+        <div className={styles.card_line}>
+          <span>状态:</span>
+          <Tag bordered={false} color={state === SpaceState.Active ? "success" : "warning"}>
+            {" "}
+            {state === SpaceState.Active ? "活跃" : "等待中"}
+          </Tag>
+        </div>
+        <Button block type="primary" onClick={handleJoinSpace}>
+          加入空间
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

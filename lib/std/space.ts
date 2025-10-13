@@ -17,6 +17,13 @@ export enum SpaceState {
   Waiting = "waiting",
 }
 
+export enum SpaceType {
+  Meeting = "meeting",
+  Class = "class",
+  Hobbies = "hobbies",
+  Tech = "tech",
+}
+
 export interface Space {
   id: string;
   name: string;
@@ -39,8 +46,5 @@ export interface Space {
    * Array of image URLs
    */
   images: string[];
-  /**
-   * Whether the space is public or requires payment
-   */
-  is_public: boolean;
+  ty: SpaceType | string;
 }

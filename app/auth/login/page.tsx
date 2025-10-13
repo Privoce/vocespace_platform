@@ -1,17 +1,24 @@
 "use client";
 import { LoginForm } from "@/components/login-form";
 import styles from "@/styles/login.module.scss";
-import { GoogleOutlined } from "@ant-design/icons";
+import {
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  GoogleOutlined,
+} from "@ant-design/icons";
 import { Button, Divider, Input } from "antd";
 import { useState } from "react";
 
-
 export default function Page() {
-
   const [isSignUp, setIsSignUp] = useState(false);
-  
-  const changeToSignUp = () => {
-    setIsSignUp(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const signInOrUp = () => {
+    if (isSignUp) {
+      console.log("sign up", email, password);
+    }else{
+      console.log("sign in", email, password);
+    }
   };
 
   return (
@@ -43,38 +50,72 @@ export default function Page() {
           <div className={styles.login_left_main_form}>
             <div className={styles.login_form_input}>
               <div className={styles.login_form_input_title}>邮箱</div>
-              <Input size="large" placeholder="请输入邮箱" />
+              <Input
+                size="large"
+                placeholder="请输入邮箱"
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
 
             <div className={styles.login_form_input}>
               <div className={styles.login_form_input_title}>
                 <span>密码</span>
-                <a
-                  href="/auth/forget-password"
-                 style={{color: "#22ccee"}}
-                >
+                <a href="/auth/forget-password" style={{ color: "#22ccee" }}>
                   忘记密码？
                 </a>
               </div>
 
-              <Input size="large" placeholder="请输入密码" />
+              <Input.Password
+                onChange={(e) => setPassword(e.target.value)}
+                size="large"
+                placeholder="请输入密码"
+                iconRender={(visible) =>
+                  visible ? (
+                    <EyeOutlined
+                      style={{
+                        color: "#22ccee",
+                      }}
+                    />
+                  ) : (
+                    <EyeInvisibleOutlined
+                      style={{
+                        color: "#22ccee",
+                      }}
+                    />
+                  )
+                }
+              />
             </div>
 
-            <Button size="large" block type="primary">
-              登录
+            <Button size="large" block type="primary" onClick={signInOrUp}>
+              {isSignUp ? "注册" : "登录"}
             </Button>
           </div>
-          <div className={styles.login_left_main_signup}>
-            还没有账号？
-            <a
-              onClick={changeToSignUp}
-              style={{
-                color: "#22ccee",
-              }}
-            >
-              注册一个
-            </a>
-          </div>
+          {isSignUp ? (
+            <div className={styles.login_left_main_signup}>
+              以经有账号了？
+              <a
+                onClick={() => setIsSignUp(false)}
+                style={{
+                  color: "#22ccee",
+                }}
+              >
+                立即登录
+              </a>
+            </div>
+          ) : (
+            <div className={styles.login_left_main_signup}>
+              还没有账号？
+              <a
+                onClick={() => setIsSignUp(true)}
+                style={{
+                  color: "#22ccee",
+                }}
+              >
+                注册一个
+              </a>
+            </div>
+          )}
         </main>
         <footer className={styles.login_left_footer}>
           © 2025 VoceSpace, Inc. 保留所有权利。

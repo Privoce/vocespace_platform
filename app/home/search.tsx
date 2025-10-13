@@ -19,7 +19,7 @@ export function HomeSearch() {
         size="large"
         placeholder="input search text"
         onSearch={onSearch}
-        style={{ width: "60%" }}
+        style={{ width: "60%", maxWidth: "1080px" }}
         enterButton
         allowClear
       />
