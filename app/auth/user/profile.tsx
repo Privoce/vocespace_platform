@@ -12,6 +12,7 @@ import {
   message,
   Dropdown,
   MenuProps,
+  List,
 } from "antd";
 import {
   EditOutlined,
@@ -36,18 +37,24 @@ import { Pie } from "@ant-design/charts";
 import { HomeHeader } from "@/app/home/header";
 import { SpaceCard } from "@/components/space/card";
 import { User, UserStats } from "@/lib/std/user";
-import { Space, SpaceType, SpaceState, FrequencyInterval } from "@/lib/std/space";
+import {
+  Space,
+  SpaceType,
+  SpaceState,
+  FrequencyInterval,
+} from "@/lib/std/space";
 import styles from "./UserProfile.module.scss";
 import dayjs from "dayjs";
+import { VocespaceLogo } from "@/components/widget/logo";
 
 // Mock用户数据
 const mockUser: User = {
   id: "user1",
   username: "张三",
   email: "zhangsan@example.com",
-  avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+  avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=syf",
   bio: "热爱技术的全栈开发者，专注于前端和后端开发。喜欢分享技术心得，参与开源项目。",
-  created_at: Date.now() / 1000 - 365 * 24 * 3600, // 1年前
+  created_at: Date.now() / 1000 - 55 * 24 * 3600,
   updated_at: Date.now() / 1000,
   location: "北京，中国",
   website: "https://zhangsan.dev",
@@ -71,9 +78,24 @@ const mockUserStats: UserStats = {
   },
   activity_heatmap: generateMockHeatmapData(),
   monthly_stats: [
-    { month: "2024-01", spaces_created: 1, spaces_joined: 5, total_duration: 20 },
-    { month: "2024-02", spaces_created: 0, spaces_joined: 8, total_duration: 35 },
-    { month: "2024-03", spaces_created: 2, spaces_joined: 12, total_duration: 45 },
+    {
+      month: "2024-01",
+      spaces_created: 1,
+      spaces_joined: 5,
+      total_duration: 20,
+    },
+    {
+      month: "2024-02",
+      spaces_created: 0,
+      spaces_joined: 8,
+      total_duration: 35,
+    },
+    {
+      month: "2024-03",
+      spaces_created: 2,
+      spaces_joined: 12,
+      total_duration: 45,
+    },
   ],
   overview: {
     total_spaces_created: 5,
@@ -117,19 +139,19 @@ const mockUserSpaces: Space[] = [
 function generateMockHeatmapData() {
   const data = [];
   const today = dayjs();
-  
+
   for (let i = 0; i < 365; i++) {
     const date = today.subtract(i, "day");
     const count = Math.floor(Math.random() * 5); // 0-4的随机数
     const duration = count * (20 + Math.floor(Math.random() * 40)); // 20-60分钟
-    
+
     data.push({
       date: date.format("YYYY-MM-DD"),
       count,
       duration,
     });
   }
-  
+
   return data.reverse();
 }
 
@@ -151,7 +173,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
   const loadUserData = async () => {
     setLoading(true);
     // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     // 在实际应用中，这里会根据userId获取用户数据
     setLoading(false);
   };
@@ -171,8 +193,8 @@ export default function UserProfile({ userId }: UserProfileProps) {
       onOk: async () => {
         try {
           // 模拟API调用
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setUserSpaces(prev => prev.filter(space => space.id !== spaceId));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          setUserSpaces((prev) => prev.filter((space) => space.id !== spaceId));
           message.success("空间删除成功");
         } catch (error) {
           message.error("删除失败");
@@ -184,10 +206,12 @@ export default function UserProfile({ userId }: UserProfileProps) {
   // 空间类型偏好图表配置
   const pieConfig = {
     appendPadding: 10,
-    data: Object.entries(userStats.space_type_preferences).map(([type, value]) => ({
-      type: getSpaceTypeName(type as SpaceType),
-      value,
-    })),
+    data: Object.entries(userStats.space_type_preferences).map(
+      ([type, value]) => ({
+        type: getSpaceTypeName(type as SpaceType),
+        value,
+      })
+    ),
     angleField: "value",
     colorField: "type",
     radius: 0.8,
@@ -217,15 +241,15 @@ export default function UserProfile({ userId }: UserProfileProps) {
     return 4;
   };
 
-  const spaceActions: MenuProps['items'] = [
+  const spaceActions: MenuProps["items"] = [
     {
-      key: 'edit',
-      label: '编辑空间',
+      key: "edit",
+      label: "编辑空间",
       icon: <EditOutlined />,
     },
     {
-      key: 'delete',
-      label: '删除空间',
+      key: "delete",
+      label: "删除空间",
       icon: <DeleteOutlined />,
       danger: true,
     },
@@ -234,37 +258,34 @@ export default function UserProfile({ userId }: UserProfileProps) {
   return (
     <div className={styles.userProfile}>
       <HomeHeader />
-      
+
       <div className={styles.container}>
         {/* 个人资料头部 */}
-        <div className={styles.profileHeader}>
+        <Card className={styles.profileHeader}>
           <div className={styles.headerContent}>
             <div className={styles.avatarSection}>
-              <Avatar 
-                size={120} 
+              <Avatar
+                size={120}
                 src={user.avatar_url}
                 className={styles.avatar}
               >
                 {user.username?.[0]}
               </Avatar>
-              <Button 
-                size="small" 
+              <Button
                 icon={<EditOutlined />}
-                className={styles.editAvatarBtn}
+                type="default"
                 onClick={handleEditProfile}
               >
                 编辑头像
               </Button>
             </div>
-            
+
             <div className={styles.profileInfo}>
               <h1 className={styles.username}>{user.username}</h1>
-              <div className={styles.email}>{user.email}</div>
-              
-              {user.bio && (
-                <div className={styles.bio}>{user.bio}</div>
-              )}
-              
+              {/* <div className={styles.email}>{user.email}</div> */}
+
+              {user.bio && <div className={styles.bio}>{user.bio}</div>}
+
               <div className={styles.metaInfo}>
                 <div className={styles.metaItem}>
                   <CalendarOutlined className={styles.icon} />
@@ -278,66 +299,72 @@ export default function UserProfile({ userId }: UserProfileProps) {
                 )}
                 {user.website && (
                   <div className={styles.metaItem}>
-                    <GlobalOutlined className={styles.icon} />
-                    <a href={user.website} target="_blank" rel="noopener noreferrer">
-                      个人网站
+                    <VocespaceLogo></VocespaceLogo>
+                    <a
+                      href={user.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      个人Vocespace
                     </a>
                   </div>
                 )}
               </div>
-              
+
               {user.social_links && (
                 <div className={styles.socialLinks}>
                   {user.social_links.github && (
                     <Tooltip title="GitHub">
-                      <a 
-                        href={user.social_links.github} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <GithubOutlined />
-                      </a>
+                      <Button type="default">
+                        <a
+                          href={user.social_links.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <GithubOutlined />
+                        </a>
+                      </Button>
                     </Tooltip>
                   )}
                   {user.social_links.twitter && (
                     <Tooltip title="Twitter">
-                      <a 
-                        href={user.social_links.twitter} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <TwitterOutlined />
-                      </a>
+                      <Button type="default">
+                        <a
+                          href={user.social_links.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <TwitterOutlined />
+                        </a>
+                      </Button>
                     </Tooltip>
                   )}
                   {user.social_links.linkedin && (
                     <Tooltip title="LinkedIn">
-                      <a 
-                        href={user.social_links.linkedin} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <LinkedinOutlined />
-                      </a>
+                      <Button type="default">
+                        <a
+                          href={user.social_links.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <LinkedinOutlined />
+                        </a>
+                      </Button>
                     </Tooltip>
                   )}
                 </div>
               )}
             </div>
-            
+
             <div className={styles.profileActions}>
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 icon={<EditOutlined />}
-                className={styles.editProfileBtn}
                 onClick={handleEditProfile}
               >
                 编辑资料
               </Button>
-              <Button 
+              <Button
                 icon={<SettingOutlined />}
                 onClick={() => message.info("设置功能待实现")}
               >
@@ -345,86 +372,123 @@ export default function UserProfile({ userId }: UserProfileProps) {
               </Button>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* 统计数据卡片 */}
         <div className={styles.profileStats}>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>{userStats.overview.total_spaces_created}</div>
+          <Card className={styles.statCard}>
+            <div className={styles.statValue}>
+              {userStats.overview.total_spaces_created}
+            </div>
             <div className={styles.statLabel}>创建空间</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>{userStats.overview.total_spaces_subscribed}</div>
+          </Card>
+          <Card className={styles.statCard}>
+            <div className={styles.statValue}>
+              {userStats.overview.total_spaces_subscribed}
+            </div>
             <div className={styles.statLabel}>订阅空间</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>{userStats.overview.total_participation_hours}h</div>
+          </Card>
+          <Card className={styles.statCard}>
+            <div className={styles.statValue}>
+              {userStats.overview.total_participation_hours}h
+            </div>
             <div className={styles.statLabel}>参与时长</div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statValue}>{userStats.overview.current_streak_days}</div>
+          </Card>
+          <Card className={styles.statCard}>
+            <div className={styles.statValue}>
+              {userStats.overview.current_streak_days}
+            </div>
             <div className={styles.statLabel}>连续天数</div>
-          </div>
+          </Card>
         </div>
 
         {/* 主要内容区域 */}
         <div className={styles.contentGrid}>
           <div className={styles.mainContent}>
+            {/* 我的空间 */}
+            <Card className={styles.sectionCard}>
+              <div className={styles.sectionCard_inner}>
+                <div className={styles.sectionTitle}>
+                  <TeamOutlined className={styles.icon} />
+                  我创建的空间 ({userSpaces.length})
+                </div>
+
+                <div className={styles.userSpacesList}>
+                  <List
+                    dataSource={userSpaces}
+                    renderItem={(item) => (
+                      <List.Item>
+                        <SpaceCard {...item} cardType="edit" />
+                      </List.Item>
+                    )}
+                  ></List>
+                </div>
+              </div>
+            </Card>
             {/* 参与活动热力图 */}
-            <div className={styles.sectionCard}>
+            <Card className={styles.sectionCard}>
               <div className={styles.sectionTitle}>
                 <FireOutlined className={styles.icon} />
                 参与活动热力图
               </div>
-              
+
               <div className={styles.activityCalendar}>
                 <div className={styles.calendarHeader}>
                   <span>过去一年的活动情况</span>
                   <div className={styles.yearNav}>
-                    <Button 
-                      size="small" 
+                    <Button
+                      size="small"
                       onClick={() => setSelectedYear(selectedYear - 1)}
                     >
                       {selectedYear - 1}
                     </Button>
-                    <Button 
-                      size="small" 
-                      type="primary"
-                    >
+                    <Button size="small" type="primary">
                       {selectedYear}
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className={styles.heatmapGrid}>
                   {userStats.activity_heatmap.map((item, index) => (
-                    <Tooltip 
+                    <Tooltip
                       key={index}
                       title={`${item.date}: ${item.count}次参与, ${item.duration}分钟`}
                     >
-                      <div 
-                        className={`${styles.heatmapCell} ${styles[`level-${getHeatmapLevel(item.count)}`]}`}
+                      <div
+                        className={`${styles.heatmapCell} ${
+                          styles[`level-${getHeatmapLevel(item.count)}`]
+                        }`}
                       />
                     </Tooltip>
                   ))}
                 </div>
-                
+
                 <div className={styles.calendarLegend}>
                   <span>较少</span>
                   <div className={styles.legendItem}>
-                    <div className={`${styles.heatmapCell} ${styles['level-0']}`} />
-                    <div className={`${styles.heatmapCell} ${styles['level-1']}`} />
-                    <div className={`${styles.heatmapCell} ${styles['level-2']}`} />
-                    <div className={`${styles.heatmapCell} ${styles['level-3']}`} />
-                    <div className={`${styles.heatmapCell} ${styles['level-4']}`} />
+                    <div
+                      className={`${styles.heatmapCell} ${styles["level-0"]}`}
+                    />
+                    <div
+                      className={`${styles.heatmapCell} ${styles["level-1"]}`}
+                    />
+                    <div
+                      className={`${styles.heatmapCell} ${styles["level-2"]}`}
+                    />
+                    <div
+                      className={`${styles.heatmapCell} ${styles["level-3"]}`}
+                    />
+                    <div
+                      className={`${styles.heatmapCell} ${styles["level-4"]}`}
+                    />
                   </div>
                   <span>较多</span>
                 </div>
               </div>
-            </div>
+            </Card>
 
             {/* 空间类型偏好 */}
-            <div className={styles.sectionCard}>
+            <Card className={styles.sectionCard}>
               <div className={styles.sectionTitle}>
                 <TrophyOutlined className={styles.icon} />
                 空间类型偏好
@@ -434,145 +498,56 @@ export default function UserProfile({ userId }: UserProfileProps) {
                   <Pie {...pieConfig} />
                 </div>
               </div>
-            </div>
-
-            {/* 我的空间 */}
-            <div className={styles.sectionCard}>
-              <div className={styles.sectionTitle}>
-                <TeamOutlined className={styles.icon} />
-                我创建的空间 ({userSpaces.length})
-              </div>
-              
-              <div className={styles.userSpacesList}>
-                {userSpaces.map((space) => (
-                  <div key={space.id} className={styles.spaceItem}>
-                    <div className={styles.spaceHeader}>
-                      <div className={styles.spaceInfo}>
-                        <div className={styles.spaceName}>{space.name}</div>
-                        <div className={styles.spaceDesc}>{space.desc}</div>
-                      </div>
-                      <div className={styles.spaceActions}>
-                        <Button 
-                          size="small" 
-                          icon={<EditOutlined />}
-                          onClick={() => window.open(`/space/edit?id=${space.id}`, '_blank')}
-                        >
-                          编辑
-                        </Button>
-                        <Dropdown
-                          menu={{
-                            items: spaceActions,
-                            onClick: ({ key }) => {
-                              if (key === 'delete') {
-                                handleDeleteSpace(space.id);
-                              } else if (key === 'edit') {
-                                window.open(`/space/edit?id=${space.id}`, '_blank');
-                              }
-                            }
-                          }}
-                          trigger={['click']}
-                        >
-                          <Button size="small" icon={<MoreOutlined />} />
-                        </Dropdown>
-                      </div>
-                    </div>
-                    
-                    <div className={styles.spaceMeta}>
-                      <div className={styles.metaItem}>
-                        <UserOutlined />
-                        {space.sub_count} 订阅
-                      </div>
-                      <div className={styles.metaItem}>
-                        <PlayCircleOutlined />
-                        {space.online_count} 在线
-                      </div>
-                      <div className={styles.metaItem}>
-                        <Tag color={space.state === SpaceState.Active ? 'green' : 'orange'}>
-                          {space.state === SpaceState.Active ? '活跃' : '等待中'}
-                        </Tag>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            </Card>
           </div>
 
           {/* 侧边栏 */}
           <div className={styles.sidebar}>
-            {/* 成就 */}
-            <div className={styles.sectionCard}>
-              <div className={styles.sectionTitle}>
-                <TrophyOutlined />
-                成就
-              </div>
-              
-              <div className={styles.achievements}>
-                <div className={styles.achievementItem}>
-                  <div className={styles.achievementIcon}>🏆</div>
-                  <div className={styles.achievementInfo}>
-                    <div className={styles.achievementTitle}>空间创建者</div>
-                    <div className={styles.achievementDesc}>创建了{userStats.overview.total_spaces_created}个空间</div>
-                  </div>
-                </div>
-                
-                <div className={styles.achievementItem}>
-                  <div className={styles.achievementIcon}>🔥</div>
-                  <div className={styles.achievementInfo}>
-                    <div className={styles.achievementTitle}>活跃参与者</div>
-                    <div className={styles.achievementDesc}>连续参与{userStats.overview.current_streak_days}天</div>
-                  </div>
-                </div>
-                
-                <div className={styles.achievementItem}>
-                  <div className={styles.achievementIcon}>⭐</div>
-                  <div className={styles.achievementInfo}>
-                    <div className={styles.achievementTitle}>技术达人</div>
-                    <div className={styles.achievementDesc}>主要参与技术类空间</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* 最近活动 */}
-            <div className={styles.sectionCard}>
+            <Card className={styles.sectionCard}>
               <div className={styles.sectionTitle}>
-                <ClockCircleOutlined />
+                <ClockCircleOutlined style={{color: "#22CCEE"}} />
                 最近活动
               </div>
-              
+
               <div className={styles.recentActivity}>
                 <div className={styles.activityItem}>
                   <div className={styles.activityIcon}>
                     <PlayCircleOutlined />
                   </div>
                   <div className={styles.activityContent}>
-                    <div className={styles.activityText}>参与了"前端技术交流"</div>
+                    <div className={styles.activityText}>
+                      参与了"前端技术交流"
+                    </div>
                     <div className={styles.activityTime}>2小时前</div>
                   </div>
                 </div>
-                
+
                 <div className={styles.activityItem}>
                   <div className={styles.activityIcon}>
                     <TeamOutlined />
                   </div>
                   <div className={styles.activityContent}>
-                    <div className={styles.activityText}>创建了新空间"React进阶"</div>
+                    <div className={styles.activityText}>
+                      创建了新空间"React进阶"
+                    </div>
                     <div className={styles.activityTime}>1天前</div>
                   </div>
                 </div>
-                
+
                 <div className={styles.activityItem}>
                   <div className={styles.activityIcon}>
                     <UserOutlined />
                   </div>
                   <div className={styles.activityContent}>
-                    <div className={styles.activityText}>订阅了"设计师聚会"</div>
+                    <div className={styles.activityText}>
+                      订阅了"设计师聚会"
+                    </div>
                     <div className={styles.activityTime}>3天前</div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       </div>

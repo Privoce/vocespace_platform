@@ -11,8 +11,11 @@ import {
 } from "@ant-design/icons";
 import { Space, SpaceState, FrequencyInterval } from "@/lib/std/space";
 import styles from "@/styles/space_card.module.scss";
+import { useRouter } from "next/navigation";
 
-type SpaceCardProps = Space;
+export interface SpaceCardProps extends Space {
+  cardType?: "default" | "edit";
+}
 
 export function SpaceCard({
   id,
@@ -29,7 +32,10 @@ export function SpaceCard({
   online_count,
   url,
   images,
+  cardType = "default",
 }: SpaceCardProps) {
+  const router = useRouter();
+
   const formatFrequency = (frequency: any) => {
     switch (frequency.interval) {
       case FrequencyInterval.Daily:
@@ -70,12 +76,15 @@ export function SpaceCard({
   const handleJoinSpace = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Handle join space logic
-    window.open(url, "_blank");
+    // window.open(url, "_blank");
+    // jump to space detail page
+    router.push("/space/" + id);
   };
 
   const handleCardClick = () => {
     // Navigate to space detail page
     console.log("Navigate to space:", id);
+    router.push("/space/" + id);
   };
 
   const defaultImage =
@@ -83,83 +92,131 @@ export function SpaceCard({
   const spaceImage =
     images && images.length > 0 ? images[0] : "/images/default_intro.png";
 
-  return (
-    <Card
-      className={styles.spaceCard}
-      onClick={handleCardClick}
-      styles={{ body: { padding: 0 } }}
-    >
-      <div className={styles.imageSection}>
-        <img
-          src={spaceImage}
-          alt={name}
-          onError={(e) => {
-            e.currentTarget.src = defaultImage;
-          }}
-        />
+  if (cardType === "edit") {
+    return (
+      <Card className={styles.spaceCard} styles={{ body: { padding: 0 } }}>
+        <div className={styles.spaceCard_edit}>
+          <div className={styles.spaceCard_edit_imageSection}>
+            <img
+              src={spaceImage}
+              alt={name}
+              onError={(e) => {
+                e.currentTarget.src = defaultImage;
+              }}
+            />
+          </div>
+          <div className={styles.spaceCard_edit_content}>
+            <div className={styles.spaceCard_edit_content_name}>{name}</div>
+            <div className={styles.spaceCard_edit_content_desc} title={desc}>
+              {desc}
+            </div>
+            <div className={styles.spaceCard_edit_content_info}>
+              <CalendarOutlined className={styles.icon} />
+              订阅频率: {formatFrequency(freq)}
+            </div>
 
-        <div className={`${styles.feeTag} ${fee === 0 ? styles.free : ""}`}>
-          {fee === 0 ? "免费" : `¥${fee}`}
+            <div className={styles.content_inline}>
+              <div className={styles.flex_line}>
+                <UserOutlined className={styles.icon} />
+                <span className={styles.value}>{sub_count}</span>
+              </div>
+              <div className={styles.flex_line}>
+                <EyeOutlined className={styles.icon} />
+                <span className={styles.value}>{online_count}</span>
+              </div>
+              <div className={styles.flex_line}>
+                <DollarOutlined className={styles.icon} />
+                <span className={styles.value}>¥{fee}</span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.spaceCard_edit_opts}>
+            <Button type="primary" block>
+              编辑
+            </Button>
+          </div>
         </div>
-      </div>
+      </Card>
+    );
+  } else {
+    return (
+      <Card
+        className={styles.spaceCard}
+        onClick={handleCardClick}
+        styles={{ body: { padding: 0 } }}
+      >
+        <div className={styles.imageSection}>
+          <img
+            src={spaceImage}
+            alt={name}
+            onError={(e) => {
+              e.currentTarget.src = defaultImage;
+            }}
+          />
 
-      <div className={styles.content}>
-        <div className={styles.content_line}>
-          <div className={styles.name}>{name}</div>
-        </div>
-
-        <div className={styles.content_line_desc}>{desc}</div>
-
-        <div className={styles.content_line}>
-          <div className={styles.flex_line}>
-            <CalendarOutlined className={styles.icon} />
-            订阅频率: {formatFrequency(freq)}
-          </div>
-        </div>
-        <div className={styles.content_line}>
-          <div className={styles.flex_line}>
-            <ClockCircleOutlined className={styles.icon} />
-            {formatTime(start_at)} - {formatTime(end_at)} (持续{" "}
-            {formatDuration()})
+          <div className={`${styles.feeTag} ${fee === 0 ? styles.free : ""}`}>
+            {fee === 0 ? "免费" : `¥${fee}`}
           </div>
         </div>
 
-        <div className={styles.content_inline}>
-          <div className={styles.flex_line}>
-            <UserOutlined className={styles.icon} />
-            <span className={styles.value}>{sub_count}</span>
+        <div className={styles.content}>
+          <div className={styles.content_line}>
+            <div className={styles.name}>{name}</div>
           </div>
-          <div className={styles.flex_line}>
-            <EyeOutlined className={styles.icon} />
-            <span className={styles.value}>{online_count}</span>
-          </div>
-          <div className={styles.flex_line}>
-            <DollarOutlined className={styles.icon} />
-            <span className={styles.value}>¥{fee}</span>
-          </div>
-        </div>
 
-        <div className={styles.content_line}>
-          <div className={styles.flex_line}>
-            空间所有者: <span className={styles.ownerName}>{owner_name}</span>
+          <div className={styles.content_line_desc}>{desc}</div>
+
+          <div className={styles.content_line}>
+            <div className={styles.flex_line}>
+              <CalendarOutlined className={styles.icon} />
+              订阅频率: {formatFrequency(freq)}
+            </div>
           </div>
-        </div>
-        <div className={styles.content_line}>
-          <div className={styles.flex_line}>
-            <span>状态:</span>
-            <Tag
-              bordered={true}
-              color={state === SpaceState.Active ? "success" : "warning"}
-            >
-              {" "}
-              {state === SpaceState.Active ? "活跃" : "等待中"}
-            </Tag>
+          <div className={styles.content_line}>
+            <div className={styles.flex_line}>
+              <ClockCircleOutlined className={styles.icon} />
+              {formatTime(start_at)} - {formatTime(end_at)} (持续{" "}
+              {formatDuration()})
+            </div>
           </div>
+
+          <div className={styles.content_inline}>
+            <div className={styles.flex_line}>
+              <UserOutlined className={styles.icon} />
+              <span className={styles.value}>{sub_count}</span>
+            </div>
+            <div className={styles.flex_line}>
+              <EyeOutlined className={styles.icon} />
+              <span className={styles.value}>{online_count}</span>
+            </div>
+            <div className={styles.flex_line}>
+              <DollarOutlined className={styles.icon} />
+              <span className={styles.value}>¥{fee}</span>
+            </div>
+          </div>
+
+          <div className={styles.content_line}>
+            <div className={styles.flex_line}>
+              空间所有者: <span className={styles.ownerName}>{owner_name}</span>
+            </div>
+          </div>
+          <div className={styles.content_line}>
+            <div className={styles.flex_line}>
+              <span>状态:</span>
+              <Tag
+                bordered={true}
+                color={state === SpaceState.Active ? "success" : "warning"}
+              >
+                {" "}
+                {state === SpaceState.Active ? "活跃" : "等待中"}
+              </Tag>
+            </div>
+          </div>
+          <Button block type="primary" onClick={handleJoinSpace}>
+            加入空间
+          </Button>
         </div>
-        <Button block type="primary" onClick={handleJoinSpace}>
-          加入空间
-        </Button>
-      </div>
-    </Card>
-  );
+      </Card>
+    );
+  }
 }

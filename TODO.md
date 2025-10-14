@@ -2,9 +2,10 @@
   - [x] header: HomeHeader
     - [x] 描述 (发现Vocespace空间)
     - [x] 搜索框
-  - [ ] main: HomeMain
-    - [ ] SpaceCard 列表
+  - [x] main: HomeMain
+    - [x] SpaceCard 列表
 - [x] 空间卡片: SpaceCard
+  - [x] edit类型
   - [x] 空间宣传图
   - [x] 空间名
   - [x] 空间描述
@@ -20,9 +21,17 @@
   - [x] 当前状态
     - [x] Active 表示活跃，空间内内容已经倒了开始时间
     - [x] Waiting 表示等待中，表示空间内容未开始
-- [ ] 空间介绍页面: SpaceIntro
+- [ ] 空间介绍页面: SpaceAbout
   - [ ] 空间README部分（类似github）
   - [ ] 空间宣传视频/图片
 - [x] 登陆
 - [x] 注册
 - [ ] supabase接入
+- [ ] 用户页
+  - [ ] 设置
+  - [ ] profile
+    - [x] 用户信息
+    - [x] 数据统计
+    - [x] 我创建的空间
+    - [ ] 活动统计
+    - [ ] 热力图

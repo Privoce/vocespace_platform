@@ -15,7 +15,7 @@ export function HomeHeader() {
   return (
     <header className={styles.home_header}>
       <div className={styles.home_header_content}>
-        <img src="/logo.svg"></img>
+        <img src="/logo.svg" onClick={() => router.push("/")} style={{cursor: "pointer"}}></img>
         <Button
           type="primary"
           size="large"
