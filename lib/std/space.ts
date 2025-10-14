@@ -27,7 +27,7 @@ export enum SpaceType {
 export interface Space {
   id: string;
   name: string;
-  desc: string;
+  desc?: string;
   created_at: number;
   start_at: number;
   end_at: number;
@@ -50,5 +50,5 @@ export interface Space {
   /**
    * Detailed description or content of the space (e.g., markdown format)
    */
-  readme: string;
+  readme?: string;
 }

@@ -104,50 +104,57 @@ export function SpaceCard({
       </div>
 
       <div className={styles.content}>
-        <div className={styles.header}>
-          <h3 className={styles.spaceName}>{name}</h3>
+        <div className={styles.content_line}>
+          <div className={styles.name}>{name}</div>
         </div>
 
-        <p className={styles.description}>{desc}</p>
+        <div className={styles.content_line_desc}>{desc}</div>
 
-        <div className={styles.scheduleInfo}>
-          <div className={styles.frequency}>
+        <div className={styles.content_line}>
+          <div className={styles.flex_line}>
             <CalendarOutlined className={styles.icon} />
             订阅频率: {formatFrequency(freq)}
           </div>
-          <div className={styles.timeInfo}>
+        </div>
+        <div className={styles.content_line}>
+          <div className={styles.flex_line}>
             <ClockCircleOutlined className={styles.icon} />
             {formatTime(start_at)} - {formatTime(end_at)} (持续{" "}
             {formatDuration()})
           </div>
         </div>
 
-        <div className={styles.stats}>
-          <div className={styles.statItem}>
+        <div className={styles.content_inline}>
+          <div className={styles.flex_line}>
             <UserOutlined className={styles.icon} />
             <span className={styles.value}>{sub_count}</span>
-            <span>订阅</span>
           </div>
-          <div className={styles.statItem}>
+          <div className={styles.flex_line}>
             <EyeOutlined className={styles.icon} />
             <span className={styles.value}>{online_count}</span>
-            <span>在线</span>
           </div>
-          <div className={styles.statItem}>
+          <div className={styles.flex_line}>
             <DollarOutlined className={styles.icon} />
             <span className={styles.value}>¥{fee}</span>
           </div>
         </div>
 
-        <div className={styles.owner}>
-          空间所有者: <span className={styles.ownerName}>{owner_name}</span>
+        <div className={styles.content_line}>
+          <div className={styles.flex_line}>
+            空间所有者: <span className={styles.ownerName}>{owner_name}</span>
+          </div>
         </div>
-        <div className={styles.card_line}>
-          <span>状态:</span>
-          <Tag bordered={false} color={state === SpaceState.Active ? "success" : "warning"}>
-            {" "}
-            {state === SpaceState.Active ? "活跃" : "等待中"}
-          </Tag>
+        <div className={styles.content_line}>
+          <div className={styles.flex_line}>
+            <span>状态:</span>
+            <Tag
+              bordered={true}
+              color={state === SpaceState.Active ? "success" : "warning"}
+            >
+              {" "}
+              {state === SpaceState.Active ? "活跃" : "等待中"}
+            </Tag>
+          </div>
         </div>
         <Button block type="primary" onClick={handleJoinSpace}>
           加入空间
