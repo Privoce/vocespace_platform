@@ -47,4 +47,8 @@ export interface Space {
    */
   images: string[];
   ty: SpaceType | string;
+  /**
+   * Detailed description or content of the space (e.g., markdown format)
+   */
+  readme: string;
 }

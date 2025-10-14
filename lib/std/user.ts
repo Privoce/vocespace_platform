@@ -1,0 +1,75 @@
+import { SpaceType } from "./space";
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  avatar_url?: string;
+  bio?: string;
+  created_at: number;
+  updated_at: number;
+  location?: string;
+  website?: string;
+  social_links?: {
+    github?: string;
+    twitter?: string;
+    linkedin?: string;
+  };
+  // 统计信息
+  total_spaces_created: number;
+  total_spaces_subscribed: number;
+  total_participation_hours: number;
+}
+
+export interface UserSubscription {
+  id: string;
+  user_id: string;
+  space_id: string;
+  subscribed_at: number;
+  space_type: SpaceType;
+  is_active: boolean;
+}
+
+export interface UserParticipation {
+  id: string;
+  user_id: string;
+  space_id: string;
+  joined_at: number;
+  left_at?: number;
+  duration_minutes: number;
+  date: string; // YYYY-MM-DD format for activity heatmap
+  space_type: SpaceType;
+}
+
+export interface UserStats {
+  // 空间类型偏好统计
+  space_type_preferences: {
+    [key in SpaceType]: number;
+  };
+  
+  // 参与活动热力图数据 (类似GitHub贡献图)
+  activity_heatmap: {
+    date: string; // YYYY-MM-DD
+    count: number; // 参与次数
+    duration: number; // 参与时长(分钟)
+  }[];
+  
+  // 每月统计
+  monthly_stats: {
+    month: string; // YYYY-MM
+    spaces_created: number;
+    spaces_joined: number;
+    total_duration: number;
+  }[];
+  
+  // 总体统计
+  overview: {
+    total_spaces_created: number;
+    total_spaces_subscribed: number;
+    total_participation_hours: number;
+    longest_streak_days: number; // 连续参与天数
+    current_streak_days: number;
+    most_active_space_type: SpaceType;
+    average_session_duration: number; // 平均每次参与时长(分钟)
+  };
+}

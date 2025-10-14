@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Spin, Empty, Tabs, TabsProps, List } from "antd";
+import { Spin, Empty, Tabs, TabsProps, List, FloatButton } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 import { SpaceCard } from "@/components/space/card";
 import {
   Space,
@@ -33,6 +35,7 @@ const mockSpaces: Space[] = [
     url: "https://example.com/space1",
     images: [],
     ty: SpaceType.Tech,
+    readme: "# 技术交流空间\n\n这里是技术爱好者的聚集地，我们分享最新技术趋势，讨论编程最佳实践。",
   },
   {
     id: "2",
@@ -54,6 +57,7 @@ const mockSpaces: Space[] = [
     url: "https://example.com/space2",
     images: [],
     ty: SpaceType.Meeting,
+    readme: "# 创业分享会\n\n创业者的聚集地，分享创业经验、讨论商业模式、连接投资人。",
   },
   {
     id: "3",
@@ -74,6 +78,7 @@ const mockSpaces: Space[] = [
     url: "https://example.com/space3",
     images: [],
     ty: SpaceType.Class,
+    readme: "# 设计师聚会\n\n设计师的创意园地，分享UI/UX设计经验，探讨设计工具使用技巧。",
   },
   {
     id: "4",
@@ -94,6 +99,7 @@ const mockSpaces: Space[] = [
     url: "https://example.com/space4",
     images: [],
     ty: SpaceType.Hobbies,
+    readme: "# 金融投资课堂\n\n学习投资理财知识，分析市场趋势，掌握风险管理技能。",
   },
   {
     id: "5",
@@ -113,8 +119,9 @@ const mockSpaces: Space[] = [
     sub_count: 756,
     online_count: 12,
     url: "https://example.com/space5",
-    images: ["/images/language-space.jpg"],
+    images: [],
     ty: SpaceType.Class,
+    readme: "# 语言学习角\n\n多语种学习交流平台，与native speaker对话练习，提升语言能力。",
   },
   {
     id: "6",
@@ -136,12 +143,14 @@ const mockSpaces: Space[] = [
     url: "https://example.com/space6",
     images: ["/images/fitness-space.jpg"],
     ty: SpaceType.Hobbies,
+    readme: "# 健身训练营\n\n专业健身指导，多样化训练课程，与健身达人一起享受运动的乐趣。",
   },
 ];
 
 export function DisplaySpaces() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     // Simulate API call
@@ -239,6 +248,15 @@ export function DisplaySpaces() {
         onChange={onChange}
       />
       </div>
+      
+      {/* 浮动创建按钮 */}
+      <FloatButton
+        icon={<PlusOutlined />}
+        type="primary"
+        style={{ right: 24, bottom: 24 }}
+        onClick={() => router.push('/space/edit')}
+        tooltip="创建新空间"
+      />
     </div>
   );
 }
