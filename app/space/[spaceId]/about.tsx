@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Spin, Empty, message } from "antd";
+import { Spin, Empty, message, Card } from "antd";
 import ReactMarkdown from "react-markdown";
-import { HomeHeader } from "../home/header";
+import { HomeHeader } from "../../home/header";
 import { SpaceCard } from "@/components/space/card";
 import { Space, SpaceState, FrequencyInterval, SpaceType } from "@/lib/std/space";
-import styles from "./SpaceAbout.module.scss";
+import styles from "@/styles/space_about.module.scss";
 
 // Mock space data - in real app this would come from API
 const mockSpace: Space = {
@@ -112,7 +112,7 @@ export default function SpaceAbout({ spaceId }: SpaceAboutProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const id = spaceId || searchParams?.get("id");
+  const id = spaceId || searchParams?.get("spaceId");
 
   useEffect(() => {
     const fetchSpace = async () => {
@@ -172,7 +172,7 @@ export default function SpaceAbout({ spaceId }: SpaceAboutProps) {
       
       <div className={styles.container}>
         {/* Left Content - Images and README */}
-        <div className={styles.leftContent}>
+        <Card className={styles.leftContent}>
           {/* Image Gallery */}
           <div className={styles.imageGallery}>
             {space.images && space.images.length > 0 ? (
@@ -216,13 +216,11 @@ export default function SpaceAbout({ spaceId }: SpaceAboutProps) {
               </div>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Right Content - Space Card */}
         <div className={styles.rightContent}>
-          <div className={styles.spaceCardWrapper}>
-            <SpaceCard {...space} />
-          </div>
+          <SpaceCard {...space} style={{margin: 0}} />
         </div>
       </div>
     </div>

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 
 export interface SpaceCardProps extends Space {
   cardType?: "default" | "edit";
+  style?: React.CSSProperties;
 }
 
 export function SpaceCard({
@@ -32,6 +33,7 @@ export function SpaceCard({
   online_count,
   url,
   images,
+  style,
   cardType = "default",
 }: SpaceCardProps) {
   const router = useRouter();
@@ -94,7 +96,7 @@ export function SpaceCard({
 
   if (cardType === "edit") {
     return (
-      <Card className={styles.spaceCard} styles={{ body: { padding: 0 } }}>
+      <Card className={styles.spaceCard} styles={{ body: { padding: 0} }} style={style}>
         <div className={styles.spaceCard_edit}>
           <div className={styles.spaceCard_edit_imageSection}>
             <img
@@ -144,6 +146,7 @@ export function SpaceCard({
         className={styles.spaceCard}
         onClick={handleCardClick}
         styles={{ body: { padding: 0 } }}
+        style={style}
       >
         <div className={styles.imageSection}>
           <img
