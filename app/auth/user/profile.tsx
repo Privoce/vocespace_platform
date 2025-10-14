@@ -50,10 +50,10 @@ import { VocespaceLogo } from "@/components/widget/logo";
 // Mock用户数据
 const mockUser: User = {
   id: "user1",
-  username: "张三",
+  username: "施攀",
   email: "zhangsan@example.com",
   avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=syf",
-  bio: "热爱技术的全栈开发者，专注于前端和后端开发。喜欢分享技术心得，参与开源项目。",
+  bio: "上海宝尊电商公司 - 产品专员 - 喜欢 🍽️",
   created_at: Date.now() / 1000 - 55 * 24 * 3600,
   updated_at: Date.now() / 1000,
   location: "北京，中国",
@@ -132,7 +132,72 @@ const mockUserSpaces: Space[] = [
     ty: SpaceType.Tech,
     readme: "# 前端技术交流空间",
   },
-  // 添加更多mock数据...
+  {
+    id: "2",
+    name: "前端技术交流",
+    desc: "分享前端开发经验和最新技术趋势",
+    created_at: Date.now() / 1000,
+    start_at: Date.now() / 1000 + 3600,
+    end_at: Date.now() / 1000 + 7200,
+    freq: {
+      interval: FrequencyInterval.Weekly,
+      in_week: [1, 3, 5],
+    },
+    fee: 0,
+    owner_id: "user1",
+    owner_name: "张三",
+    state: SpaceState.Active,
+    sub_count: 125,
+    online_count: 15,
+    url: "https://example.com/space1",
+    images: [],
+    ty: SpaceType.Tech,
+    readme: "# 前端技术交流空间",
+  },
+  {
+    id: "3",
+    name: "前端技术交流",
+    desc: "分享前端开发经验和最新技术趋势",
+    created_at: Date.now() / 1000,
+    start_at: Date.now() / 1000 + 3600,
+    end_at: Date.now() / 1000 + 7200,
+    freq: {
+      interval: FrequencyInterval.Weekly,
+      in_week: [1, 3, 5],
+    },
+    fee: 0,
+    owner_id: "user1",
+    owner_name: "张三",
+    state: SpaceState.Active,
+    sub_count: 125,
+    online_count: 15,
+    url: "https://example.com/space1",
+    images: [],
+    ty: SpaceType.Tech,
+    readme: "# 前端技术交流空间",
+  },
+  {
+    id: "4",
+    name: "前端技术交流",
+    desc: "分享前端开发经验和最新技术趋势",
+    created_at: Date.now() / 1000,
+    start_at: Date.now() / 1000 + 3600,
+    end_at: Date.now() / 1000 + 7200,
+    freq: {
+      interval: FrequencyInterval.Weekly,
+      in_week: [1, 3, 5],
+    },
+    fee: 0,
+    owner_id: "user1",
+    owner_name: "张三",
+    state: SpaceState.Active,
+    sub_count: 125,
+    online_count: 15,
+    url: "https://example.com/space1",
+    images: [],
+    ty: SpaceType.Tech,
+    readme: "# 前端技术交流空间",
+  },
 ];
 
 // 生成模拟热力图数据
@@ -204,24 +269,24 @@ export default function UserProfile({ userId }: UserProfileProps) {
   };
 
   // 空间类型偏好图表配置
-  const pieConfig = {
-    appendPadding: 10,
-    data: Object.entries(userStats.space_type_preferences).map(
-      ([type, value]) => ({
-        type: getSpaceTypeName(type as SpaceType),
-        value,
-      })
-    ),
-    angleField: "value",
-    colorField: "type",
-    radius: 0.8,
-    label: {
-      type: "outer",
-      content: "{name} {percentage}",
-    },
-    interactions: [{ type: "element-active" }],
-    color: ["#1890ff", "#52c41a", "#faad14", "#f5222d"],
-  };
+  //   const pieConfig = {
+  //     appendPadding: 10,
+  //     data: Object.entries(userStats.space_type_preferences).map(
+  //       ([type, value]) => ({
+  //         type: getSpaceTypeName(type as SpaceType),
+  //         value,
+  //       })
+  //     ),
+  //     angleField: "value",
+  //     colorField: "type",
+  //     radius: 0.8,
+  //     label: {
+  //       type: "outer",
+  //       content: "{name} {percentage}",
+  //     },
+  //     interactions: [{ type: "element-active" }],
+  //     color: ["#1890ff", "#52c41a", "#faad14", "#f5222d"],
+  //   };
 
   function getSpaceTypeName(type: SpaceType) {
     const typeNames = {
@@ -413,26 +478,37 @@ export default function UserProfile({ userId }: UserProfileProps) {
                   我创建的空间 ({userSpaces.length})
                 </div>
 
-                <div className={styles.userSpacesList}>
-                  <List
-                    dataSource={userSpaces}
-                    renderItem={(item) => (
-                      <List.Item>
-                        <SpaceCard {...item} cardType="edit" />
-                      </List.Item>
-                    )}
-                  ></List>
-                </div>
+                <List
+                  pagination={{
+                    pageSize: 3,
+                    position: "bottom",
+                    size: "small",
+                    simple: { readOnly: true },
+                  }}
+                  split={false}
+                  bordered={false}
+                  dataSource={userSpaces}
+                  renderItem={(item) => (
+                    <List.Item
+                      style={{
+                        height: "120px",
+                        padding: "0",
+                      }}
+                    >
+                      <SpaceCard {...item} cardType="edit" />
+                    </List.Item>
+                  )}
+                ></List>
               </div>
             </Card>
             {/* 参与活动热力图 */}
             <Card className={styles.sectionCard}>
-              <div className={styles.sectionTitle}>
-                <FireOutlined className={styles.icon} />
-                参与活动热力图
-              </div>
+              <div className={styles.sectionCard_inner}>
+                <div className={styles.sectionTitle}>
+                  <FireOutlined className={styles.icon} />
+                  参与活动热力图
+                </div>
 
-              <div className={styles.activityCalendar}>
                 <div className={styles.calendarHeader}>
                   <span>过去一年的活动情况</span>
                   <div className={styles.yearNav}>
@@ -448,21 +524,22 @@ export default function UserProfile({ userId }: UserProfileProps) {
                   </div>
                 </div>
 
-                <div className={styles.heatmapGrid}>
-                  {userStats.activity_heatmap.map((item, index) => (
-                    <Tooltip
-                      key={index}
-                      title={`${item.date}: ${item.count}次参与, ${item.duration}分钟`}
-                    >
-                      <div
-                        className={`${styles.heatmapCell} ${
-                          styles[`level-${getHeatmapLevel(item.count)}`]
-                        }`}
-                      />
-                    </Tooltip>
-                  ))}
+                <div className={styles.activityCalendar}>
+                  <div className={styles.heatmapGrid}>
+                    {userStats.activity_heatmap.map((item, index) => (
+                      <Tooltip
+                        key={index}
+                        title={`${item.date}: ${item.count}次参与, ${item.duration}分钟`}
+                      >
+                        <div
+                          className={`${styles.heatmapCell} ${
+                            styles[`level-${getHeatmapLevel(item.count)}`]
+                          }`}
+                        />
+                      </Tooltip>
+                    ))}
+                  </div>
                 </div>
-
                 <div className={styles.calendarLegend}>
                   <span>较少</span>
                   <div className={styles.legendItem}>
@@ -488,7 +565,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
             </Card>
 
             {/* 空间类型偏好 */}
-            <Card className={styles.sectionCard}>
+            {/* <Card className={styles.sectionCard}>
               <div className={styles.sectionTitle}>
                 <TrophyOutlined className={styles.icon} />
                 空间类型偏好
@@ -498,7 +575,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
                   <Pie {...pieConfig} />
                 </div>
               </div>
-            </Card>
+            </Card> */}
           </div>
 
           {/* 侧边栏 */}
@@ -506,47 +583,46 @@ export default function UserProfile({ userId }: UserProfileProps) {
             {/* 最近活动 */}
             <Card className={styles.sectionCard}>
               <div className={styles.sectionTitle}>
-                <ClockCircleOutlined style={{color: "#22CCEE"}} />
+                <ClockCircleOutlined style={{ color: "#22CCEE" }} />
                 最近活动
               </div>
 
-              <div className={styles.recentActivity}>
-                <div className={styles.activityItem}>
-                  <div className={styles.activityIcon}>
-                    <PlayCircleOutlined />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      参与了"前端技术交流"
+              <List
+                pagination={{
+                  pageSize: 8,
+                  position: "bottom",
+                  size: "small",
+                  simple: { readOnly: true },
+                }}
+                // split={false}
+                bordered={false}
+                dataSource={[
+                  {
+                    title: '参加了 "前端技术交流"',
+                    time: "2小时前",
+                    icon: <PlayCircleOutlined></PlayCircleOutlined>,
+                  },
+                  {
+                    title: '创建了新空间 "React进阶"',
+                    time: "1天前",
+                    icon: <TeamOutlined></TeamOutlined>,
+                  },
+                  {
+                    title: '订阅了 "设计师聚会"',
+                    time: "3天前",
+                    icon: <UserOutlined></UserOutlined>,
+                  },
+                ]}
+                renderItem={(item) => (
+                  <List.Item className={styles.activityItem}>
+                    <div className={styles.activityIcon}>{item.icon}</div>
+                    <div className={styles.activityContent}>
+                      <div className={styles.activityText}>{item.title}</div>
+                      <div className={styles.activityTime}>{item.time}</div>
                     </div>
-                    <div className={styles.activityTime}>2小时前</div>
-                  </div>
-                </div>
-
-                <div className={styles.activityItem}>
-                  <div className={styles.activityIcon}>
-                    <TeamOutlined />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      创建了新空间"React进阶"
-                    </div>
-                    <div className={styles.activityTime}>1天前</div>
-                  </div>
-                </div>
-
-                <div className={styles.activityItem}>
-                  <div className={styles.activityIcon}>
-                    <UserOutlined />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityText}>
-                      订阅了"设计师聚会"
-                    </div>
-                    <div className={styles.activityTime}>3天前</div>
-                  </div>
-                </div>
-              </div>
+                  </List.Item>
+                )}
+              ></List>
             </Card>
           </div>
         </div>

@@ -59,7 +59,7 @@
             font-size: 14px;
 
             .icon {
-              color: #1890ff;
+              color: #22ccee;
             }
           }
         }
@@ -138,11 +138,13 @@
       .sectionCard {
         width: 100%;
         &_inner {
-            height: 100%;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+          justify-content: center;
+          gap: 16px;
         }
         .sectionTitle {
           width: 100%;
@@ -155,26 +157,26 @@
             color: #22ccee;
           }
         }
-
-        .activityCalendar {
-          .calendarHeader {
+        .calendarHeader {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          .yearNav {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-
-            .yearNav {
-              display: flex;
-              gap: 8px;
-            }
+            gap: 8px;
           }
-
+        }
+        .activityCalendar {
+          width: 100%;
+          overflow-x: scroll;
+          scrollbar-width: thin;
+          padding: 0 0 8px 0;
           .heatmapGrid {
             display: grid;
             grid-template-columns: repeat(53, 1fr);
             gap: 2px;
-            margin-bottom: 16px;
-
+            background-color: transparent;
             .heatmapCell {
               width: 12px;
               height: 12px;
@@ -205,89 +207,61 @@
               }
             }
           }
+        }
+        .calendarLegend {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
 
-          .calendarLegend {
+          .legendItem {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
+            gap: 4px;
+          }
 
+          .heatmapCell {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            background: #ebedf0;
+            cursor: pointer;
+            transition: all 0.2s;
 
-            .legendItem {
-              display: flex;
-              align-items: center;
-              gap: 4px;
+            &.level-0 {
+              background: #ebedf0;
+            }
+            &.level-1 {
+              background: #c6e48b;
+            }
+            &.level-2 {
+              background: #7bc96f;
+            }
+            &.level-3 {
+              background: #239a3b;
+            }
+            &.level-4 {
+              background: #196127;
+            }
+
+            &:hover {
+              transform: scale(1.2);
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             }
           }
         }
-
         .spaceTypeChart {
           .chartContainer {
             height: 300px;
             margin-top: 16px;
           }
         }
-
-        .userSpacesList {
-          .spaceItem {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            transition: all 0.2s;
-
-            &:hover {
-              border-color: #d9d9d9;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            }
-
-            .spaceHeader {
-              display: flex;
-              justify-content: between;
-              align-items: flex-start;
-              margin-bottom: 8px;
-
-              .spaceInfo {
-                flex: 1;
-
-                .spaceName {
-                  font-size: 16px;
-                  font-weight: 600;
-                  color: #262626;
-                  margin-bottom: 4px;
-                }
-
-                .spaceDesc {
-                  color: #8c8c8c;
-                  font-size: 14px;
-                }
-              }
-
-              .spaceActions {
-                display: flex;
-                gap: 8px;
-              }
-            }
-
-            .spaceMeta {
-              display: flex;
-              gap: 16px;
-              font-size: 12px;
-              color: #8c8c8c;
-
-              .metaItem {
-                display: flex;
-                align-items: center;
-                gap: 4px;
-              }
-            }
-          }
-        }
       }
     }
 
     .sidebar {
-        width: 244px;
+      width: 244px;
       .sectionCard {
         .sectionTitle {
           font-size: 16px;
@@ -297,75 +271,30 @@
           justify-content: flex-start;
           gap: 8px;
         }
-
-        .achievements {
-          .achievementItem {
+        .activityItem {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          .activityIcon {
+            height: 48px;
+            width: 48px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-
-            .achievementIcon {
-              font-size: 24px;
-            }
-
-            .achievementInfo {
-              flex: 1;
-
-              .achievementTitle {
-                font-weight: 600;
-                color: #262626;
-                font-size: 14px;
-              }
-
-              .achievementDesc {
-                color: #8c8c8c;
-                font-size: 12px;
-              }
-            }
+            justify-content: center;
+            
           }
-        }
-
-        .recentActivity {
-          .activityItem {
+          .activityContent {
+            width: calc(100% - 48px);
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-
-            &:last-child {
-              border-bottom: none;
-            }
-
-            .activityIcon {
-              flex-shrink: 0;
-              width: 32px;
-              height: 32px;
-              border-radius: 50%;
-              background: #e6f7ff;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: #1890ff;
-            }
-
-            .activityContent {
-              flex: 1;
-
-              .activityText {
-                color: #262626;
-                font-size: 14px;
-                margin-bottom: 4px;
-              }
-
-              .activityTime {
-                color: #8c8c8c;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+            .activityTime {
+                width: 100%;
+                text-align: end;
                 font-size: 12px;
-              }
+                color: #8c8c8c;
             }
           }
         }
