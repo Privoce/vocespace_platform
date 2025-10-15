@@ -1,10 +1,8 @@
 "use client";
 
 import React from "react";
-import { Button, GetProps, Input } from "antd";
 import styles from "@/styles/home_header.module.scss";
 import { useRouter } from "next/navigation";
-import { UserOutlined } from "@ant-design/icons";
 import { UserBox } from "@/components/user/box";
 import { useUser } from "@/hooks/useUser";
 

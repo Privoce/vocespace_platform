@@ -52,6 +52,11 @@ export function UserBox({ user, loading = false }: UserBoxProps) {
           menu={{
             items: [
               {
+                key: "display_email",
+                label: user.email,
+                disabled: true,
+              },
+              {
                 key: "profile",
                 label: "个人资料",
                 onClick: () => router.push(`/auth/user/${user.id}`),

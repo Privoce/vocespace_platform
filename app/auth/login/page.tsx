@@ -45,7 +45,7 @@ export default function Page() {
         if (error) {
           throw error;
         }
-        getUserAndRedirect();
+        await getUserAndRedirect();
       }
     } catch (e) {
       messageApi.error(e instanceof Error ? e.message : "登录失败");
@@ -63,6 +63,25 @@ export default function Page() {
     }
 
     router.push(`/auth/user/${data.user.id}`);
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await client.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+      
+      // OAuth 会自动重定向，不需要手动处理
+    } catch (e) {
+      messageApi.error(e instanceof Error ? e.message : "Google登录失败");
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,6 +102,7 @@ export default function Page() {
           </div>
           <div className={styles.login_left_main_others}>
             <Button
+              onClick={signInWithGoogle}
               icon={<GoogleOutlined></GoogleOutlined>}
               size="large"
               block
