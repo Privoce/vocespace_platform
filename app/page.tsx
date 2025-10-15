@@ -1,3 +1,4 @@
+"use client";
 import { HomeHeader } from "./home/header";
 import { DisplaySpaces } from "./home/main";
 import styles from "@/styles/home.module.scss";

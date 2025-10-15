@@ -4,6 +4,9 @@
     - [x] 搜索框
   - [x] main: HomeMain
     - [x] SpaceCard 列表
+  - [x] user box
+    - [x] 跳转用户profile
+    - [x] 退出登陆
 - [x] 空间卡片: SpaceCard
   - [x] edit类型
   - [x] 空间宣传图
