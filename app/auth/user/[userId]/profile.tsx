@@ -43,7 +43,7 @@ import {
   SpaceState,
   FrequencyInterval,
 } from "@/lib/std/space";
-import styles from "./UserProfile.module.scss";
+import styles from "@/styles/user_profile.module.scss";
 import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
 
@@ -224,7 +224,7 @@ interface UserProfileProps {
   userId?: string;
 }
 
-export default function UserProfile({ userId }: UserProfileProps) {
+export function UserProfile({ userId }: UserProfileProps) {
   const [user, setUser] = useState<User>(mockUser);
   const [userStats, setUserStats] = useState<UserStats>(mockUserStats);
   const [userSpaces, setUserSpaces] = useState<Space[]>(mockUserSpaces);

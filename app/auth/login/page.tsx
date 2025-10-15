@@ -1,28 +1,61 @@
 "use client";
 import { LoginForm } from "@/components/login-form";
+import { createClient } from "@/lib/supabase/client";
 import styles from "@/styles/login.module.scss";
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
   GoogleOutlined,
 } from "@ant-design/icons";
-import { Button, Divider, Input } from "antd";
+import { Button, Divider, Input, message } from "antd";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Page() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const signInOrUp = () => {
+  const [loading, setLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+  const router = useRouter();
+  const client = createClient();
+
+  const signInOrUp = async () => {
     if (isSignUp) {
       console.log("sign up", email, password);
-    }else{
-      console.log("sign in", email, password);
+    } else {
+      try {
+        setLoading(true);
+        const { error } = await client.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) {
+          throw error;
+        }
+        getUserAndRedirect();
+      } catch (e) {
+        messageApi.error(e instanceof Error ? e.message : "登录失败");
+      } finally {
+        setLoading(false);
+      }
     }
+  };
+
+  const getUserAndRedirect = async () => {
+    const { data, error } = await client.auth.getUser();
+
+    if (error) {
+      messageApi.error(`获取用户信息失败: ${error.message}`);
+      return;
+    }
+
+    router.push(`/auth/user/${data.user.id}`);
   };
 
   return (
     <div className={styles.login}>
+      {contextHolder}
       <div className={styles.login_left}>
         <header className={styles.login_left_header}>
           <img src="/logo.svg"></img>
@@ -87,7 +120,13 @@ export default function Page() {
               />
             </div>
 
-            <Button size="large" block type="primary" onClick={signInOrUp}>
+            <Button
+              size="large"
+              block
+              type="primary"
+              onClick={signInOrUp}
+              loading={loading}
+            >
               {isSignUp ? "注册" : "登录"}
             </Button>
           </div>
