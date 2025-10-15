@@ -21,11 +21,23 @@ export default function Page() {
   const client = createClient();
 
   const signInOrUp = async () => {
-    if (isSignUp) {
-      console.log("sign up", email, password);
-    } else {
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
+
+      if (isSignUp) {
+        const { error } = await client.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/verify_email`,
+          },
+        });
+        if (error) throw error;
+        messageApi.success("注册成功，请检查邮箱进行验证");
+        setEmail("");
+        setPassword("");
+        setIsSignUp(false);
+      } else {
         const { error } = await client.auth.signInWithPassword({
           email,
           password,
@@ -34,11 +46,11 @@ export default function Page() {
           throw error;
         }
         getUserAndRedirect();
-      } catch (e) {
-        messageApi.error(e instanceof Error ? e.message : "登录失败");
-      } finally {
-        setLoading(false);
       }
+    } catch (e) {
+      messageApi.error(e instanceof Error ? e.message : "登录失败");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,6 +96,7 @@ export default function Page() {
             <div className={styles.login_form_input}>
               <div className={styles.login_form_input_title}>邮箱</div>
               <Input
+                value={email}
                 size="large"
                 placeholder="请输入邮箱"
                 onChange={(e) => setEmail(e.target.value)}
@@ -99,6 +112,7 @@ export default function Page() {
               </div>
 
               <Input.Password
+                value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 size="large"
                 placeholder="请输入密码"
