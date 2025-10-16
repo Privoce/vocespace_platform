@@ -14,7 +14,7 @@ export interface HomeHeaderProps {
 
 export function HomeHeader({ messageApi }: HomeHeaderProps) {
   const router = useRouter();
-  const { user, loading, error } = useUser();
+  const { user, loading, error } = useUser({});
 
   useEffect(() => {
     if (error) {

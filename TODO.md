@@ -1,4 +1,4 @@
-- [ ] 首页
+- [x] 首页
   - [x] header: HomeHeader
     - [x] 描述 (发现Vocespace空间)
     - [x] 搜索框
@@ -36,7 +36,7 @@
 - [x] supabase接入
 - [ ] 用户页
   - [ ] 设置
-  - [ ] profile
+  - [x] profile
     - [x] 用户信息
     - [x] 数据统计
     - [x] 我创建的空间

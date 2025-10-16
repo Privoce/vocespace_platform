@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/client";
 import { UserInfo } from "@/lib/std/user";
 import { Nullable } from "@/lib/std";
 import { MessageInstance } from "antd/es/message/interface";
-import { dbApi } from "@/lib/db";
+import { api } from "@/lib/api";
+import { dbApi } from "@/lib/api/db";
 
 export interface UseUserResult {
   user: Nullable<User>;
@@ -14,7 +15,9 @@ export interface UseUserResult {
   error: Nullable<string>;
 }
 
-export interface useUserProps {}
+export interface useUserProps {
+  userId?: string;
+}
 
 /**
  * Custom hook for handling Supabase user authentication
@@ -28,7 +31,7 @@ export interface useUserProps {}
  * - Handles loading and error states
  * - Returns null for user when not authenticated
  */
-export function useUser(): UseUserResult {
+export function useUser({ userId }: useUserProps): UseUserResult {
   const [user, setUser] = useState<Nullable<User>>(null);
   const [userInfo, setUserInfo] = useState<Nullable<UserInfo>>(null);
   const [loading, setLoading] = useState(true);
@@ -42,23 +45,27 @@ export function useUser(): UseUserResult {
       try {
         setLoading(true);
 
-        const { data, error: userError } = await client.auth.getUser();
-
-        if (userError) {
-          if (userError.message !== "Invalid JWT") {
-            setError(userError.message);
-          }
-          setUser(null);
-          setUserInfo(null);
+        if (userId) {
+          // userId存在，直接去查找userInfo即可
+          const userInfo: UserInfo = await dbApi.userInfo.get(client, userId);
+          setUserInfo(userInfo);
         } else {
-          setUser(data.user);
-          // 如果获取到用户，尝试获取用户信息
-          if (data.user) {
-            let userInfo: UserInfo = await dbApi.userInfo.get(
-              client,
-              data.user.id
-            );
-            setUserInfo(userInfo);
+          const { data, error: userError } = await client.auth.getUser();
+
+          if (userError) {
+            console.error("Error fetching user:", userError);
+            if (userError.message !== "Invalid JWT") {
+              setError(userError.message);
+            }
+            setUser(null);
+            setUserInfo(null);
+          } else {
+            setUser(data.user);
+            // 如果获取到用户，尝试获取用户信息
+            if (data.user) {
+              let userInfo: UserInfo = await dbApi.userInfo.get(client, data.user.id);
+              setUserInfo(userInfo);
+            }
           }
         }
       } catch (err) {

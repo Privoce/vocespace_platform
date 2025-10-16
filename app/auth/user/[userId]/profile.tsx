@@ -228,7 +228,7 @@ interface UserProfileProps {
 }
 
 export function UserProfile({ userId }: UserProfileProps) {
-  const { user, userInfo, loading, setLoading, error } = useUser();
+  const { user, userInfo, loading, setLoading, error } = useUser({ userId });
   const [userStats, setUserStats] = useState<UserStats>(mockUserStats);
   const [userSpaces, setUserSpaces] = useState<Space[]>(mockUserSpaces);
   // const [loading, setLoading] = useState(false);
@@ -236,20 +236,11 @@ export function UserProfile({ userId }: UserProfileProps) {
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
-    loadUserData();
-  }, [userId]);
-
-  useEffect(() => {
-    if (error) messageApi.error(error);
+    if (error) {
+      console.warn("Error loading user data:", error, userId);
+      messageApi.error(error);
+    }
   }, [error]);
-
-  const loadUserData = async () => {
-    setLoading(true);
-    // 模拟API调用
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    // 在实际应用中，这里会根据userId获取用户数据
-    setLoading(false);
-  };
 
   const handleEditProfile = () => {
     // 打开编辑个人资料对话框
@@ -333,10 +324,12 @@ export function UserProfile({ userId }: UserProfileProps) {
       {contextHolder}
       <HomeHeader messageApi={messageApi} />
       {loading ? (
-        <>
-          <Skeleton avatar paragraph={{ rows: 4 }} active />
+        <div className={styles.container}>
+          <Card className={styles.profileHeader}>
+            <Skeleton avatar paragraph={{ rows: 4 }} active />
+          </Card>
           <Skeleton.Node active style={{ width: "100%" }} />
-        </>
+        </div>
       ) : !user ? (
         <Result
           status="404"
@@ -349,7 +342,7 @@ export function UserProfile({ userId }: UserProfileProps) {
           <Card className={styles.profileHeader}>
             <div className={styles.headerContent}>
               <div className={styles.avatarSection}>
-                <Avatar size={120} className={styles.avatar}>
+                <Avatar size={120} className={styles.avatar} style={{fontSize: 48, backgroundColor: '#22CCEE'}}>
                   {userInfo?.nickname ||
                     user.email?.charAt(0).toUpperCase() || <UserOutlined />}
                 </Avatar>
@@ -374,8 +367,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                 <div className={styles.metaInfo}>
                   <div className={styles.metaItem}>
                     <CalendarOutlined className={styles.icon} />
-                    加入于{" "}
-                    {dayjs(user.created_at).format("YYYY年MM月")}
+                    加入于 {dayjs(user.created_at).format("YYYY年MM月")}
                   </div>
                   {userInfo?.location && (
                     <div className={styles.metaItem}>
@@ -399,6 +391,19 @@ export function UserProfile({ userId }: UserProfileProps) {
                 </div>
 
                 <div className={styles.socialLinks}>
+                  <Tooltip title="Vocespace">
+                    <Button type="default">
+                      <a
+                        href={`https://vocespace.com/${
+                          userInfo?.nickname || user.id
+                        }`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <VocespaceLogo></VocespaceLogo>
+                      </a>
+                    </Button>
+                  </Tooltip>
                   {userInfo?.github && (
                     <Tooltip title="GitHub">
                       <Button type="default">
@@ -463,13 +468,13 @@ export function UserProfile({ userId }: UserProfileProps) {
           <div className={styles.profileStats}>
             <Card className={styles.statCard}>
               <div className={styles.statValue}>
-                {userStats.overview.total_spaces_created}
+                {(userInfo?.publishs?.length || 0) + 1}
               </div>
               <div className={styles.statLabel}>创建空间</div>
             </Card>
             <Card className={styles.statCard}>
               <div className={styles.statValue}>
-                {userStats.overview.total_spaces_subscribed}
+                {userInfo?.subscribes?.length || 0}
               </div>
               <div className={styles.statLabel}>订阅空间</div>
             </Card>

@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Nullable } from "../std";
-import { DEFAULT_USER_INFO, UserInfo } from "../std/user";
+import { DEFAULT_USER_INFO, UserInfo } from "../../std/user";
+
+export const USER_INFO_API_URL = "/api/user_info";
 
 export const get = async (
   client: SupabaseClient,
@@ -19,6 +20,7 @@ export const get = async (
     }
     throw error;
   }
+
   return data;
 };
 
@@ -26,11 +28,12 @@ export const create = async (
   client: SupabaseClient,
   uid: string
 ): Promise<UserInfo> => {
-  const newUserInfo: UserInfo = DEFAULT_USER_INFO(uid);
   const { data, error } = await client
     .from("user_info")
-    .insert(newUserInfo)
+    .insert(DEFAULT_USER_INFO(uid))
+    .select()
     .single();
+
   if (error) {
     throw error;
   }
