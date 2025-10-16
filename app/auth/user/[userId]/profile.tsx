@@ -13,6 +13,8 @@ import {
   Dropdown,
   MenuProps,
   List,
+  Skeleton,
+  Result,
 } from "antd";
 import {
   EditOutlined,
@@ -46,27 +48,28 @@ import {
 import styles from "@/styles/user_profile.module.scss";
 import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
+import { useUser } from "@/hooks/useUser";
 
 // Mock用户数据
-const mockUser: User = {
-  id: "user1",
-  username: "施攀",
-  email: "zhangsan@example.com",
-  avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=syf",
-  bio: "上海宝尊电商公司 - 产品专员 - 喜欢 🍽️",
-  created_at: Date.now() / 1000 - 55 * 24 * 3600,
-  updated_at: Date.now() / 1000,
-  location: "北京，中国",
-  website: "https://zhangsan.dev",
-  social_links: {
-    github: "https://github.com/zhangsan",
-    twitter: "https://twitter.com/zhangsan",
-    linkedin: "https://linkedin.com/in/zhangsan",
-  },
-  total_spaces_created: 5,
-  total_spaces_subscribed: 23,
-  total_participation_hours: 156,
-};
+// const mockUser: User = {
+//   id: "user1",
+//   username: "施攀",
+//   email: "zhangsan@example.com",
+//   avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=syf",
+//   bio: "上海宝尊电商公司 - 产品专员 - 喜欢 🍽️",
+//   created_at: Date.now() / 1000 - 55 * 24 * 3600,
+//   updated_at: Date.now() / 1000,
+//   location: "北京，中国",
+//   website: "https://zhangsan.dev",
+//   social_links: {
+//     github: "https://github.com/zhangsan",
+//     twitter: "https://twitter.com/zhangsan",
+//     linkedin: "https://linkedin.com/in/zhangsan",
+//   },
+//   total_spaces_created: 5,
+//   total_spaces_subscribed: 23,
+//   total_participation_hours: 156,
+// };
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {
@@ -225,15 +228,20 @@ interface UserProfileProps {
 }
 
 export function UserProfile({ userId }: UserProfileProps) {
-  const [user, setUser] = useState<User>(mockUser);
+  const { user, userInfo, loading, setLoading, error } = useUser();
   const [userStats, setUserStats] = useState<UserStats>(mockUserStats);
   const [userSpaces, setUserSpaces] = useState<Space[]>(mockUserSpaces);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState(dayjs().year());
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     loadUserData();
   }, [userId]);
+
+  useEffect(() => {
+    if (error) messageApi.error(error);
+  }, [error]);
 
   const loadUserData = async () => {
     setLoading(true);
@@ -322,67 +330,80 @@ export function UserProfile({ userId }: UserProfileProps) {
 
   return (
     <div className={styles.userProfile}>
-      <HomeHeader />
+      {contextHolder}
+      <HomeHeader messageApi={messageApi} />
+      {loading ? (
+        <>
+          <Skeleton avatar paragraph={{ rows: 4 }} active />
+          <Skeleton.Node active style={{ width: "100%" }} />
+        </>
+      ) : !user ? (
+        <Result
+          status="404"
+          title="用户未找到"
+          subTitle="抱歉，您要查看的用户不存在。"
+        />
+      ) : (
+        <div className={styles.container}>
+          {/* 个人资料头部 */}
+          <Card className={styles.profileHeader}>
+            <div className={styles.headerContent}>
+              <div className={styles.avatarSection}>
+                <Avatar size={120} className={styles.avatar}>
+                  {userInfo?.nickname ||
+                    user.email?.charAt(0).toUpperCase() || <UserOutlined />}
+                </Avatar>
+                <Button
+                  icon={<EditOutlined />}
+                  type="default"
+                  onClick={handleEditProfile}
+                >
+                  编辑头像
+                </Button>
+              </div>
 
-      <div className={styles.container}>
-        {/* 个人资料头部 */}
-        <Card className={styles.profileHeader}>
-          <div className={styles.headerContent}>
-            <div className={styles.avatarSection}>
-              <Avatar
-                size={120}
-                src={user.avatar_url}
-                className={styles.avatar}
-              >
-                {user.username?.[0]}
-              </Avatar>
-              <Button
-                icon={<EditOutlined />}
-                type="default"
-                onClick={handleEditProfile}
-              >
-                编辑头像
-              </Button>
-            </div>
+              <div className={styles.profileInfo}>
+                <h1 className={styles.username}>
+                  {userInfo?.nickname || user.email}
+                </h1>
+                {/* <div className={styles.email}>{user.email}</div> */}
 
-            <div className={styles.profileInfo}>
-              <h1 className={styles.username}>{user.username}</h1>
-              {/* <div className={styles.email}>{user.email}</div> */}
-
-              {user.bio && <div className={styles.bio}>{user.bio}</div>}
-
-              <div className={styles.metaInfo}>
-                <div className={styles.metaItem}>
-                  <CalendarOutlined className={styles.icon} />
-                  加入于 {dayjs(user.created_at * 1000).format("YYYY年MM月")}
+                <div className={styles.bio}>
+                  {userInfo?.desc || "这位用户很懒，什么都没有留下。"}
                 </div>
-                {user.location && (
+                <div className={styles.metaInfo}>
                   <div className={styles.metaItem}>
-                    <EnvironmentOutlined className={styles.icon} />
-                    {user.location}
+                    <CalendarOutlined className={styles.icon} />
+                    加入于{" "}
+                    {dayjs(user.created_at).format("YYYY年MM月")}
                   </div>
-                )}
-                {user.website && (
+                  {userInfo?.location && (
+                    <div className={styles.metaItem}>
+                      <EnvironmentOutlined className={styles.icon} />
+                      {userInfo.location}
+                    </div>
+                  )}
+
                   <div className={styles.metaItem}>
                     <VocespaceLogo></VocespaceLogo>
                     <a
-                      href={user.website}
+                      href={`https://vocespace.com/${
+                        userInfo?.nickname || user.id
+                      }`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       个人Vocespace
                     </a>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {user.social_links && (
                 <div className={styles.socialLinks}>
-                  {user.social_links.github && (
+                  {userInfo?.github && (
                     <Tooltip title="GitHub">
                       <Button type="default">
                         <a
-                          href={user.social_links.github}
+                          href={userInfo.github}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -391,11 +412,11 @@ export function UserProfile({ userId }: UserProfileProps) {
                       </Button>
                     </Tooltip>
                   )}
-                  {user.social_links.twitter && (
+                  {userInfo?.twitter && (
                     <Tooltip title="Twitter">
                       <Button type="default">
                         <a
-                          href={user.social_links.twitter}
+                          href={userInfo.twitter}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -404,11 +425,11 @@ export function UserProfile({ userId }: UserProfileProps) {
                       </Button>
                     </Tooltip>
                   )}
-                  {user.social_links.linkedin && (
+                  {userInfo?.linkedin && (
                     <Tooltip title="LinkedIn">
                       <Button type="default">
                         <a
-                          href={user.social_links.linkedin}
+                          href={userInfo.linkedin}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -418,154 +439,153 @@ export function UserProfile({ userId }: UserProfileProps) {
                     </Tooltip>
                   )}
                 </div>
-              )}
-            </div>
+              </div>
 
-            <div className={styles.profileActions}>
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                onClick={handleEditProfile}
-              >
-                编辑资料
-              </Button>
-              <Button
-                icon={<SettingOutlined />}
-                onClick={() => message.info("设置功能待实现")}
-              >
-                设置
-              </Button>
+              <div className={styles.profileActions}>
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={handleEditProfile}
+                >
+                  编辑资料
+                </Button>
+                <Button
+                  icon={<SettingOutlined />}
+                  onClick={() => message.info("设置功能待实现")}
+                >
+                  设置
+                </Button>
+              </div>
             </div>
+          </Card>
+
+          {/* 统计数据卡片 */}
+          <div className={styles.profileStats}>
+            <Card className={styles.statCard}>
+              <div className={styles.statValue}>
+                {userStats.overview.total_spaces_created}
+              </div>
+              <div className={styles.statLabel}>创建空间</div>
+            </Card>
+            <Card className={styles.statCard}>
+              <div className={styles.statValue}>
+                {userStats.overview.total_spaces_subscribed}
+              </div>
+              <div className={styles.statLabel}>订阅空间</div>
+            </Card>
+            <Card className={styles.statCard}>
+              <div className={styles.statValue}>
+                {userStats.overview.total_participation_hours}h
+              </div>
+              <div className={styles.statLabel}>参与时长</div>
+            </Card>
+            <Card className={styles.statCard}>
+              <div className={styles.statValue}>
+                {userStats.overview.current_streak_days}
+              </div>
+              <div className={styles.statLabel}>连续天数</div>
+            </Card>
           </div>
-        </Card>
 
-        {/* 统计数据卡片 */}
-        <div className={styles.profileStats}>
-          <Card className={styles.statCard}>
-            <div className={styles.statValue}>
-              {userStats.overview.total_spaces_created}
-            </div>
-            <div className={styles.statLabel}>创建空间</div>
-          </Card>
-          <Card className={styles.statCard}>
-            <div className={styles.statValue}>
-              {userStats.overview.total_spaces_subscribed}
-            </div>
-            <div className={styles.statLabel}>订阅空间</div>
-          </Card>
-          <Card className={styles.statCard}>
-            <div className={styles.statValue}>
-              {userStats.overview.total_participation_hours}h
-            </div>
-            <div className={styles.statLabel}>参与时长</div>
-          </Card>
-          <Card className={styles.statCard}>
-            <div className={styles.statValue}>
-              {userStats.overview.current_streak_days}
-            </div>
-            <div className={styles.statLabel}>连续天数</div>
-          </Card>
-        </div>
-
-        {/* 主要内容区域 */}
-        <div className={styles.contentGrid}>
-          <div className={styles.mainContent}>
-            {/* 我的空间 */}
-            <Card className={styles.sectionCard}>
-              <div className={styles.sectionCard_inner}>
-                <div className={styles.sectionTitle}>
-                  <TeamOutlined className={styles.icon} />
-                  我创建的空间 ({userSpaces.length})
-                </div>
-
-                <List
-                  pagination={{
-                    pageSize: 3,
-                    position: "bottom",
-                    size: "small",
-                    simple: { readOnly: true },
-                  }}
-                  split={false}
-                  bordered={false}
-                  dataSource={userSpaces}
-                  renderItem={(item) => (
-                    <List.Item
-                      style={{
-                        height: "120px",
-                        padding: "0",
-                      }}
-                    >
-                      <SpaceCard {...item} cardType="edit" />
-                    </List.Item>
-                  )}
-                ></List>
-              </div>
-            </Card>
-            {/* 参与活动热力图 */}
-            <Card className={styles.sectionCard}>
-              <div className={styles.sectionCard_inner}>
-                <div className={styles.sectionTitle}>
-                  <FireOutlined className={styles.icon} />
-                  参与活动热力图
-                </div>
-
-                <div className={styles.calendarHeader}>
-                  <span>过去一年的活动情况</span>
-                  <div className={styles.yearNav}>
-                    <Button
-                      size="small"
-                      onClick={() => setSelectedYear(selectedYear - 1)}
-                    >
-                      {selectedYear - 1}
-                    </Button>
-                    <Button size="small" type="primary">
-                      {selectedYear}
-                    </Button>
+          {/* 主要内容区域 */}
+          <div className={styles.contentGrid}>
+            <div className={styles.mainContent}>
+              {/* 我的空间 */}
+              <Card className={styles.sectionCard}>
+                <div className={styles.sectionCard_inner}>
+                  <div className={styles.sectionTitle}>
+                    <TeamOutlined className={styles.icon} />
+                    我创建的空间 ({userSpaces.length})
                   </div>
-                </div>
 
-                <div className={styles.activityCalendar}>
-                  <div className={styles.heatmapGrid}>
-                    {userStats.activity_heatmap.map((item, index) => (
-                      <Tooltip
-                        key={index}
-                        title={`${item.date}: ${item.count}次参与, ${item.duration}分钟`}
+                  <List
+                    pagination={{
+                      pageSize: 3,
+                      position: "bottom",
+                      size: "small",
+                      simple: { readOnly: true },
+                    }}
+                    split={false}
+                    bordered={false}
+                    dataSource={userSpaces}
+                    renderItem={(item) => (
+                      <List.Item
+                        style={{
+                          height: "120px",
+                          padding: "0",
+                        }}
                       >
-                        <div
-                          className={`${styles.heatmapCell} ${
-                            styles[`level-${getHeatmapLevel(item.count)}`]
-                          }`}
-                        />
-                      </Tooltip>
-                    ))}
-                  </div>
+                        <SpaceCard {...item} cardType="edit" />
+                      </List.Item>
+                    )}
+                  ></List>
                 </div>
-                <div className={styles.calendarLegend}>
-                  <span>较少</span>
-                  <div className={styles.legendItem}>
-                    <div
-                      className={`${styles.heatmapCell} ${styles["level-0"]}`}
-                    />
-                    <div
-                      className={`${styles.heatmapCell} ${styles["level-1"]}`}
-                    />
-                    <div
-                      className={`${styles.heatmapCell} ${styles["level-2"]}`}
-                    />
-                    <div
-                      className={`${styles.heatmapCell} ${styles["level-3"]}`}
-                    />
-                    <div
-                      className={`${styles.heatmapCell} ${styles["level-4"]}`}
-                    />
+              </Card>
+              {/* 参与活动热力图 */}
+              <Card className={styles.sectionCard}>
+                <div className={styles.sectionCard_inner}>
+                  <div className={styles.sectionTitle}>
+                    <FireOutlined className={styles.icon} />
+                    参与活动热力图
                   </div>
-                  <span>较多</span>
-                </div>
-              </div>
-            </Card>
 
-            {/* 空间类型偏好 */}
-            {/* <Card className={styles.sectionCard}>
+                  <div className={styles.calendarHeader}>
+                    <span>过去一年的活动情况</span>
+                    <div className={styles.yearNav}>
+                      <Button
+                        size="small"
+                        onClick={() => setSelectedYear(selectedYear - 1)}
+                      >
+                        {selectedYear - 1}
+                      </Button>
+                      <Button size="small" type="primary">
+                        {selectedYear}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className={styles.activityCalendar}>
+                    <div className={styles.heatmapGrid}>
+                      {userStats.activity_heatmap.map((item, index) => (
+                        <Tooltip
+                          key={index}
+                          title={`${item.date}: ${item.count}次参与, ${item.duration}分钟`}
+                        >
+                          <div
+                            className={`${styles.heatmapCell} ${
+                              styles[`level-${getHeatmapLevel(item.count)}`]
+                            }`}
+                          />
+                        </Tooltip>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.calendarLegend}>
+                    <span>较少</span>
+                    <div className={styles.legendItem}>
+                      <div
+                        className={`${styles.heatmapCell} ${styles["level-0"]}`}
+                      />
+                      <div
+                        className={`${styles.heatmapCell} ${styles["level-1"]}`}
+                      />
+                      <div
+                        className={`${styles.heatmapCell} ${styles["level-2"]}`}
+                      />
+                      <div
+                        className={`${styles.heatmapCell} ${styles["level-3"]}`}
+                      />
+                      <div
+                        className={`${styles.heatmapCell} ${styles["level-4"]}`}
+                      />
+                    </div>
+                    <span>较多</span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* 空间类型偏好 */}
+              {/* <Card className={styles.sectionCard}>
               <div className={styles.sectionTitle}>
                 <TrophyOutlined className={styles.icon} />
                 空间类型偏好
@@ -576,57 +596,58 @@ export function UserProfile({ userId }: UserProfileProps) {
                 </div>
               </div>
             </Card> */}
-          </div>
+            </div>
 
-          {/* 侧边栏 */}
-          <div className={styles.sidebar}>
-            {/* 最近活动 */}
-            <Card className={styles.sectionCard}>
-              <div className={styles.sectionTitle}>
-                <ClockCircleOutlined style={{ color: "#22CCEE" }} />
-                最近活动
-              </div>
+            {/* 侧边栏 */}
+            <div className={styles.sidebar}>
+              {/* 最近活动 */}
+              <Card className={styles.sectionCard}>
+                <div className={styles.sectionTitle}>
+                  <ClockCircleOutlined style={{ color: "#22CCEE" }} />
+                  最近活动
+                </div>
 
-              <List
-                pagination={{
-                  pageSize: 8,
-                  position: "bottom",
-                  size: "small",
-                  simple: { readOnly: true },
-                }}
-                // split={false}
-                bordered={false}
-                dataSource={[
-                  {
-                    title: '参加了 "前端技术交流"',
-                    time: "2小时前",
-                    icon: <PlayCircleOutlined></PlayCircleOutlined>,
-                  },
-                  {
-                    title: '创建了新空间 "React进阶"',
-                    time: "1天前",
-                    icon: <TeamOutlined></TeamOutlined>,
-                  },
-                  {
-                    title: '订阅了 "设计师聚会"',
-                    time: "3天前",
-                    icon: <UserOutlined></UserOutlined>,
-                  },
-                ]}
-                renderItem={(item) => (
-                  <List.Item className={styles.activityItem}>
-                    <div className={styles.activityIcon}>{item.icon}</div>
-                    <div className={styles.activityContent}>
-                      <div className={styles.activityText}>{item.title}</div>
-                      <div className={styles.activityTime}>{item.time}</div>
-                    </div>
-                  </List.Item>
-                )}
-              ></List>
-            </Card>
+                <List
+                  pagination={{
+                    pageSize: 8,
+                    position: "bottom",
+                    size: "small",
+                    simple: { readOnly: true },
+                  }}
+                  // split={false}
+                  bordered={false}
+                  dataSource={[
+                    {
+                      title: '参加了 "前端技术交流"',
+                      time: "2小时前",
+                      icon: <PlayCircleOutlined></PlayCircleOutlined>,
+                    },
+                    {
+                      title: '创建了新空间 "React进阶"',
+                      time: "1天前",
+                      icon: <TeamOutlined></TeamOutlined>,
+                    },
+                    {
+                      title: '订阅了 "设计师聚会"',
+                      time: "3天前",
+                      icon: <UserOutlined></UserOutlined>,
+                    },
+                  ]}
+                  renderItem={(item) => (
+                    <List.Item className={styles.activityItem}>
+                      <div className={styles.activityIcon}>{item.icon}</div>
+                      <div className={styles.activityContent}>
+                        <div className={styles.activityText}>{item.title}</div>
+                        <div className={styles.activityTime}>{item.time}</div>
+                      </div>
+                    </List.Item>
+                  )}
+                ></List>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

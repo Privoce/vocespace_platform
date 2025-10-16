@@ -1,19 +1,27 @@
-import { useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
-import { createClient } from '@/lib/supabase/client';
+import { useState, useEffect } from "react";
+import { User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
+import { UserInfo } from "@/lib/std/user";
+import { Nullable } from "@/lib/std";
+import { MessageInstance } from "antd/es/message/interface";
+import { dbApi } from "@/lib/db";
 
 export interface UseUserResult {
-  user: User | null;
+  user: Nullable<User>;
+  userInfo: Nullable<UserInfo>;
   loading: boolean;
-  error: string | null;
+  setLoading: (loading: boolean) => void;
+  error: Nullable<string>;
 }
+
+export interface useUserProps {}
 
 /**
  * Custom hook for handling Supabase user authentication
- * 
+ *
  * Usage:
  * const { user, loading, error } = useUser();
- * 
+ *
  * Features:
  * - Automatically fetches current user on mount
  * - Listens for auth state changes (login/logout)
@@ -21,9 +29,10 @@ export interface UseUserResult {
  * - Returns null for user when not authenticated
  */
 export function useUser(): UseUserResult {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Nullable<User>>(null);
+  const [userInfo, setUserInfo] = useState<Nullable<UserInfo>>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Nullable<string>>(null);
 
   useEffect(() => {
     const client = createClient();
@@ -32,21 +41,30 @@ export function useUser(): UseUserResult {
     const getInitialUser = async () => {
       try {
         setLoading(true);
-        setError(null);
-        
+
         const { data, error: userError } = await client.auth.getUser();
-        
+
         if (userError) {
-          if (userError.message !== 'Invalid JWT') {
+          if (userError.message !== "Invalid JWT") {
             setError(userError.message);
           }
           setUser(null);
+          setUserInfo(null);
         } else {
           setUser(data.user);
+          // 如果获取到用户，尝试获取用户信息
+          if (data.user) {
+            let userInfo: UserInfo = await dbApi.userInfo.get(
+              client,
+              data.user.id
+            );
+            setUserInfo(userInfo);
+          }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        setError(err instanceof Error ? err.message : "Unknown error");
         setUser(null);
+        setUserInfo(null);
       } finally {
         setLoading(false);
       }
@@ -55,43 +73,45 @@ export function useUser(): UseUserResult {
     getInitialUser();
 
     // Listen for auth changes
-    const { data: { subscription } } = client.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
-        
-        setLoading(false);
-        setError(null);
-        
-        switch (event) {
-          case 'SIGNED_IN':
-          case 'TOKEN_REFRESHED':
-            setUser(session?.user ?? null);
-            break;
-          case 'SIGNED_OUT':
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event, session?.user?.email);
+
+      setLoading(false);
+      setError(null);
+
+      switch (event) {
+        case "SIGNED_IN":
+        case "TOKEN_REFRESHED":
+          setUser(session?.user ?? null);
+          break;
+        case "SIGNED_OUT":
+          setUser(null);
+          setUserInfo(null);
+          break;
+        default:
+          // For other events, check current session
+          if (session) {
+            setUser(session.user);
+          } else {
             setUser(null);
-            break;
-          default:
-            // For other events, check current session
-            if (session) {
-              setUser(session.user);
-            } else {
-              setUser(null);
-            }
-        }
+            setUserInfo(null);
+          }
       }
-    );
+    });
 
     return () => {
       subscription?.unsubscribe();
     };
   }, []);
 
-  return { user, loading, error };
+  return { user, loading, setLoading, error, userInfo };
 }
 
 /**
  * Custom hook for user authentication actions
- * 
+ *
  * Usage:
  * const { signOut, signIn, signUp } = useAuth();
  */

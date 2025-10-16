@@ -1,17 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "@/styles/home_header.module.scss";
 import { useRouter } from "next/navigation";
 import { UserBox } from "@/components/user/box";
 import { useUser } from "@/hooks/useUser";
+import { MessageInstance } from "antd/es/message/interface";
 
 // 简化后的Props，不再需要传入client
-export interface HomeHeaderProps {}
+export interface HomeHeaderProps {
+  messageApi: MessageInstance;
+}
 
-export function HomeHeader({}: HomeHeaderProps) {
+export function HomeHeader({ messageApi }: HomeHeaderProps) {
   const router = useRouter();
   const { user, loading, error } = useUser();
+
+  useEffect(() => {
+    if (error) {
+      messageApi.error(error);
+    }
+  }, [error]);
 
   return (
     <header className={styles.home_header}>

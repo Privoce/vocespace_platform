@@ -1,4 +1,40 @@
-import { SpaceType } from "./space";
+import { Nullable } from ".";
+import { Space, SpaceType } from "./space";
+
+export interface UserInfo {
+  id: string;
+  nickname: Nullable<string>;
+  desc: Nullable<string>;
+  location: Nullable<string>;
+  /**
+   * 用户订阅过的空间ID列表
+   */
+  subscribes: Nullable<string[]>;
+  /**
+   * 用户发布过的空间ID列表
+   */
+  publishs: Nullable<string[]>;
+  /**
+   * 用户参与使用过的空间的时间戳列表 (用于生成热力图)
+   */
+  records: Nullable<string[]>;
+  linkedin: Nullable<string>;
+  github: Nullable<string>;
+  twitter: Nullable<string>;
+}
+
+export const DEFAULT_USER_INFO = (id: string): UserInfo => ({
+  id,
+  nickname: null,
+  desc: null,
+  location: null,
+  subscribes: null,
+  publishs: null,
+  records: null,
+  linkedin: null,
+  github: null,
+  twitter: null,
+});
 
 export interface User {
   id: string;
@@ -46,14 +82,14 @@ export interface UserStats {
   space_type_preferences: {
     [key in SpaceType]: number;
   };
-  
+
   // 参与活动热力图数据 (类似GitHub贡献图)
   activity_heatmap: {
     date: string; // YYYY-MM-DD
     count: number; // 参与次数
     duration: number; // 参与时长(分钟)
   }[];
-  
+
   // 每月统计
   monthly_stats: {
     month: string; // YYYY-MM
@@ -61,7 +97,7 @@ export interface UserStats {
     spaces_joined: number;
     total_duration: number;
   }[];
-  
+
   // 总体统计
   overview: {
     total_spaces_created: number;
