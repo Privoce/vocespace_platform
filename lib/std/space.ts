@@ -52,3 +52,22 @@ export interface Space {
    */
   readme?: string;
 }
+
+/**
+ * create vocespace url for direct access
+ * @param userId user id
+ * @param username username from `UserInfo.nickname` || `User.email!`
+ * @param spaceName spaceName if is undefined, will use username as spaceName
+ * @returns
+ */
+export const vocespaceUrl = (
+  userId: string,
+  username: string,
+  authFrom: "vocespace" | "google" = "vocespace",
+  spaceName?: string
+): string => {
+  return `https://vocespace.com/${
+    spaceName || username
+  }?auth=${authFrom}&userId=${userId}&username=${username}`;
+};
+

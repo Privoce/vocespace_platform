@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Avatar,
   Button,
@@ -44,32 +44,12 @@ import {
   SpaceType,
   SpaceState,
   FrequencyInterval,
+  vocespaceUrl,
 } from "@/lib/std/space";
 import styles from "@/styles/user_profile.module.scss";
 import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
-import { useUser } from "@/hooks/useUser";
-
-// Mock用户数据
-// const mockUser: User = {
-//   id: "user1",
-//   username: "施攀",
-//   email: "zhangsan@example.com",
-//   avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=syf",
-//   bio: "上海宝尊电商公司 - 产品专员 - 喜欢 🍽️",
-//   created_at: Date.now() / 1000 - 55 * 24 * 3600,
-//   updated_at: Date.now() / 1000,
-//   location: "北京，中国",
-//   website: "https://zhangsan.dev",
-//   social_links: {
-//     github: "https://github.com/zhangsan",
-//     twitter: "https://twitter.com/zhangsan",
-//     linkedin: "https://linkedin.com/in/zhangsan",
-//   },
-//   total_spaces_created: 5,
-//   total_spaces_subscribed: 23,
-//   total_participation_hours: 156,
-// };
+import { getUsername, useUser, whereUserFrom } from "@/hooks/useUser";
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {
@@ -242,6 +222,18 @@ export function UserProfile({ userId }: UserProfileProps) {
     }
   }, [error]);
 
+  const username = useMemo(() => {
+    return getUsername(user, userInfo);
+  }, [userInfo, user]);
+
+  const selfVocespaceUrl = useMemo(() => {
+    if (user && username) {
+      return vocespaceUrl(user.id, username, whereUserFrom(user));
+    } else {
+      return "";
+    }
+  }, [user?.id, username]);
+
   const handleEditProfile = () => {
     // 打开编辑个人资料对话框
     message.info("编辑个人资料功能待实现");
@@ -342,9 +334,17 @@ export function UserProfile({ userId }: UserProfileProps) {
           <Card className={styles.profileHeader}>
             <div className={styles.headerContent}>
               <div className={styles.avatarSection}>
-                <Avatar size={120} className={styles.avatar} style={{fontSize: 48, backgroundColor: '#22CCEE'}}>
-                  {userInfo?.nickname ||
-                    user.email?.charAt(0).toUpperCase() || <UserOutlined />}
+                <Avatar
+                  size={120}
+                  className={styles.avatar}
+                  src={
+                    whereUserFrom(user) === "google"
+                      ? user.user_metadata?.picture
+                      : undefined
+                  }
+                  style={{ fontSize: 48, backgroundColor: "#22CCEE", border: "none" }}
+                >
+                  {username.charAt(0).toUpperCase() || <UserOutlined />}
                 </Avatar>
                 <Button
                   icon={<EditOutlined />}
@@ -356,9 +356,7 @@ export function UserProfile({ userId }: UserProfileProps) {
               </div>
 
               <div className={styles.profileInfo}>
-                <h1 className={styles.username}>
-                  {userInfo?.nickname || user.email}
-                </h1>
+                <h1 className={styles.username}>{username}</h1>
                 {/* <div className={styles.email}>{user.email}</div> */}
 
                 <div className={styles.bio}>
@@ -379,9 +377,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <div className={styles.metaItem}>
                     <VocespaceLogo></VocespaceLogo>
                     <a
-                      href={`https://vocespace.com/${
-                        userInfo?.nickname || user.id
-                      }`}
+                      href={selfVocespaceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -394,9 +390,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <Tooltip title="Vocespace">
                     <Button type="default">
                       <a
-                        href={`https://vocespace.com/${
-                          userInfo?.nickname || user.id
-                        }`}
+                        href={selfVocespaceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -454,17 +448,16 @@ export function UserProfile({ userId }: UserProfileProps) {
                 >
                   编辑资料
                 </Button>
-                <Button
+                {/* <Button
                   icon={<SettingOutlined />}
                   onClick={() => message.info("设置功能待实现")}
                 >
                   设置
-                </Button>
+                </Button> */}
               </div>
             </div>
           </Card>
 
-          {/* 统计数据卡片 */}
           <div className={styles.profileStats}>
             <Card className={styles.statCard}>
               <div className={styles.statValue}>
@@ -478,7 +471,7 @@ export function UserProfile({ userId }: UserProfileProps) {
               </div>
               <div className={styles.statLabel}>订阅空间</div>
             </Card>
-            <Card className={styles.statCard}>
+            {/* <Card className={styles.statCard}>
               <div className={styles.statValue}>
                 {userStats.overview.total_participation_hours}h
               </div>
@@ -489,13 +482,12 @@ export function UserProfile({ userId }: UserProfileProps) {
                 {userStats.overview.current_streak_days}
               </div>
               <div className={styles.statLabel}>连续天数</div>
-            </Card>
+            </Card> */}
           </div>
 
-          {/* 主要内容区域 */}
-          <div className={styles.contentGrid}>
+          {/* <div className={styles.contentGrid}>
             <div className={styles.mainContent}>
-              {/* 我的空间 */}
+
               <Card className={styles.sectionCard}>
                 <div className={styles.sectionCard_inner}>
                   <div className={styles.sectionTitle}>
@@ -526,7 +518,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   ></List>
                 </div>
               </Card>
-              {/* 参与活动热力图 */}
+
               <Card className={styles.sectionCard}>
                 <div className={styles.sectionCard_inner}>
                   <div className={styles.sectionTitle}>
@@ -588,24 +580,8 @@ export function UserProfile({ userId }: UserProfileProps) {
                   </div>
                 </div>
               </Card>
-
-              {/* 空间类型偏好 */}
-              {/* <Card className={styles.sectionCard}>
-              <div className={styles.sectionTitle}>
-                <TrophyOutlined className={styles.icon} />
-                空间类型偏好
-              </div>
-              <div className={styles.spaceTypeChart}>
-                <div className={styles.chartContainer}>
-                  <Pie {...pieConfig} />
-                </div>
-              </div>
-            </Card> */}
             </div>
-
-            {/* 侧边栏 */}
             <div className={styles.sidebar}>
-              {/* 最近活动 */}
               <Card className={styles.sectionCard}>
                 <div className={styles.sectionTitle}>
                   <ClockCircleOutlined style={{ color: "#22CCEE" }} />
@@ -619,7 +595,6 @@ export function UserProfile({ userId }: UserProfileProps) {
                     size: "small",
                     simple: { readOnly: true },
                   }}
-                  // split={false}
                   bordered={false}
                   dataSource={[
                     {
@@ -650,7 +625,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                 ></List>
               </Card>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
     </div>

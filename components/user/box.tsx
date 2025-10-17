@@ -2,10 +2,11 @@ import { UserOutlined } from "@ant-design/icons";
 import { User } from "@supabase/supabase-js";
 import { Avatar, Button, Dropdown, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useUser";
+import { useAuth, whereUserFrom } from "@/hooks/useUser";
 
 export interface UserBoxProps {
   user: User | null;
+  username: string;
   loading?: boolean;
 }
 
@@ -15,7 +16,7 @@ export interface UserBoxProps {
  * if login, show user avatar and dropdown menu
  * if not login, show login button
  */
-export function UserBox({ user, loading = false }: UserBoxProps) {
+export function UserBox({ user, username, loading = false }: UserBoxProps) {
   const router = useRouter();
   const { signOut } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
@@ -71,9 +72,18 @@ export function UserBox({ user, loading = false }: UserBoxProps) {
         >
           <Avatar
             size={"large"}
-            style={{ backgroundColor: "#22CCEE", cursor: "pointer" }}
+            src={
+              whereUserFrom(user) === "google"
+                ? user.user_metadata?.picture
+                : undefined
+            }
+            style={{
+              backgroundColor: "#22CCEE",
+              cursor: "pointer",
+              border: "none",
+            }}
           >
-            {user.email?.charAt(0).toUpperCase() || <UserOutlined />}
+            {username.charAt(0).toUpperCase() || <UserOutlined />}
           </Avatar>
         </Dropdown>
       ) : (

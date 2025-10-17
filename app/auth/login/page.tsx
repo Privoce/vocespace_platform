@@ -1,5 +1,8 @@
 "use client";
 import { LoginForm } from "@/components/login-form";
+import { dbApi } from "@/lib/api/db";
+import { vocespaceUrl } from "@/lib/std/space";
+import { UserInfo } from "@/lib/std/user";
 import { createClient } from "@/lib/supabase/client";
 import styles from "@/styles/login.module.scss";
 import {
@@ -11,7 +14,22 @@ import { Button, Divider, Input, message } from "antd";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function Page() {
+export interface LoginPageProps {
+  searchParams?: {
+    /**
+     * from where the user come
+     * - vocespace: from vocespace meeting page (which need to get user login params and back to meeting with user info)
+     * - unknown: unknown source (for future other platform need vocespace platform user login)
+     */
+    from?: "vocespace" | "unknown";
+    /**
+     * redirect to which page after login success, if from is `vocespace` (this is not needed), it should container params see [`vocespaceUrl()`](../../../lib/std/space.ts)
+     */
+    redirectTo?: string;
+  };
+}
+
+export default function Page({searchParams}: LoginPageProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +37,6 @@ export default function Page() {
   const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
   const client = createClient();
-
   const signInOrUp = async () => {
     try {
       setLoading(true);
@@ -62,6 +79,22 @@ export default function Page() {
       return;
     }
 
+    if (searchParams && searchParams.from) {
+      if (searchParams.from === "vocespace") {
+        // get userInfo
+        const userInfo: UserInfo = await dbApi.userInfo.get(
+          client,
+          data.user.id
+        );
+        // redirect to vocespace with params
+        const redirectUrl = vocespaceUrl(data.user.id, userInfo?.nickname || data.user.email!, "vocespace");
+        router.replace(redirectUrl);
+        return;
+      } else {
+        // TODO: handle other from source
+      }
+    }
+
     router.push(`/auth/user/${data.user.id}`);
   };
 
@@ -71,12 +104,12 @@ export default function Page() {
       const { data, error } = await client.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback`, // TODO, 携带参数判断从那个页面进去
         },
       });
 
       if (error) throw error;
-      
+
       // OAuth 会自动重定向，不需要手动处理
     } catch (e) {
       messageApi.error(e instanceof Error ? e.message : "Google登录失败");
@@ -101,15 +134,33 @@ export default function Page() {
             </div>
           </div>
           <div className={styles.login_left_main_others}>
-            <Button
+            <button
               onClick={signInWithGoogle}
-              icon={<GoogleOutlined></GoogleOutlined>}
-              size="large"
-              block
-              type="primary"
+              style={{
+                backgroundColor: "#141414",
+                width: "100%",
+                height: "42px",
+                padding: "8px 16px",
+                borderRadius: 4,
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "1rem",
+                cursor: "pointer",
+                fontSize: 14,
+              }}
             >
-              使用Google账号登录
-            </Button>
+              <img
+                src="/google.svg"
+                style={{
+                  height: 20,
+                  width: 20,
+                  paddingBottom: 2,
+                }}
+              ></img>
+              <span>Continue with Google</span>
+            </button>
           </div>
           <Divider style={{ borderColor: "#4c4c4c", margin: 0 }}>or</Divider>
           <div className={styles.login_left_main_form}>

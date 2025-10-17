@@ -9,8 +9,14 @@ export enum UserInfoErrMsg {
   INTERNAL_ERROR = "Internal server error",
 }
 
+export enum VocespaceError {
+  CREATE_SPACE_PARAM_LACK = "common.create_space.error.param",
+  CREATE_SPACE_EXIST = "common.create_space.error.exist",
+}
+
 export interface ApiErrMsg {
   userInfo: UserInfoErrMsg;
+  vocespace: VocespaceError;
 }
 
 export interface ApiErr {

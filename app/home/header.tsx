@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import styles from "@/styles/home_header.module.scss";
 import { useRouter } from "next/navigation";
 import { UserBox } from "@/components/user/box";
-import { useUser } from "@/hooks/useUser";
+import { getUsername, useUser } from "@/hooks/useUser";
 import { MessageInstance } from "antd/es/message/interface";
 
 // 简化后的Props，不再需要传入client
@@ -14,7 +14,11 @@ export interface HomeHeaderProps {
 
 export function HomeHeader({ messageApi }: HomeHeaderProps) {
   const router = useRouter();
-  const { user, loading, error } = useUser({});
+  const { user, userInfo, loading, error } = useUser({});
+
+  const username = useMemo(()=>{
+    return getUsername(user, userInfo);
+  }, [userInfo, user]);
 
   useEffect(() => {
     if (error) {
@@ -30,7 +34,7 @@ export function HomeHeader({ messageApi }: HomeHeaderProps) {
           onClick={() => router.push("/")}
           style={{ cursor: "pointer" }}
         ></img>
-        <UserBox user={user} loading={loading}></UserBox>
+        <UserBox user={user} username={username} loading={loading}></UserBox>
       </div>
     </header>
   );
