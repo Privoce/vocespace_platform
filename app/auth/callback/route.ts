@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const spaceName = request.nextUrl.searchParams.get("spaceName");
+  const origin = request.nextUrl.origin;
 
   if (code) {
     const supabase = await createClient();

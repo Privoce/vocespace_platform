@@ -93,8 +93,22 @@ export default function Page({ searchParams }: LoginPageProps) {
       return;
     }
 
-    if (searchParams && searchParams.from) {
-      if (searchParams.from === "vocespace") {
+    // 首先尝试从 searchParams 获取参数，如果没有则从 URL 获取
+    let params = searchParams;
+    if (!params || !params.from) {
+      const urlParams = new URLSearchParams(window.location.search);
+      params = {
+        from: urlParams.get('from') as "vocespace" | "unknown" | undefined,
+        redirectTo: urlParams.get('redirectTo') || undefined,
+        auth: urlParams.get('auth') as "google" | "email" | undefined,
+        spaceName: urlParams.get('spaceName') || ''
+      };
+    }
+
+    console.log('Login redirect params:', params); // 添加调试日志
+
+    if (params && params.from) {
+      if (params.from === "vocespace") {
         // get userInfo
         const userInfo: UserInfo = await dbApi.userInfo.get(
           client,
@@ -105,9 +119,10 @@ export default function Page({ searchParams }: LoginPageProps) {
           data.user.id,
           userInfo?.nickname || data.user.email!,
           "vocespace",
-          searchParams.spaceName
+          params.spaceName
         );
-        router.replace(redirectUrl);
+        console.log('Redirecting to vocespace:', redirectUrl); // 添加调试日志
+        window.location.href = redirectUrl; // 使用 window.location.href 替代 router.replace
         return;
       } else {
         // TODO: handle other from source
@@ -125,8 +140,13 @@ export default function Page({ searchParams }: LoginPageProps) {
       setLoading(true);
       // if is directly, means with search params from vocespace
       let redirectTo = `${window.location.origin}/auth/callback`;
-      if (directly) {
-        redirectTo += `?spaceName=${searchParams!.spaceName}`;
+      
+      // 获取当前 URL 参数
+      const urlParams = new URLSearchParams(window.location.search);
+      const spaceName = searchParams?.spaceName || urlParams.get('spaceName');
+      
+      if (directly || spaceName) {
+        redirectTo += `?spaceName=${spaceName}`;
       }
 
       const { data, error } = await client.auth.signInWithOAuth({
