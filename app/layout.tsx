@@ -4,6 +4,8 @@ import ClientProviders from "./client-providers";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
+  : process.env.NODE_ENV === "production"
+  ? "https://home.vocespace.com"
   : "http://localhost:3000";
 
 export const metadata: Metadata = {
