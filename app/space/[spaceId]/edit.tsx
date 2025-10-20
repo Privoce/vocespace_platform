@@ -137,7 +137,7 @@ export default function SpaceEdit({ spaceId }: SpaceEditProps) {
       });
 
       setImages(mockSpace.images);
-      setMarkdownContent(mockSpace.readme);
+      setMarkdownContent(mockSpace.readme || "");
       setSelectedDays(mockSpace.freq.in_week || []);
       
     } catch (error) {
@@ -267,11 +267,12 @@ export default function SpaceEdit({ spaceId }: SpaceEditProps) {
   const handleCancel = () => {
     router.back();
   };
-
+    const [messageApi, contextHolder] = message.useMessage();
   return (
     <div className={styles.spaceEdit}>
-      <HomeHeader />
-      
+      {contextHolder}
+      <HomeHeader messageApi={messageApi} />
+
       <div className={styles.container}>
         <h1 className={styles.pageTitle}>
           {isEdit ? "编辑空间" : "创建新空间"}
