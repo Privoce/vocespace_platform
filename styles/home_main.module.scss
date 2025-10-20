@@ -13,6 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  height: calc(80vh - 128px);
   &_tabs {
     width: 1080px;
   }

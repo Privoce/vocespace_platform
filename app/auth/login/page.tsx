@@ -12,9 +12,13 @@ import {
 } from "@ant-design/icons";
 import { Button, Divider, Input, message } from "antd";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface LoginPageProps {
+  /**
+   * search params from url
+   * - `https://home.vocespace.com/auth/login?from=vocespace&redirectTo=...&auth=google&spaceName=xxx`
+   */
   searchParams?: {
     /**
      * from where the user come
@@ -26,10 +30,21 @@ export interface LoginPageProps {
      * redirect to which page after login success, if from is `vocespace` (this is not needed), it should container params see [`vocespaceUrl()`](../../../lib/std/space.ts)
      */
     redirectTo?: string;
+    /**
+     * authentication method, could be `google` or `email` or undefined (default)
+     * - google: use google oauth
+     * - email: use email (vocespace default auth method)
+     */
+    auth?: "google" | "email";
+    /**
+     * vocespace space name, needed!
+     * use to create / join space after login
+     */
+    spaceName: string;
   };
 }
 
-export default function Page({searchParams}: LoginPageProps) {
+export default function Page({ searchParams }: LoginPageProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -87,7 +102,12 @@ export default function Page({searchParams}: LoginPageProps) {
           data.user.id
         );
         // redirect to vocespace with params
-        const redirectUrl = vocespaceUrl(data.user.id, userInfo?.nickname || data.user.email!, "vocespace");
+        const redirectUrl = vocespaceUrl(
+          data.user.id,
+          userInfo?.nickname || data.user.email!,
+          "vocespace",
+          searchParams.spaceName
+        );
         router.replace(redirectUrl);
         return;
       } else {
@@ -98,24 +118,42 @@ export default function Page({searchParams}: LoginPageProps) {
     router.push(`/auth/user/${data.user.id}`);
   };
 
-  const signInWithGoogle = async () => {
+  /**
+   * login with google oauth when clicked continue with google button
+   */
+  const signInWithGoogle = async (directly = false) => {
     try {
       setLoading(true);
+      // if is directly, means with search params from vocespace
+      let redirectTo = `${window.location.origin}/auth/callback`;
+      if (directly) {
+        redirectTo += `?spaceName=${searchParams!.spaceName}`;
+      }
+
       const { data, error } = await client.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`, // TODO, 携带参数判断从那个页面进去
+          redirectTo,
         },
       });
 
       if (error) throw error;
-
-      // OAuth 会自动重定向，不需要手动处理
     } catch (e) {
       messageApi.error(e instanceof Error ? e.message : "Google登录失败");
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (
+      searchParams &&
+      searchParams.from === "vocespace" &&
+      searchParams.auth === "google"
+    ) {
+      // directly use google oauth
+      signInWithGoogle(true);
+    }
+  }, [searchParams]);
 
   return (
     <div className={styles.login}>
@@ -135,7 +173,7 @@ export default function Page({searchParams}: LoginPageProps) {
           </div>
           <div className={styles.login_left_main_others}>
             <button
-              onClick={signInWithGoogle}
+              onClick={() => signInWithGoogle(false)}
               style={{
                 backgroundColor: "#141414",
                 width: "100%",
