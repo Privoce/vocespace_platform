@@ -9,7 +9,6 @@ import {
   GithubOutlined,
   LinkedinOutlined,
   TwitterOutlined,
-  EditOutlined,
   LeftOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
@@ -17,6 +16,7 @@ import styles from "@/styles/user_settings.module.scss";
 import { UserPageUniProps } from "./page";
 import { whereUserFrom } from "@/hooks/useUser";
 import { useI18n } from "@/lib/i18n/i18n";
+import { EditAvatarBtn } from "./page";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
@@ -32,6 +32,7 @@ export default function UserSettings({
   messageApi,
   setPage,
   client,
+  flushUser,
 }: UserSettingsProps) {
   const { t } = useI18n();
   const [nickname, setNickname] = useState(userInfo?.nickname || "");
@@ -40,6 +41,25 @@ export default function UserSettings({
   const [linkedin, setLinkedin] = useState(userInfo?.linkedin || "");
   const [github, setGithub] = useState(userInfo?.github || "");
   const [twitter, setTwitter] = useState(userInfo?.twitter || "");
+  const [currentUserInfo, setCurrentUserInfo] = useState(userInfo);
+
+  // 获取头像URL的优先级：自定义头像 > Google头像 > 默认
+  const getAvatarSrc = () => {
+    if (currentUserInfo?.avatar) {
+      return currentUserInfo.avatar;
+    }
+    if (whereUserFrom(user) === "google" && user?.user_metadata?.picture) {
+      return user.user_metadata.picture;
+    }
+    return undefined;
+  };
+
+  const handleAvatarUpdate = (avatarUrl: string) => {
+    // 更新本地状态
+    setCurrentUserInfo((prev) =>
+      prev ? { ...prev, avatar: avatarUrl } : null
+    );
+  };
 
   const handleSave = async (values: any) => {
     setLoading(true);
@@ -185,11 +205,7 @@ export default function UserSettings({
         <Avatar
           size={120}
           className={styles.avatar}
-          src={
-            whereUserFrom(user) === "google"
-              ? user.user_metadata?.picture
-              : undefined
-          }
+          src={getAvatarSrc()}
           style={{
             fontSize: 48,
             backgroundColor: "#22CCEE",
@@ -199,13 +215,12 @@ export default function UserSettings({
           {username.charAt(0).toUpperCase() || <UserOutlined />}
         </Avatar>
         <div>{username}</div>
-        <Button
-          icon={<EditOutlined />}
-          type="default"
-          onClick={handleEditProfile}
-        >
-          {t("user.setting.editAvatar")}
-        </Button>
+        <EditAvatarBtn
+          userId={userId}
+          client={client}
+          messageApi={messageApi}
+          afterUpdate={flushUser}
+        />
       </div>
     </div>
   );

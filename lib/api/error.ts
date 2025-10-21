@@ -14,9 +14,15 @@ export enum VocespaceError {
   CREATE_SPACE_EXIST = "common.create_space.error.exist",
 }
 
+export enum BucketApiErrMsg {
+  FILE_NO_EXT = "error.bucket.fileNoExt",
+
+}
+
 export interface ApiErrMsg {
   userInfo: UserInfoErrMsg;
   vocespace: VocespaceError;
+  bucket: BucketApiErrMsg;
 }
 
 export interface ApiErr {

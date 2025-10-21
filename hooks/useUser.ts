@@ -15,6 +15,7 @@ export interface UseUserResult {
   setLoading: (loading: boolean) => void;
   error: Nullable<string>;
   client: SupabaseClient;
+  getUser: () => Promise<void>;
 }
 
 export interface useUserProps {
@@ -39,6 +40,8 @@ export interface useUserProps {
  * - loading: Boolean indicating if auth state is being determined
  * - setLoading: Function to manually set loading state
  * - error: Error message if any error occurs
+ * - client: Supabase client instance
+ * - getUser: Function to manually refresh user info
  */
 export function useUser({ userId }: useUserProps): UseUserResult {
   const [user, setUser] = useState<Nullable<User>>(null);
@@ -84,60 +87,62 @@ export function useUser({ userId }: useUserProps): UseUserResult {
     return true;
   };
 
-  useEffect(() => {
-    // Get initial user
-    const getInitialUser = async () => {
-      try {
-        setLoading(true);
+  /**
+   * get or refresh user info
+   */
+  const getUser = async () => {
+    try {
+      setLoading(true);
 
-        if (userId) {
-          // userId存在，直接去查找userInfo即可
-          const userInfo: UserInfo = await dbApi.userInfo.get(client, userId);
-          // 不需要检查是否创建空间，因为这可能是查看别人的空间
-          setUserInfo(userInfo);
+      if (userId) {
+        // userId存在，直接去查找userInfo即可
+        const userInfo: UserInfo = await dbApi.userInfo.get(client, userId);
+        // 不需要检查是否创建空间，因为这可能是查看别人的空间
+        setUserInfo(userInfo);
+      } else {
+        const { data, error: userError } = await client.auth.getUser();
+
+        if (userError) {
+          console.error("Error fetching user:", userError);
+          if (userError.message !== "Invalid JWT") {
+            setError(userError.message);
+          }
+          setUser(null);
+          setUserInfo(null);
         } else {
-          const { data, error: userError } = await client.auth.getUser();
-
-          if (userError) {
-            console.error("Error fetching user:", userError);
-            if (userError.message !== "Invalid JWT") {
-              setError(userError.message);
+          setUser(data.user);
+          // 如果获取到用户，尝试获取用户信息
+          if (data.user) {
+            let userInfo: UserInfo = await dbApi.userInfo.get(
+              client,
+              data.user.id
+            );
+            // 用户获取到之后，检查是否有自己的空间
+            const hasSpace = await createSelfSpace(
+              userInfo.has_space,
+              userInfo.id,
+              userInfo?.nickname || data.user.email!
+            );
+            if (hasSpace && !userInfo.has_space) {
+              // 说明创建成功，更新用户信息
+              userInfo.has_space = true;
             }
-            setUser(null);
-            setUserInfo(null);
-          } else {
-            setUser(data.user);
-            // 如果获取到用户，尝试获取用户信息
-            if (data.user) {
-              let userInfo: UserInfo = await dbApi.userInfo.get(
-                client,
-                data.user.id
-              );
-              // 用户获取到之后，检查是否有自己的空间
-              const hasSpace = await createSelfSpace(
-                userInfo.has_space,
-                userInfo.id,
-                userInfo?.nickname || data.user.email!
-              );
-              if (hasSpace && !userInfo.has_space) {
-                // 说明创建成功，更新用户信息
-                userInfo.has_space = true;
-              }
-              setUserInfo(userInfo);
-            }
+            setUserInfo(userInfo);
           }
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-        // setUser(null);
-        setUserInfo(null);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      // setUser(null);
+      setUserInfo(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    getInitialUser();
-
+  useEffect(() => {
+    // Get initial user
+    getUser();
     // Listen for auth changes
     const {
       data: { subscription },
@@ -172,7 +177,7 @@ export function useUser({ userId }: useUserProps): UseUserResult {
     };
   }, []);
 
-  return { user, loading, setLoading, error, userInfo, client };
+  return { user, loading, setLoading, error, userInfo, client, getUser };
 }
 
 /**

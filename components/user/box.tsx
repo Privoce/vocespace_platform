@@ -3,9 +3,13 @@ import { User } from "@supabase/supabase-js";
 import { Avatar, Button, Dropdown, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
 import { useAuth, whereUserFrom } from "@/hooks/useUser";
+import { Nullable } from "@/lib/std";
+import { UserInfo } from "@/lib/std/user";
+import { useI18n } from "@/lib/i18n/i18n";
 
 export interface UserBoxProps {
-  user: User | null;
+  user: Nullable<User>;
+  userInfo: Nullable<UserInfo>;
   username: string;
   loading?: boolean;
 }
@@ -16,11 +20,16 @@ export interface UserBoxProps {
  * if login, show user avatar and dropdown menu
  * if not login, show login button
  */
-export function UserBox({ user, username, loading = false }: UserBoxProps) {
+export function UserBox({
+  user,
+  username,
+  loading = false,
+  userInfo,
+}: UserBoxProps) {
+  const {t} = useI18n();
   const router = useRouter();
   const { signOut } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
-
   const toLogin = () => {
     router.push("/auth/login");
   };
@@ -59,12 +68,13 @@ export function UserBox({ user, username, loading = false }: UserBoxProps) {
               },
               {
                 key: "profile",
-                label: "个人资料",
-                onClick: () => router.push(`/auth/user/${user.id}?page=profile`),
+                label: t("user.box.profile"),
+                onClick: () =>
+                  router.push(`/auth/user/${user.id}?page=profile`),
               },
               {
                 key: "logout",
-                label: "退出登录",
+                label: t("user.box.logout"),
                 onClick: handleLogout,
               },
             ],
@@ -75,7 +85,7 @@ export function UserBox({ user, username, loading = false }: UserBoxProps) {
             src={
               whereUserFrom(user) === "google"
                 ? user.user_metadata?.picture
-                : undefined
+                : userInfo?.avatar
             }
             style={{
               backgroundColor: "#22CCEE",

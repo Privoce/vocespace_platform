@@ -37,7 +37,12 @@ export function HomeHeader({ messageApi }: HomeHeaderProps) {
         ></img>
         <div className={styles.home_header_right}>
           <LangSelect></LangSelect>
-          <UserBox user={user} username={username} loading={loading}></UserBox>
+          <UserBox
+            user={user}
+            username={username}
+            loading={loading}
+            userInfo={userInfo}
+          ></UserBox>
         </div>
       </div>
     </header>

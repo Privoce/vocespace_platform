@@ -1,5 +1,24 @@
 export default {
+  common: {
+    save: "Save",
+    cancel: "Cancel",
+    uploading: "Uploading...",
+  },
   user: {
+    box: {
+      profile: "Profile",
+      logout: "Logout",
+    },
+    profile: {
+      joinAt: "Joined at",
+      selfVocespace: "Personal Vocespace",
+      edit: "Edit profile",
+      publishs: "Create space",
+      subscribes: "Subscribe to space",
+      placeholder: {
+        desc: "This user is lazy and left nothing.",
+      },
+    },
     setting: {
       title: "User Settings",
       username: "Username",
@@ -12,6 +31,12 @@ export default {
       save: "Save Settings",
       saving: "Saving...",
       editAvatar: "Change Avatar",
+      cropAvatar: "Crop Avatar",
+      avatarUpdateSuccess: "Avatar updated successfully",
+      avatarUpdateError: "Failed to update avatar",
+      uploadError: "Upload failed, please try again",
+      imageFormatError: "Only JPG/PNG format images are supported",
+      imageSizeError: "Image size cannot exceed 2MB",
       loadError: "Loading User Information Failed",
       saveSuccess: "Settings Saved Successfully",
       saveError: "Save Failed, Please Try Again",

@@ -51,7 +51,8 @@ import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
 import { getUsername, useUser, whereUserFrom } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
-import { UserPageType, UserPageUniProps } from "./page";
+import { EditAvatarBtn, UserPageType, UserPageUniProps } from "./page";
+import { useI18n } from "@/lib/i18n/i18n";
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {
@@ -215,7 +216,11 @@ export function UserProfile({
   userInfo,
   loading,
   setLoading,
+  client,
+  messageApi,
+  flushUser
 }: UserProfileProps) {
+  const { t } = useI18n();
   const [userStats, setUserStats] = useState<UserStats>(mockUserStats);
   const [userSpaces, setUserSpaces] = useState<Space[]>(mockUserSpaces);
   // const [loading, setLoading] = useState(false);
@@ -332,7 +337,7 @@ export function UserProfile({
                   src={
                     whereUserFrom(user) === "google"
                       ? user.user_metadata?.picture
-                      : undefined
+                      : userInfo?.avatar
                   }
                   style={{
                     fontSize: 48,
@@ -342,13 +347,12 @@ export function UserProfile({
                 >
                   {username.charAt(0).toUpperCase() || <UserOutlined />}
                 </Avatar>
-                <Button
-                  icon={<EditOutlined />}
-                  type="default"
-                  onClick={handleEditProfile}
-                >
-                  编辑头像
-                </Button>
+                <EditAvatarBtn
+                  userId={userId}
+                  client={client}
+                  messageApi={messageApi}
+                  afterUpdate={flushUser}
+                />
               </div>
 
               <div className={styles.profileInfo}>
@@ -356,12 +360,14 @@ export function UserProfile({
                 {/* <div className={styles.email}>{user.email}</div> */}
 
                 <div className={styles.bio}>
-                  {userInfo?.desc || "这位用户很懒，什么都没有留下。"}
+                  {userInfo?.desc || t("user.profile.placeholder.desc")}
                 </div>
                 <div className={styles.metaInfo}>
                   <div className={styles.metaItem}>
                     <CalendarOutlined className={styles.icon} />
-                    加入于 {dayjs(user.created_at).format("YYYY年MM月")}
+                    {`${t("user.profile.joinAt")} ${dayjs(
+                      user.created_at
+                    ).format("YYYY年MM月")}`}
                   </div>
                   {userInfo?.location && (
                     <div className={styles.metaItem}>
@@ -377,7 +383,7 @@ export function UserProfile({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      个人Vocespace
+                      {t("user.profile.selfVocespace")}
                     </a>
                   </div>
                 </div>
@@ -442,7 +448,7 @@ export function UserProfile({
                   icon={<EditOutlined />}
                   onClick={handleEditProfile}
                 >
-                  编辑资料
+                  {t("user.profile.edit")}
                 </Button>
                 {/* <Button
                   icon={<SettingOutlined />}
@@ -459,13 +465,17 @@ export function UserProfile({
               <div className={styles.statValue}>
                 {(userInfo?.publishs?.length || 0) + 1}
               </div>
-              <div className={styles.statLabel}>创建空间</div>
+              <div className={styles.statLabel}>
+                {t("user.profile.publishs")}
+              </div>
             </Card>
             <Card className={styles.statCard}>
               <div className={styles.statValue}>
                 {userInfo?.subscribes?.length || 0}
               </div>
-              <div className={styles.statLabel}>订阅空间</div>
+              <div className={styles.statLabel}>
+                {t("user.profile.subscribes")}
+              </div>
             </Card>
             {/* <Card className={styles.statCard}>
               <div className={styles.statValue}>

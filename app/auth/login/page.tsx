@@ -55,27 +55,39 @@ export default function Page({ searchParams }: LoginPageProps) {
 
   // 创建一个可靠的参数获取函数
   const getParams = useCallback(() => {
-    const from = urlSearchParams?.get('from') || 
-                 searchParams?.from || 
-                 (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('from') : null);
-    
-    const spaceName = urlSearchParams?.get('spaceName') || 
-                      searchParams?.spaceName || 
-                      (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('spaceName') : null);
-    
-    const auth = urlSearchParams?.get('auth') || 
-                 searchParams?.auth || 
-                 (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('auth') : null);
-    
-    const redirectTo = urlSearchParams?.get('redirectTo') || 
-                       searchParams?.redirectTo || 
-                       (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirectTo') : null);
+    const from =
+      urlSearchParams?.get("from") ||
+      searchParams?.from ||
+      (typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("from")
+        : null);
+
+    const spaceName =
+      urlSearchParams?.get("spaceName") ||
+      searchParams?.spaceName ||
+      (typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("spaceName")
+        : null);
+
+    const auth =
+      urlSearchParams?.get("auth") ||
+      searchParams?.auth ||
+      (typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("auth")
+        : null);
+
+    const redirectTo =
+      urlSearchParams?.get("redirectTo") ||
+      searchParams?.redirectTo ||
+      (typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("redirectTo")
+        : null);
 
     return {
       from: from as "vocespace" | "unknown" | undefined,
-      spaceName: spaceName || '',
+      spaceName: spaceName || "",
       auth: auth as "google" | "email" | undefined,
-      redirectTo: redirectTo || undefined
+      redirectTo: redirectTo || undefined,
     };
   }, [urlSearchParams, searchParams]);
   const signInOrUp = async () => {
@@ -178,11 +190,7 @@ export default function Page({ searchParams }: LoginPageProps) {
   useEffect(() => {
     const params = getParams();
 
-    if (
-      params &&
-      params.from === "vocespace" &&
-      params.auth === "google"
-    ) {
+    if (params && params.from === "vocespace" && params.auth === "google") {
       // directly use google oauth
       signInWithGoogle(true);
     }
