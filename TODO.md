@@ -46,18 +46,23 @@
 ---
 
 - [x] 用户设置 
-  - [ ] 头像 (supabase storage)
+  - [x] 头像 (supabase storage)
+    - [x] 裁剪
+    - [x] storage api
   - [x] 基础设置
+  - [ ] 推特 -> wx
 - [ ] 创建空间
 - [ ] 空间编辑
 - [ ] 主页空间搜索
 - [ ] 空间订阅
 - [x] i18n
-  - [ ] i18n切换器
-  - [ ] 替换文本
+  - [x] i18n切换器
+  - [x] 替换文本
 - [ ] 空间发布
 - [ ] 后台页面
-
+- [ ] 每个用户的space最多两个
+- [ ] 暂时去除url作为必填参数
+- [ ] nickname不重复
 ---
 
 - [ ] 图片/视频审核(Google Vision SafeSearch)

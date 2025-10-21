@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+} from "react";
 import styles from "@/styles/home_header.module.scss";
 import { useRouter } from "next/navigation";
 import { UserBox } from "@/components/user/box";
@@ -13,38 +18,48 @@ export interface HomeHeaderProps {
   messageApi: MessageInstance;
 }
 
-export function HomeHeader({ messageApi }: HomeHeaderProps) {
-  const router = useRouter();
-  const { user, userInfo, loading, error } = useUser({});
-
-  const username = useMemo(() => {
-    return getUsername(user, userInfo);
-  }, [userInfo, user]);
-
-  useEffect(() => {
-    if (error) {
-      messageApi.error(error);
-    }
-  }, [error]);
-
-  return (
-    <header className={styles.home_header}>
-      <div className={styles.home_header_content}>
-        <img
-          src="/logo.svg"
-          onClick={() => router.push("/")}
-          style={{ cursor: "pointer" }}
-        ></img>
-        <div className={styles.home_header_right}>
-          <LangSelect></LangSelect>
-          <UserBox
-            user={user}
-            username={username}
-            loading={loading}
-            userInfo={userInfo}
-          ></UserBox>
-        </div>
-      </div>
-    </header>
-  );
+export interface HomeHeaderExports {
+  flush: () => Promise<void>;
 }
+
+export const HomeHeader = forwardRef<HomeHeaderExports, HomeHeaderProps>(
+  ({ messageApi }: HomeHeaderProps, ref) => {
+    const router = useRouter();
+    const { user, userInfo, loading, error, getUser } = useUser({});
+
+    const username = useMemo(() => {
+      return getUsername(user, userInfo);
+    }, [userInfo, user]);
+
+    useEffect(() => {
+      if (error) {
+        messageApi.error(error);
+      }
+    }, [error]);
+
+    useImperativeHandle(ref, () => ({
+      flush: getUser,
+    }));
+
+    return (
+      <header className={styles.home_header}>
+        <div className={styles.home_header_content}>
+          <img
+            src="/logo.svg"
+            onClick={() => router.push("/")}
+            style={{ cursor: "pointer" }}
+          ></img>
+          <div className={styles.home_header_right}>
+            <LangSelect></LangSelect>
+            <UserBox
+              user={user}
+              username={username}
+              loading={loading}
+              userInfo={userInfo}
+            ></UserBox>
+          </div>
+        </div>
+      </header>
+    );
+  }
+);

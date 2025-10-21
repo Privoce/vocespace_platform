@@ -53,6 +53,8 @@ import { getUsername, useUser, whereUserFrom } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { EditAvatarBtn, UserPageType, UserPageUniProps } from "./page";
 import { useI18n } from "@/lib/i18n/i18n";
+import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
+import { dbApi } from "@/lib/api/db";
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {
@@ -94,98 +96,6 @@ const mockUserStats: UserStats = {
   },
 };
 
-// Mock用户创建的空间
-const mockUserSpaces: Space[] = [
-  {
-    id: "1",
-    name: "前端技术交流",
-    desc: "分享前端开发经验和最新技术趋势",
-    created_at: Date.now() / 1000,
-    start_at: Date.now() / 1000 + 3600,
-    end_at: Date.now() / 1000 + 7200,
-    freq: {
-      interval: FrequencyInterval.Weekly,
-      in_week: [1, 3, 5],
-    },
-    fee: 0,
-    owner_id: "user1",
-    owner_name: "张三",
-    state: SpaceState.Active,
-    sub_count: 125,
-    online_count: 15,
-    url: "https://example.com/space1",
-    images: [],
-    ty: SpaceType.Tech,
-    readme: "# 前端技术交流空间",
-  },
-  {
-    id: "2",
-    name: "前端技术交流",
-    desc: "分享前端开发经验和最新技术趋势",
-    created_at: Date.now() / 1000,
-    start_at: Date.now() / 1000 + 3600,
-    end_at: Date.now() / 1000 + 7200,
-    freq: {
-      interval: FrequencyInterval.Weekly,
-      in_week: [1, 3, 5],
-    },
-    fee: 0,
-    owner_id: "user1",
-    owner_name: "张三",
-    state: SpaceState.Active,
-    sub_count: 125,
-    online_count: 15,
-    url: "https://example.com/space1",
-    images: [],
-    ty: SpaceType.Tech,
-    readme: "# 前端技术交流空间",
-  },
-  {
-    id: "3",
-    name: "前端技术交流",
-    desc: "分享前端开发经验和最新技术趋势",
-    created_at: Date.now() / 1000,
-    start_at: Date.now() / 1000 + 3600,
-    end_at: Date.now() / 1000 + 7200,
-    freq: {
-      interval: FrequencyInterval.Weekly,
-      in_week: [1, 3, 5],
-    },
-    fee: 0,
-    owner_id: "user1",
-    owner_name: "张三",
-    state: SpaceState.Active,
-    sub_count: 125,
-    online_count: 15,
-    url: "https://example.com/space1",
-    images: [],
-    ty: SpaceType.Tech,
-    readme: "# 前端技术交流空间",
-  },
-  {
-    id: "4",
-    name: "前端技术交流",
-    desc: "分享前端开发经验和最新技术趋势",
-    created_at: Date.now() / 1000,
-    start_at: Date.now() / 1000 + 3600,
-    end_at: Date.now() / 1000 + 7200,
-    freq: {
-      interval: FrequencyInterval.Weekly,
-      in_week: [1, 3, 5],
-    },
-    fee: 0,
-    owner_id: "user1",
-    owner_name: "张三",
-    state: SpaceState.Active,
-    sub_count: 125,
-    online_count: 15,
-    url: "https://example.com/space1",
-    images: [],
-    ty: SpaceType.Tech,
-    readme: "# 前端技术交流空间",
-  },
-];
-
 // 生成模拟热力图数据
 function generateMockHeatmapData() {
   const data = [];
@@ -218,14 +128,12 @@ export function UserProfile({
   setLoading,
   client,
   messageApi,
-  flushUser
+  flushUser,
 }: UserProfileProps) {
   const { t } = useI18n();
-  const [userStats, setUserStats] = useState<UserStats>(mockUserStats);
-  const [userSpaces, setUserSpaces] = useState<Space[]>(mockUserSpaces);
-  // const [loading, setLoading] = useState(false);
-  const [selectedYear, setSelectedYear] = useState(dayjs().year());
+  const [userSpaces, setUserSpaces] = useState<Space[]>([]);
 
+  const [openPublishModal, setOpenPublishModal] = useState(false);
   const selfVocespaceUrl = useMemo(() => {
     if (user && username) {
       return vocespaceUrl(user.id, username, whereUserFrom(user));
@@ -309,6 +217,20 @@ export function UserProfile({
       danger: true,
     },
   ];
+
+  const confirmCreateSpace = async (space: Space) => {
+    try {
+      const success = await dbApi.space.insert(client, {
+        ...space,
+        owner_id: userId,
+      });
+      if (success) {
+        messageApi.success("space.pub.success");
+      }
+    } catch (error) {
+      messageApi.error(`${error}`);
+    }
+  };
 
   return (
     <div className={styles.userProfile}>
@@ -461,7 +383,13 @@ export function UserProfile({
           </Card>
 
           <div className={styles.profileStats}>
-            <Card className={styles.statCard}>
+            <Card
+              className={styles.statCard}
+              onClick={() => {
+                setOpenPublishModal(true);
+              }}
+              style={{ cursor: "pointer" }}
+            >
               <div className={styles.statValue}>
                 {(userInfo?.publishs?.length || 0) + 1}
               </div>
@@ -490,7 +418,47 @@ export function UserProfile({
               <div className={styles.statLabel}>连续天数</div>
             </Card> */}
           </div>
+          <Card className={styles.sectionCard} style={{ width: "100%" }}>
+            <div className={styles.sectionCard_inner}>
+              <div
+                className={styles.sectionTitle}
+                style={{
+                  marginBottom: "16px",
+                  fontSize: "18px",
+                  fontWeight: "600",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "8px",
+                }}
+              >
+                <TeamOutlined className={styles.icon} />
+                我创建的空间 ({userSpaces.length})
+              </div>
 
+              <List
+                pagination={{
+                  pageSize: 3,
+                  position: "bottom",
+                  size: "small",
+                  simple: { readOnly: true },
+                }}
+                split={false}
+                bordered={false}
+                dataSource={userSpaces}
+                renderItem={(item) => (
+                  <List.Item
+                    style={{
+                      height: "120px",
+                      padding: "0",
+                    }}
+                  >
+                    <SpaceCard {...item} cardType="edit" />
+                  </List.Item>
+                )}
+              ></List>
+            </div>
+          </Card>
           {/* <div className={styles.contentGrid}>
             <div className={styles.mainContent}>
 
@@ -634,6 +602,12 @@ export function UserProfile({
           </div> */}
         </div>
       )}
+      <EasyPubSpaceModal
+        open={openPublishModal}
+        setOpen={setOpenPublishModal}
+        messageApi={messageApi}
+        onSave={confirmCreateSpace}
+      />
     </div>
   );
 }

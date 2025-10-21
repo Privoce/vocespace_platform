@@ -25,17 +25,20 @@ export enum SpaceType {
 }
 
 export interface Space {
-  id: string;
+  id?: string;
   name: string;
   desc?: string;
   created_at: number;
-  start_at: number;
-  end_at: number;
+  expired_at: number;
+  /**
+   * Start time as UNIX timestamp
+   */
+  start_at?: number;
+  end_at?: number;
   freq: Frequency;
   fee: number;
   owner_id: string;
-  owner_name: string;
-  state: SpaceState;
+  state?: SpaceState;
   sub_count: number;
   online_count: number;
   /**
@@ -51,7 +54,31 @@ export interface Space {
    * Detailed description or content of the space (e.g., markdown format)
    */
   readme?: string;
+  public: boolean;
 }
+
+export const initSpace = (partial: Partial<Space>): Space | null => {
+  const now = Math.floor(Date.now() / 1000);
+  if (!partial.name || !partial.url || !partial.owner_id) {
+    return null;
+  } else {
+    return {
+      name: partial.name,
+      desc: partial.desc || "",
+      url: partial.url,
+      owner_id: partial.owner_id,
+      created_at: partial.created_at || now,
+      expired_at: partial.expired_at || now + 365 * 24 * 3600, // default 1 year later
+      freq: partial.freq || { interval: FrequencyInterval.Flexible },
+      fee: partial.fee || 0,
+      sub_count: partial.sub_count || 0,
+      online_count: partial.online_count || 0,
+      images: partial.images || [],
+      ty: partial.ty || SpaceType.Meeting,
+      public: partial.public !== undefined ? partial.public : false,
+    };
+  }
+};
 
 /**
  * create vocespace url for direct access
@@ -70,4 +97,3 @@ export const vocespaceUrl = (
     spaceName || username
   }?auth=${authFrom}&userId=${userId}&username=${username}`;
 };
-

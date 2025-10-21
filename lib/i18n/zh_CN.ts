@@ -4,6 +4,34 @@ export default {
     cancel: "取消",
     uploading: "上传中...",
   },
+  space: {
+    pub: {
+      intro: "快速创建您的空间，您可以随时编辑和管理它。",
+      title: "快速创建空间",
+      public: {
+        title: "公开空间",
+        pub: "公开",
+        private: "私密",
+        desc: "任何人都可以查看和订阅此空间",
+      },
+      name: "空间名称(必填)",
+      desc: "空间描述(选填)",
+      url: "空间地址(必填)",
+      placeholder: {
+        name: "请输入空间名称",
+        desc: "请输入空间描述",
+        url: "请输入空间地址",
+      },
+      validation: {
+        name: "空间名称不能为空",
+        url: "空间地址不能为空",
+        failed: "空间创建失败，请检查必填项是否填写完整",
+      },
+      ok: "创建空间",
+      cancel: "取消",
+      success: "空间创建成功",
+    },
+  },
   user: {
     box: {
       profile: "个人资料",

@@ -27,7 +27,6 @@ export function SpaceCard({
   end_at,
   freq,
   fee,
-  owner_name,
   state,
   sub_count,
   online_count,
@@ -65,6 +64,8 @@ export function SpaceCard({
   };
 
   const formatDuration = () => {
+    if (!start_at || !end_at) return "";
+
     const duration = end_at - start_at;
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration % 3600) / 60);
@@ -92,11 +93,15 @@ export function SpaceCard({
   const defaultImage =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' font-family='Arial, sans-serif' font-size='14' fill='%23999'%3E空间封面图%3C/text%3E%3C/svg%3E";
   const spaceImage =
-    images && images.length > 0 ? images[0] : "/images/default_intro.png";
+    images && images.length > 0 ? images[0] : "/images/default_space.jpg";
 
   if (cardType === "edit") {
     return (
-      <Card className={styles.spaceCard} styles={{ body: { padding: 0} }} style={style}>
+      <Card
+        className={styles.spaceCard}
+        styles={{ body: { padding: 0 } }}
+        style={style}
+      >
         <div className={styles.spaceCard_edit}>
           <div className={styles.spaceCard_edit_imageSection}>
             <img
@@ -176,11 +181,13 @@ export function SpaceCard({
             </div>
           </div>
           <div className={styles.content_line}>
-            <div className={styles.flex_line}>
-              <ClockCircleOutlined className={styles.icon} />
-              {formatTime(start_at)} - {formatTime(end_at)} (持续{" "}
-              {formatDuration()})
-            </div>
+            {start_at && end_at && (
+              <div className={styles.flex_line}>
+                <ClockCircleOutlined className={styles.icon} />
+                {formatTime(start_at)} - {formatTime(end_at)} (持续{" "}
+                {formatDuration()})
+              </div>
+            )}
           </div>
 
           <div className={styles.content_inline}>
@@ -200,7 +207,7 @@ export function SpaceCard({
 
           <div className={styles.content_line}>
             <div className={styles.flex_line}>
-              空间所有者: <span className={styles.ownerName}>{owner_name}</span>
+              空间所有者: <span className={styles.ownerName}>{}</span>
             </div>
           </div>
           <div className={styles.content_line}>

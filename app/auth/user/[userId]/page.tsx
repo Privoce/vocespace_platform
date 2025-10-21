@@ -1,5 +1,12 @@
 "use client";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  RefObject,
+} from "react";
 import { UserProfile } from "./profile";
 import UserSettings from "./settings";
 import { getUsername, useUser } from "@/hooks/useUser";
@@ -10,11 +17,12 @@ import {
   Button,
   GetProp,
   message,
+  Modal,
   Upload,
   UploadFile,
   UploadProps,
 } from "antd";
-import { HomeHeader } from "@/app/home/header";
+import { HomeHeader, HomeHeaderExports } from "@/app/home/header";
 import { useI18n } from "@/lib/i18n/i18n";
 import { MessageInstance } from "antd/es/message/interface";
 import { useSearchParams } from "next/navigation";
@@ -49,6 +57,7 @@ export default function UserPage({
 }) {
   const [page, setPage] = useState<UserPageType>("profile");
   const [messageApi, contextHolder] = message.useMessage();
+  const HomeHeaderRef = useRef<HomeHeaderExports>(null);
   const urlSearchParams = useSearchParams();
   const { user, userInfo, loading, setLoading, error, client, getUser } =
     useUser({
@@ -87,13 +96,20 @@ export default function UserPage({
     }
   }, [urlSearchParams, searchParams, getPageParam]);
 
+  const flushUser = async () => {
+    await getUser();
+    if (HomeHeaderRef.current) {
+      await HomeHeaderRef.current.flush();
+    }
+  };
+
   return (
     <div className="uni-page-container">
-      <HomeHeader messageApi={messageApi} />
+      <HomeHeader ref={HomeHeaderRef} messageApi={messageApi} />
       {contextHolder}
       {page === "profile" ? (
         <UserProfile
-          flushUser={getUser}
+          flushUser={flushUser}
           client={client}
           userId={params.userId}
           username={username}
@@ -106,7 +122,7 @@ export default function UserPage({
         />
       ) : (
         <UserSettings
-          flushUser={getUser}
+          flushUser={flushUser}
           client={client}
           username={username}
           userId={params.userId}

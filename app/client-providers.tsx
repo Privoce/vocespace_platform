@@ -36,9 +36,10 @@ export default function ClientProviders({ children }: { children: React.ReactNod
             dotSize: 32,
           },
           Radio: {
-            buttonBg: '#1E1E1E',
+            buttonBg: '#333',
             colorBorder: '#1E1E1E',
-            buttonCheckedBg: '#1E1E1E',
+            buttonCheckedBg: '#222',
+            
           },
           Input: {
             colorBgBase: '#1E1E1E',
