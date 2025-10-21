@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { UserBox } from "@/components/user/box";
 import { getUsername, useUser } from "@/hooks/useUser";
 import { MessageInstance } from "antd/es/message/interface";
+import { LangSelect } from "@/components/widget/lang";
 
 // 简化后的Props，不再需要传入client
 export interface HomeHeaderProps {
@@ -16,7 +17,7 @@ export function HomeHeader({ messageApi }: HomeHeaderProps) {
   const router = useRouter();
   const { user, userInfo, loading, error } = useUser({});
 
-  const username = useMemo(()=>{
+  const username = useMemo(() => {
     return getUsername(user, userInfo);
   }, [userInfo, user]);
 
@@ -34,7 +35,10 @@ export function HomeHeader({ messageApi }: HomeHeaderProps) {
           onClick={() => router.push("/")}
           style={{ cursor: "pointer" }}
         ></img>
-        <UserBox user={user} username={username} loading={loading}></UserBox>
+        <div className={styles.home_header_right}>
+          <LangSelect></LangSelect>
+          <UserBox user={user} username={username} loading={loading}></UserBox>
+        </div>
       </div>
     </header>
   );

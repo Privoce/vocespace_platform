@@ -8,6 +8,8 @@
   flex-wrap: wrap;
   height: calc(100% - 68px);
   padding: 16px;
+  overflow-y: scroll;
+  scrollbar-width: thin;
   &_header {
     width: 100%;
     height: 48px;
@@ -25,11 +27,11 @@
     gap: 24px;
     align-content: flex-start;
     &_row {
-        width: 100%;
-        display: flex;
-        align-items: flex-start;
-        justify-content: flex-start;
-        gap: 8px;
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 8px;
     }
   }
   &_avatar {
@@ -46,9 +48,8 @@
 }
 
 .inline {
-    display: inline-block;
-    height: fit-content;
-    width: 120px;
-    padding-top: 4px;
+  display: inline-block;
+  height: fit-content;
+  width: 120px;
+  padding-top: 4px;
 }
-
