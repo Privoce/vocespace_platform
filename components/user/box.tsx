@@ -60,7 +60,7 @@ export function UserBox({ user, username, loading = false }: UserBoxProps) {
               {
                 key: "profile",
                 label: "个人资料",
-                onClick: () => router.push(`/auth/user/${user.id}`),
+                onClick: () => router.push(`/auth/user/${user.id}?page=profile`),
               },
               {
                 key: "logout",

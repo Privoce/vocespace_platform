@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User } from "@supabase/supabase-js";
+import { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { UserInfo } from "@/lib/std/user";
 import { Nullable } from "@/lib/std";
@@ -14,6 +14,7 @@ export interface UseUserResult {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   error: Nullable<string>;
+  client: SupabaseClient;
 }
 
 export interface useUserProps {
@@ -23,21 +24,28 @@ export interface useUserProps {
 /**
  * Custom hook for handling Supabase user authentication
  *
- * Usage:
- * const { user, loading, error } = useUser();
+ * ## Usage:
+ * `const { user, loading, error } = useUser();`
  *
- * Features:
+ * ## Features:
  * - Automatically fetches current user on mount
  * - Listens for auth state changes (login/logout)
  * - Handles loading and error states
  * - Returns null for user when not authenticated
+ *
+ * ## Returns:
+ * - user: Supabase User object or null
+ * - userInfo: Additional user info from database or null
+ * - loading: Boolean indicating if auth state is being determined
+ * - setLoading: Function to manually set loading state
+ * - error: Error message if any error occurs
  */
 export function useUser({ userId }: useUserProps): UseUserResult {
   const [user, setUser] = useState<Nullable<User>>(null);
   const [userInfo, setUserInfo] = useState<Nullable<UserInfo>>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Nullable<string>>(null);
-
+  const client = createClient();
   // 创建自己的VoceSpace
   const createSelfSpace = async (
     hasSpace: boolean,
@@ -77,8 +85,6 @@ export function useUser({ userId }: useUserProps): UseUserResult {
   };
 
   useEffect(() => {
-    const client = createClient();
-
     // Get initial user
     const getInitialUser = async () => {
       try {
@@ -166,7 +172,7 @@ export function useUser({ userId }: useUserProps): UseUserResult {
     };
   }, []);
 
-  return { user, loading, setLoading, error, userInfo };
+  return { user, loading, setLoading, error, userInfo, client };
 }
 
 /**
@@ -223,9 +229,7 @@ export const getUsername = (
   }
 };
 
-export const whereUserFrom = (
-  user: Nullable<User>
-): "vocespace" | "google"  => {
+export const whereUserFrom = (user: Nullable<User>): "vocespace" | "google" => {
   if (!user) return "vocespace";
   return user.app_metadata?.provider === "google" ? "google" : "vocespace";
 };

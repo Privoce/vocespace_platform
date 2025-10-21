@@ -10,8 +10,8 @@ import {
   GoogleOutlined,
 } from "@ant-design/icons";
 import { Button, Divider, Input, message } from "antd";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 
 export interface LoginPageProps {
   /**
@@ -50,7 +50,34 @@ export default function Page({ searchParams }: LoginPageProps) {
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
+  const urlSearchParams = useSearchParams();
   const client = createClient();
+
+  // 创建一个可靠的参数获取函数
+  const getParams = useCallback(() => {
+    const from = urlSearchParams?.get('from') || 
+                 searchParams?.from || 
+                 (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('from') : null);
+    
+    const spaceName = urlSearchParams?.get('spaceName') || 
+                      searchParams?.spaceName || 
+                      (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('spaceName') : null);
+    
+    const auth = urlSearchParams?.get('auth') || 
+                 searchParams?.auth || 
+                 (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('auth') : null);
+    
+    const redirectTo = urlSearchParams?.get('redirectTo') || 
+                       searchParams?.redirectTo || 
+                       (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirectTo') : null);
+
+    return {
+      from: from as "vocespace" | "unknown" | undefined,
+      spaceName: spaceName || '',
+      auth: auth as "google" | "email" | undefined,
+      redirectTo: redirectTo || undefined
+    };
+  }, [urlSearchParams, searchParams]);
   const signInOrUp = async () => {
     try {
       setLoading(true);
@@ -93,17 +120,7 @@ export default function Page({ searchParams }: LoginPageProps) {
       return;
     }
 
-    // 首先检查 searchParams，如果没有则从 URL 直接获取
-    let params = searchParams;
-    if (!params || !params.from) {
-      const urlParams = new URLSearchParams(window.location.search);
-      params = {
-        from: urlParams.get('from') as "vocespace" | "unknown" | undefined,
-        redirectTo: urlParams.get('redirectTo') || undefined,
-        auth: urlParams.get('auth') as "google" | "email" | undefined,
-        spaceName: urlParams.get('spaceName') || ''
-      };
-    }
+    const params = getParams();
 
     if (params && params.from) {
       if (params.from === "vocespace") {
@@ -138,10 +155,9 @@ export default function Page({ searchParams }: LoginPageProps) {
       // if is directly, means with search params from vocespace
       let redirectTo = `${window.location.origin}/auth/callback`;
       if (directly) {
-        // 获取 spaceName，优先从 searchParams，否则从 URL
-        const spaceName = searchParams?.spaceName || new URLSearchParams(window.location.search).get('spaceName');
-        if (spaceName) {
-          redirectTo += `?spaceName=${spaceName}`;
+        const params = getParams();
+        if (params.spaceName) {
+          redirectTo += `?spaceName=${params.spaceName}`;
         }
       }
 
@@ -160,17 +176,7 @@ export default function Page({ searchParams }: LoginPageProps) {
   };
 
   useEffect(() => {
-    // 首先检查 searchParams，如果没有则从 URL 直接获取
-    let params = searchParams;
-    if (!params || !params.from) {
-      const urlParams = new URLSearchParams(window.location.search);
-      params = {
-        from: urlParams.get('from') as "vocespace" | "unknown" | undefined,
-        redirectTo: urlParams.get('redirectTo') || undefined,
-        auth: urlParams.get('auth') as "google" | "email" | undefined,
-        spaceName: urlParams.get('spaceName') || ''
-      };
-    }
+    const params = getParams();
 
     if (
       params &&
@@ -180,7 +186,7 @@ export default function Page({ searchParams }: LoginPageProps) {
       // directly use google oauth
       signInWithGoogle(true);
     }
-  }, [searchParams]);
+  }, [urlSearchParams, searchParams, getParams]);
 
   return (
     <div className={styles.login}>

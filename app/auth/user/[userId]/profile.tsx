@@ -50,6 +50,8 @@ import styles from "@/styles/user_profile.module.scss";
 import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
 import { getUsername, useUser, whereUserFrom } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
+import { UserPageType, UserPageUniProps } from "./page";
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {
@@ -203,28 +205,21 @@ function generateMockHeatmapData() {
   return data.reverse();
 }
 
-interface UserProfileProps {
-  userId?: string;
-}
+interface UserProfileProps extends UserPageUniProps {}
 
-export function UserProfile({ userId }: UserProfileProps) {
-  const { user, userInfo, loading, setLoading, error } = useUser({ userId });
+export function UserProfile({
+  userId,
+  username,
+  setPage,
+  user,
+  userInfo,
+  loading,
+  setLoading,
+}: UserProfileProps) {
   const [userStats, setUserStats] = useState<UserStats>(mockUserStats);
   const [userSpaces, setUserSpaces] = useState<Space[]>(mockUserSpaces);
   // const [loading, setLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState(dayjs().year());
-  const [messageApi, contextHolder] = message.useMessage();
-
-  useEffect(() => {
-    if (error) {
-      console.warn("Error loading user data:", error, userId);
-      messageApi.error(error);
-    }
-  }, [error]);
-
-  const username = useMemo(() => {
-    return getUsername(user, userInfo);
-  }, [userInfo, user]);
 
   const selfVocespaceUrl = useMemo(() => {
     if (user && username) {
@@ -235,8 +230,7 @@ export function UserProfile({ userId }: UserProfileProps) {
   }, [user?.id, username]);
 
   const handleEditProfile = () => {
-    // 打开编辑个人资料对话框
-    message.info("编辑个人资料功能待实现");
+    setPage("settings");
   };
 
   const handleDeleteSpace = async (spaceId: string) => {
@@ -313,8 +307,6 @@ export function UserProfile({ userId }: UserProfileProps) {
 
   return (
     <div className={styles.userProfile}>
-      {contextHolder}
-      <HomeHeader messageApi={messageApi} />
       {loading ? (
         <div className={styles.container}>
           <Card className={styles.profileHeader}>
@@ -342,7 +334,11 @@ export function UserProfile({ userId }: UserProfileProps) {
                       ? user.user_metadata?.picture
                       : undefined
                   }
-                  style={{ fontSize: 48, backgroundColor: "#22CCEE", border: "none" }}
+                  style={{
+                    fontSize: 48,
+                    backgroundColor: "#22CCEE",
+                    border: "none",
+                  }}
                 >
                   {username.charAt(0).toUpperCase() || <UserOutlined />}
                 </Avatar>

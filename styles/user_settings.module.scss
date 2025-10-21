@@ -1,0 +1,54 @@
+/* User Settings Styles */
+
+.settings {
+  width: 1080px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  height: calc(100% - 68px);
+  padding: 16px;
+  &_header {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  &_form {
+    height: 100%;
+    width: calc(100% - 240px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-content: flex-start;
+    &_row {
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+  }
+  &_avatar {
+    width: 200px;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    align-content: flex-start;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 16px;
+  }
+}
+
+.inline {
+    display: inline-block;
+    height: fit-content;
+    width: 120px;
+    padding-top: 4px;
+}
+
