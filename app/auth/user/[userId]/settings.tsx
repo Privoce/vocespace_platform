@@ -29,7 +29,7 @@ export default function UserSettings({
   messageApi,
   client,
   flushUser,
-  authUser,
+  user,
   userInfo,
   username,
   avatar,
@@ -138,7 +138,7 @@ export default function UserSettings({
           </div>
           <div className={styles.settings_userInfo_links}>
             {links.map((link) => (
-              <Badge count={<PlusCircleFilled></PlusCircleFilled>}>
+              <Badge count={<PlusCircleFilled></PlusCircleFilled>} key={link.value}>
                 <div onClick={() => addLink(link.value)} key={link.value}>
                   {link.icon}
                 </div>

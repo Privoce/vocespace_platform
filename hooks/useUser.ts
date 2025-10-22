@@ -14,29 +14,23 @@ export interface UseUserOptions {
 }
 
 export interface UseUserResult {
-  // 认证相关
-  authUser: Nullable<User>;
-  authUserInfo: Nullable<UserInfo>;
-  isAuthenticated: boolean;
-  
-  // 当前查看的用户相关
-  user: Nullable<User>; // 保持向后兼容
+  // 当前用户相关（可能是认证用户或指定查看的用户）
+  user: Nullable<User>;
   userInfo: Nullable<UserInfo>;
   username: string;
   avatar: Nullable<string>;
   isSelf: boolean;
-  
+  isAuthenticated: boolean;
+
   // 状态
   loading: boolean;
   error: Nullable<string>;
-  
+  needsOnboarding: boolean; // 是否需要onboarding
+
   // 操作
   createSpace: (spaceName?: string) => Promise<Response>;
   updateUserInfo: (updates: Partial<UserInfo>) => Promise<boolean>;
-  
-  // 原始数据（用于调试或特殊用途）
-  viewingUserInfo: Nullable<UserInfo>;
-  
+
   // 兼容旧版本
   client: ReturnType<typeof createClient>;
   getUser: () => Promise<void>;
@@ -45,146 +39,141 @@ export interface UseUserResult {
 
 /**
  * Enhanced user hook that handles both authenticated users and viewing other users
- * 
+ *
  * @param options - Configuration options
  * @param options.userId - Optional user ID to view, if not provided uses current auth user
- * 
+ *
  * @example
  * // View current authenticated user
  * const { user, userInfo, username, avatar, isSelf } = useUser();
- * 
+ *
  * @example
  * // View another user
  * const { userInfo, username, avatar, isSelf } = useUser({ userId: 'other-user-id' });
  */
 export function useUser(options: UseUserOptions = {}): UseUserResult {
-  const [authUser, setAuthUser] = useState<Nullable<User>>(null);
-  const [authUserInfo, setAuthUserInfo] = useState<Nullable<UserInfo>>(null);
-  const [viewingUserInfo, setViewingUserInfo] = useState<Nullable<UserInfo>>(null);
+  const [user, setUser] = useState<Nullable<User>>(null);
+  const [userInfo, setUserInfo] = useState<Nullable<UserInfo>>(null);
+  const [currentAuthUser, setCurrentAuthUser] = useState<Nullable<User>>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Nullable<string>>(null);
 
   const { userId } = options;
   const client = createClient();
 
-  // 当前正在查看的用户信息（可能是自己也可能是别人）
-  const userInfo = userId ? viewingUserInfo : authUserInfo;
-  
   // 判断是否在查看自己的信息
-  const isSelf = !userId || (authUser !== null && userId === authUser.id);
+  const isSelf = !userId || (currentAuthUser && userId === currentAuthUser.id);
+  
+  // 是否已认证
+  const isAuthenticated = !!currentAuthUser;
 
-  // 计算用户名（优先级：nickname > email > "Unknown User"）
+  // 计算用户名（优先级：nickname > email（仅自己） > "User"）
   const username = useMemo(() => {
     if (userInfo?.nickname) return userInfo.nickname;
-    if (isSelf && authUser?.email) return authUser.email;
-    return "Unknown User";
-  }, [userInfo?.nickname, isSelf, authUser?.email]);
+    // 只有查看自己时才显示 email，查看他人时不显示敏感信息
+    if (isSelf && user?.email) return user.email;
+    // 查看他人时，如果没有 nickname，显示 "User" 而不是 "Unknown User"
+    return isSelf ? "Unknown User" : "User";
+  }, [userInfo?.nickname, isSelf, user?.email]);
 
-  // 计算头像URL
+  // 计算头像URL（优先级：自定义头像 > OAuth头像（仅自己））
   const avatar = useMemo(() => {
     if (userInfo?.avatar) return userInfo.avatar;
-    if (isSelf && authUser?.user_metadata?.avatar_url) return authUser.user_metadata.avatar_url;
+    // 只有查看自己时才使用 OAuth 头像
+    if (isSelf && user?.user_metadata?.avatar_url) return user.user_metadata.avatar_url;
     return null;
-  }, [userInfo?.avatar, isSelf, authUser?.user_metadata?.avatar_url]);
+  }, [userInfo?.avatar, isSelf, user?.user_metadata?.avatar_url]);
 
-  // 获取认证用户信息
+  // 判断是否需要onboarding（只有查看自己时才需要判断）
+  const needsOnboarding = useMemo(() => {
+    if (!isSelf || !isAuthenticated || loading) return false;
+    // 如果没有nickname，则认为需要onboarding
+    return !userInfo?.nickname || userInfo.nickname.trim() === '';
+  }, [isSelf, isAuthenticated, loading, userInfo?.nickname]);
+
+  // 初始化：获取当前认证用户
   useEffect(() => {
-    const getAuthUser = async () => {
+    const getCurrentAuthUser = async () => {
       try {
-        const {
-          data: { user },
-        } = await client.auth.getUser();
-        setAuthUser(user);
-
-        if (user) {
-          const userInfo = await dbApi.userInfo.get(client, user.id);
-          setAuthUserInfo(userInfo);
-        }
-        
-        // 只有在没有指定 userId 或者 userId 就是当前用户时才设置 loading 为 false
-        if (!userId || (user && userId === user.id)) {
-          setLoading(false);
-        }
+        const { data: { user } } = await client.auth.getUser();
+        setCurrentAuthUser(user);
       } catch (err) {
-        setError("Failed to fetch user data");
-        console.error(err);
-        setLoading(false);
+        console.error("Failed to get current auth user:", err);
       }
     };
 
-    getAuthUser();
+    getCurrentAuthUser();
 
-    const {
-      data: { subscription },
-    } = client.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        setAuthUser(session.user);
-        try {
-          const userInfo = await dbApi.userInfo.get(client, session.user.id);
-          setAuthUserInfo(userInfo);
-        } catch (err) {
-          setError("Failed to fetch user info");
-          console.error(err);
-        }
-      } else if (event === "SIGNED_OUT") {
-        setAuthUser(null);
-        setAuthUserInfo(null);
-      }
-      
-      // 只有在没有指定 userId 时才更新 loading 状态
-      if (!userId) {
-        setLoading(false);
-      }
+    // 监听认证状态变化
+    const { data: { subscription } } = client.auth.onAuthStateChange(async (event, session) => {
+      setCurrentAuthUser(session?.user || null);
     });
 
     return () => subscription.unsubscribe();
-  }, [client, userId]);
+  }, [client]);
 
-  // 获取指定用户的信息（如果提供了 userId）
+  // 获取用户数据：根据是否有 userId 决定获取哪个用户的信息
   useEffect(() => {
-    if (!userId) {
-      setViewingUserInfo(null);
-      return;
-    }
-
-    // 如果 userId 是当前认证用户，则直接使用 authUserInfo
-    if (authUser && userId === authUser.id) {
-      setViewingUserInfo(authUserInfo);
-      setLoading(false);
-      return;
-    }
-
-    const getViewingUserInfo = async () => {
+    const fetchUserData = async () => {
       try {
         setLoading(true);
-        const userInfo = await dbApi.userInfo.get(client, userId);
-        setViewingUserInfo(userInfo);
+        setError(null);
+
+        if (userId) {
+          // 有 userId：获取指定用户的信息
+          const userInfo = await dbApi.userInfo.get(client, userId);
+          setUserInfo(userInfo);
+          // 如果查看的是自己，user 就是当前认证用户
+          if (currentAuthUser && userId === currentAuthUser.id) {
+            setUser(currentAuthUser);
+          } else {
+            // 查看其他用户时，不设置 user 对象（因为无法安全获取其他用户的认证信息）
+            setUser(null);
+          }
+        } else {
+          // 没有 userId：获取当前认证用户的信息
+          if (currentAuthUser) {
+            const userInfo = await dbApi.userInfo.get(client, currentAuthUser.id);
+            setUser(currentAuthUser);
+            setUserInfo(userInfo);
+          } else {
+            setUser(null);
+            setUserInfo(null);
+          }
+        }
       } catch (err) {
-        setError("Failed to fetch user info");
+        setError("Failed to fetch user data");
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    getViewingUserInfo();
-  }, [userId, authUser, authUserInfo, client]);
+    // 只有在 currentAuthUser 已知的情况下才获取数据
+    if (currentAuthUser !== null || !userId) {
+      fetchUserData();
+    }
+  }, [userId, currentAuthUser, client]);
 
   // 创建空间（只有认证用户才能创建）
   const createSpace = async (spaceName?: string) => {
-    if (!authUser || !authUserInfo) {
+    if (!currentAuthUser || !userInfo) {
       throw new Error("User not authenticated");
     }
 
-    const displayName = authUserInfo.nickname || authUser.email || "Unknown User";
-    
+    const displayName = userInfo.nickname || currentAuthUser.email || "Unknown User";
+
     try {
-      const response = await vocespace.createSpace(authUser.id, displayName, spaceName);
-      
+      const response = await vocespace.createSpace(
+        currentAuthUser.id,
+        displayName,
+        spaceName
+      );
+
       if (!response.ok) {
         throw new Error("Failed to create space");
       }
-      
+
       return response;
     } catch (error) {
       console.error("Error creating space:", error);
@@ -194,21 +183,16 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
 
   // 更新用户信息（只能更新自己的信息）
   const updateUserInfo = async (updates: Partial<UserInfo>) => {
-    if (!authUser) {
+    if (!currentAuthUser) {
       throw new Error("User not authenticated");
     }
 
     try {
-      await dbApi.userInfo.update(client, authUser.id, updates);
-      
+      await dbApi.userInfo.update(client, currentAuthUser.id, updates);
+
       // 更新本地状态
-      setAuthUserInfo(prev => prev ? { ...prev, ...updates } : null);
-      
-      // 如果当前查看的是自己的信息，也要更新
-      if (isSelf) {
-        setViewingUserInfo(prev => prev ? { ...prev, ...updates } : null);
-      }
-      
+      setUserInfo((prev) => (prev ? { ...prev, ...updates } : null));
+
       return true;
     } catch (error) {
       console.error("Error updating user info:", error);
@@ -223,7 +207,7 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
       try {
         setLoading(true);
         const userInfo = await dbApi.userInfo.get(client, userId);
-        setViewingUserInfo(userInfo);
+        setUserInfo(userInfo);
       } catch (err) {
         setError("Failed to fetch user info");
         console.error(err);
@@ -234,14 +218,13 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
       // 否则获取当前认证用户信息
       try {
         setLoading(true);
-        const {
-          data: { user },
-        } = await client.auth.getUser();
-        setAuthUser(user);
+        const { data: { user } } = await client.auth.getUser();
+        setUser(user);
+        setCurrentAuthUser(user);
 
         if (user) {
           const userInfo = await dbApi.userInfo.get(client, user.id);
-          setAuthUserInfo(userInfo);
+          setUserInfo(userInfo);
         }
       } catch (err) {
         setError("Failed to fetch user data");
@@ -253,29 +236,23 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
   };
 
   return {
-    // 认证相关
-    authUser,
-    authUserInfo,
-    isAuthenticated: !!authUser,
-    
-    // 当前查看的用户相关
-    user: authUser, // 保持向后兼容
+    // 当前用户相关
+    user,
     userInfo,
     username,
     avatar,
-    isSelf,
-    
+    isSelf: isSelf || false,
+    isAuthenticated,
+
     // 状态
     loading,
     error,
-    
+    needsOnboarding,
+
     // 操作
     createSpace,
     updateUserInfo,
-    
-    // 原始数据（用于调试或特殊用途）
-    viewingUserInfo,
-    
+
     // 兼容旧版本
     client,
     getUser,

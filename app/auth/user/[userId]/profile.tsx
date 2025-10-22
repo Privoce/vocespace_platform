@@ -129,7 +129,7 @@ export function UserProfile({
   messageApi,
   client,
   flushUser,
-  authUser,
+  user,
   userInfo,
   username,
   avatar,
@@ -142,12 +142,12 @@ export function UserProfile({
   const [openPublishModal, setOpenPublishModal] = useState(false);
 
   const selfVocespaceUrl = useMemo(() => {
-    if (authUser && username) {
-      return vocespaceUrl(authUser.id, username, whereUserFrom(authUser));
+    if (user && username) {
+      return vocespaceUrl(user.id, username, whereUserFrom(user));
     } else {
       return "";
     }
-  }, [authUser?.id, username]);
+  }, [user?.id, username]);
 
   useEffect(() => {
     const fetchUserSpaces = async () => {
@@ -235,7 +235,7 @@ export function UserProfile({
       },
       {
         label: t("user.setting.email"),
-        url: `mailto:${authUser?.email}`,
+        url: `mailto:${user?.email}`,
         icon: <MailOutlined style={{ fontSize: 24 }} />,
       },
       ...(userInfo?.github
@@ -284,7 +284,7 @@ export function UserProfile({
           ]
         : []),
     ];
-  }, [userInfo, selfVocespaceUrl, t, authUser]);
+  }, [userInfo, selfVocespaceUrl, t, user]);
 
   const metaInfo = useMemo(() => {
     return [
@@ -314,7 +314,7 @@ export function UserProfile({
         }`,
       },
     ];
-  }, [userInfo, authUser, t]);
+  }, [userInfo, user, t]);
 
   return (
     <div className={styles.userProfile}>
@@ -325,7 +325,7 @@ export function UserProfile({
           </Card>
           <Skeleton.Node active style={{ width: "100%" }} />
         </div>
-      ) : !authUser ? (
+      ) : !userInfo ? (
         <Result
           status="404"
           title="用户未找到"

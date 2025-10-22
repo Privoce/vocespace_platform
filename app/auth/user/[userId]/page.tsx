@@ -7,6 +7,7 @@ import {
 } from "react";
 import { UserProfile } from "./profile";
 import UserSettings from "./settings";
+import OnboardingDrive from "./drive";
 import { useUser } from "@/hooks/useUser";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { UserInfo } from "@/lib/std/user";
@@ -20,13 +21,13 @@ import {
 import { HomeHeader, HomeHeaderExports } from "@/app/home/header";
 import { useI18n } from "@/lib/i18n/i18n";
 import { MessageInstance } from "antd/es/message/interface";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import ImgCrop from "antd-img-crop";
 import { dbApi } from "@/lib/api/db";
 import { BucketApiErrMsg } from "@/lib/api/error";
 import styles from "@/styles/user_settings.module.scss";
 
-export type UserPageType = "profile" | "settings";
+export type UserPageType = "profile" | "settings" | "onboarding";
 
 export interface UserPageUniProps {
   setPage: (page: UserPageType) => void;
@@ -35,7 +36,7 @@ export interface UserPageUniProps {
   client: SupabaseClient;
   flushUser: () => Promise<void>;
   // 从父组件传递的用户数据
-  authUser: any;
+  user: any;
   userInfo: any;
   username: string;
   avatar: string | null;
@@ -57,16 +58,18 @@ export default function UserPage({
   const [messageApi, contextHolder] = message.useMessage();
   const HomeHeaderRef = useRef<HomeHeaderExports>(null);
   const urlSearchParams = useSearchParams();
+  const router = useRouter();
   
   // 使用新的 useUser hook
   const {
-    authUser,
+    user,
     userInfo,
     username,
     avatar,
     isSelf,
     loading,
     error,
+    needsOnboarding,
     client,
     getUser,
     updateUserInfo,
@@ -95,9 +98,22 @@ export default function UserPage({
     }
   }, [error, messageApi, params.userId]);
 
+  // 处理onboarding重定向
+  useEffect(() => {
+    if (!loading && isSelf && needsOnboarding) {
+      const currentPage = getPageParam();
+      if (currentPage !== "onboarding") {
+        // 自动重定向到onboarding页面
+        router.replace(`/auth/user/${params.userId}?page=onboarding`);
+        setPage("onboarding");
+        return;
+      }
+    }
+  }, [loading, isSelf, needsOnboarding, getPageParam, router, params.userId]);
+
   useEffect(() => {
     const pageParam = getPageParam();
-    if (pageParam === "profile" || pageParam === "settings") {
+    if (pageParam === "profile" || pageParam === "settings" || pageParam === "onboarding") {
       setPage(pageParam);
     }
   }, [urlSearchParams, searchParams, getPageParam]);
@@ -108,6 +124,45 @@ export default function UserPage({
       await HomeHeaderRef.current.flush();
     }
   };
+
+  // 处理onboarding完成后的跳转
+  const handleOnboardingComplete = () => {
+    router.push(`/auth/user/${params.userId}?page=profile`);
+    setPage("profile");
+  };
+
+  // 如果正在加载，显示加载状态
+  if (loading) {
+    return (
+      <div className="uni-page-container">
+        <HomeHeader ref={HomeHeaderRef} messageApi={messageApi} />
+        {contextHolder}
+        <div className={styles.user_view}>
+          <div style={{ textAlign: "center", padding: "50px" }}>
+            Loading...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 如果是onboarding页面，显示onboarding组件
+  if (page === "onboarding" && isSelf && user) {
+    return (
+      <>
+        {contextHolder}
+        <OnboardingDrive
+        flushUser={flushUser}
+          user={user}
+          userInfo={userInfo}
+          client={client}
+          messageApi={messageApi}
+          onComplete={handleOnboardingComplete}
+          updateUserInfo={updateUserInfo}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="uni-page-container">
@@ -121,7 +176,7 @@ export default function UserPage({
             userId={params.userId}
             setPage={setPage}
             messageApi={messageApi}
-            authUser={authUser}
+            user={user}
             userInfo={userInfo}
             username={username}
             avatar={avatar}
@@ -136,7 +191,7 @@ export default function UserPage({
           userId={params.userId}
           messageApi={messageApi}
           setPage={setPage}
-          authUser={authUser}
+          user={user}
           userInfo={userInfo}
           username={username}
           avatar={avatar}
