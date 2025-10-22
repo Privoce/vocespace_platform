@@ -57,6 +57,12 @@ export interface Space {
   public: boolean;
 }
 
+/**
+ * Initialize a new space with default values
+ * @param partial Partial space object
+ * @returns Initialized space object or null if required fields are missing
+ * - needed fields: name, url, owner_id
+ */
 export const initSpace = (partial: Partial<Space>): Space | null => {
   const now = Math.floor(Date.now() / 1000);
   if (!partial.name || !partial.url || !partial.owner_id) {
@@ -96,4 +102,8 @@ export const vocespaceUrl = (
   return `https://vocespace.com/${
     spaceName || username
   }?auth=${authFrom}&userId=${userId}&username=${username}`;
+};
+
+export const vocespaceName = (username: string, spaceName?: string) => {
+  return spaceName || username;
 };

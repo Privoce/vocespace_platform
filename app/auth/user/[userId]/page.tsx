@@ -1,23 +1,18 @@
 "use client";
 import {
   useEffect,
-  useMemo,
   useState,
   useCallback,
   useRef,
-  RefObject,
 } from "react";
 import { UserProfile } from "./profile";
 import UserSettings from "./settings";
-import { getUsername, useUser } from "@/hooks/useUser";
-import { SupabaseClient, User } from "@supabase/supabase-js";
+import { useUser } from "@/hooks/useUser";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { UserInfo } from "@/lib/std/user";
-import { Nullable } from "@/lib/std";
 import {
-  Button,
   GetProp,
   message,
-  Modal,
   Upload,
   UploadFile,
   UploadProps,
@@ -26,7 +21,6 @@ import { HomeHeader, HomeHeaderExports } from "@/app/home/header";
 import { useI18n } from "@/lib/i18n/i18n";
 import { MessageInstance } from "antd/es/message/interface";
 import { useSearchParams } from "next/navigation";
-import { EditOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
 import { dbApi } from "@/lib/api/db";
 import { BucketApiErrMsg } from "@/lib/api/error";
@@ -37,14 +31,17 @@ export type UserPageType = "profile" | "settings";
 export interface UserPageUniProps {
   setPage: (page: UserPageType) => void;
   userId: string;
-  user: Nullable<User>;
-  userInfo: Nullable<UserInfo>;
-  username: string;
-  loading: boolean;
-  setLoading: (loading: boolean) => void;
   messageApi: MessageInstance;
   client: SupabaseClient;
   flushUser: () => Promise<void>;
+  // 从父组件传递的用户数据
+  authUser: any;
+  userInfo: any;
+  username: string;
+  avatar: string | null;
+  isSelf: boolean;
+  loading: boolean;
+  updateUserInfo: (updates: any) => Promise<boolean>;
 }
 
 export default function UserPage({
@@ -60,14 +57,22 @@ export default function UserPage({
   const [messageApi, contextHolder] = message.useMessage();
   const HomeHeaderRef = useRef<HomeHeaderExports>(null);
   const urlSearchParams = useSearchParams();
-  const { user, userInfo, loading, setLoading, error, client, getUser } =
-    useUser({
-      userId: params.userId,
-    });
-
-  const username = useMemo(() => {
-    return getUsername(user, userInfo);
-  }, [userInfo, user]);
+  
+  // 使用新的 useUser hook
+  const {
+    authUser,
+    userInfo,
+    username,
+    avatar,
+    isSelf,
+    loading,
+    error,
+    client,
+    getUser,
+    updateUserInfo,
+  } = useUser({
+    userId: params.userId,
+  });
 
   // 创建一个可靠的参数获取函数
   const getPageParam = useCallback(() => {
@@ -88,7 +93,7 @@ export default function UserPage({
       console.warn("Error loading user data:", error, params.userId);
       messageApi.error(error);
     }
-  }, [error]);
+  }, [error, messageApi, params.userId]);
 
   useEffect(() => {
     const pageParam = getPageParam();
@@ -109,29 +114,35 @@ export default function UserPage({
       <HomeHeader ref={HomeHeaderRef} messageApi={messageApi} />
       {contextHolder}
       <div className={styles.user_view}>
-        <UserSettings
-          flushUser={flushUser}
-          client={client}
-          username={username}
-          userId={params.userId}
-          user={user}
-          userInfo={userInfo}
-          loading={loading}
-          setLoading={setLoading}
-          setPage={setPage}
-          messageApi={messageApi}
-        />
+        {isSelf && (
+          <UserSettings
+            flushUser={flushUser}
+            client={client}
+            userId={params.userId}
+            setPage={setPage}
+            messageApi={messageApi}
+            authUser={authUser}
+            userInfo={userInfo}
+            username={username}
+            avatar={avatar}
+            isSelf={isSelf}
+            loading={loading}
+            updateUserInfo={updateUserInfo}
+          />
+        )}
         <UserProfile
           flushUser={flushUser}
           client={client}
           userId={params.userId}
-          username={username}
-          user={user}
-          userInfo={userInfo}
-          loading={loading}
-          setLoading={setLoading}
           messageApi={messageApi}
           setPage={setPage}
+          authUser={authUser}
+          userInfo={userInfo}
+          username={username}
+          avatar={avatar}
+          isSelf={isSelf}
+          loading={loading}
+          updateUserInfo={updateUserInfo}
         />
       </div>
     </div>
@@ -153,7 +164,7 @@ export function EditAvatarBtn({
   client,
   messageApi,
   afterUpdate,
-  children
+  children,
 }: EditAvatarBtnProps) {
   const { t } = useI18n();
   const [fileList, setFileList] = useState<UploadFile[]>([]);

@@ -52,7 +52,7 @@ import {
 import styles from "@/styles/user_profile.module.scss";
 import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
-import { getUsername, useUser, whereUserFrom } from "@/hooks/useUser";
+import { whereUserFrom } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { EditAvatarBtn, UserPageType, UserPageUniProps } from "./page";
 import { useI18n } from "@/lib/i18n/i18n";
@@ -125,51 +125,38 @@ interface UserProfileProps extends UserPageUniProps {}
 
 export function UserProfile({
   userId,
-  username,
   setPage,
-  user,
-  userInfo,
-  loading,
-  setLoading,
-  client,
   messageApi,
+  client,
   flushUser,
+  authUser,
+  userInfo,
+  username,
+  avatar,
+  isSelf,
+  loading,
+  updateUserInfo,
 }: UserProfileProps) {
   const { t } = useI18n();
   const [userSpaces, setUserSpaces] = useState<Space[]>([]);
-
   const [openPublishModal, setOpenPublishModal] = useState(false);
+
   const selfVocespaceUrl = useMemo(() => {
-    if (user && username) {
-      return vocespaceUrl(user.id, username, whereUserFrom(user));
+    if (authUser && username) {
+      return vocespaceUrl(authUser.id, username, whereUserFrom(authUser));
     } else {
       return "";
     }
-  }, [user?.id, username]);
+  }, [authUser?.id, username]);
 
-  const handleEditProfile = () => {
-    setPage("settings");
-  };
-
-  const handleDeleteSpace = async (spaceId: string) => {
-    Modal.confirm({
-      title: "确认删除空间",
-      content: "删除后不可恢复，确定要删除这个空间吗？",
-      okText: "删除",
-      okType: "danger",
-      cancelText: "取消",
-      onOk: async () => {
-        try {
-          // 模拟API调用
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          setUserSpaces((prev) => prev.filter((space) => space.id !== spaceId));
-          message.success("空间删除成功");
-        } catch (error) {
-          message.error("删除失败");
-        }
-      },
-    });
-  };
+  useEffect(() => {
+    const fetchUserSpaces = async () => {
+      const spaces = await dbApi.space.getByUserId(client, userId);
+      console.warn("Fetched user spaces:", spaces);
+      setUserSpaces(spaces);
+    };
+    fetchUserSpaces();
+  }, [userId]);
 
   // 空间类型偏好图表配置
   //   const pieConfig = {
@@ -192,6 +179,7 @@ export function UserProfile({
   //   };
   const { JoinUsBtn, JoinUsModal, JoinUserBtn } = useJoinUsBtn({ username });
   const { ShareBtn } = useShareBtn({ username });
+
   function getSpaceTypeName(type: SpaceType) {
     const typeNames = {
       [SpaceType.Tech]: "技术",
@@ -247,7 +235,7 @@ export function UserProfile({
       },
       {
         label: t("user.setting.email"),
-        url: `mailto:${user?.email}`,
+        url: `mailto:${authUser?.email}`,
         icon: <MailOutlined style={{ fontSize: 24 }} />,
       },
       ...(userInfo?.github
@@ -296,7 +284,7 @@ export function UserProfile({
           ]
         : []),
     ];
-  }, [userInfo, selfVocespaceUrl, t, user]);
+  }, [userInfo, selfVocespaceUrl, t, authUser]);
 
   const metaInfo = useMemo(() => {
     return [
@@ -316,7 +304,7 @@ export function UserProfile({
       {
         icon: <CommentOutlined className={styles.icon} />,
         label: `${t("user.profile.publishs")} : ${
-          (userInfo?.publishs?.length || 0) + 1
+          (userSpaces.length || 0) + 1
         }`,
       },
       {
@@ -326,7 +314,7 @@ export function UserProfile({
         }`,
       },
     ];
-  }, [userInfo, user, t]);
+  }, [userInfo, authUser, t]);
 
   return (
     <div className={styles.userProfile}>
@@ -337,7 +325,7 @@ export function UserProfile({
           </Card>
           <Skeleton.Node active style={{ width: "100%" }} />
         </div>
-      ) : !user ? (
+      ) : !authUser ? (
         <Result
           status="404"
           title="用户未找到"
@@ -364,11 +352,7 @@ export function UserProfile({
                 <Avatar
                   size={80}
                   className={styles.avatar}
-                  src={
-                    whereUserFrom(user) === "google"
-                      ? user.user_metadata?.picture
-                      : userInfo?.avatar
-                  }
+                  src={avatar}
                   style={{
                     fontSize: 48,
                     backgroundColor: "#22CCEE",

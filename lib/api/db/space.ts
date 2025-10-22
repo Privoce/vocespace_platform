@@ -24,7 +24,10 @@ export const get = async (client: SupabaseClient) => {
   return data;
 };
 
-export const getByUserId = async (client: SupabaseClient, uid: string) => {
+export const getByUserId = async (
+  client: SupabaseClient,
+  uid: string
+): Promise<Space[]> => {
   const { data, error } = await client
     .from(TABLE)
     .select("*")
@@ -34,10 +37,11 @@ export const getByUserId = async (client: SupabaseClient, uid: string) => {
   return data;
 };
 
-export const insert = async (client: SupabaseClient, space: Space): Promise<boolean> => {
-  const {  error } = await client
-    .from(TABLE)
-    .insert(space);
+export const insert = async (
+  client: SupabaseClient,
+  space: Space
+): Promise<boolean> => {
+  const { error } = await client.from(TABLE).insert(space);
 
   if (error) throw error;
   return true;

@@ -11,10 +11,6 @@ export interface UserInfo {
    */
   subscribes: Nullable<string[]>;
   /**
-   * 用户发布过的空间ID列表
-   */
-  publishs: Nullable<string[]>;
-  /**
    * 用户参与使用过的空间的时间戳列表 (用于生成热力图)
    */
   records: Nullable<string[]>;
@@ -23,7 +19,6 @@ export interface UserInfo {
   twitter: Nullable<string>;
   website: Nullable<string>;
   wx: Nullable<string>;
-  has_space: boolean;
   avatar: Nullable<string>;
 }
 
@@ -33,12 +28,10 @@ export const DEFAULT_USER_INFO = (id: string): UserInfo => ({
   desc: null,
   location: null,
   subscribes: null,
-  publishs: null,
   records: null,
   linkedin: null,
   github: null,
   twitter: null,
-  has_space: true,
   avatar: null,
   website: null,
   wx: null,

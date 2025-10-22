@@ -41,6 +41,7 @@ export default {
       joinAt: "加入于",
       selfVocespace: "个人Vocespace",
       edit: "编辑资料",
+      mySpace: "我的空间",
       publishs: "创建空间",
       subscribes: "订阅空间",
       placeholder: {

@@ -2,7 +2,7 @@
 
 import { UserInfo } from "@/lib/std/user";
 import { dbApi } from "@/lib/api/db";
-import { Input, Button, Typography, Avatar, Badge } from "antd";
+import { Input, Button, Typography, Avatar, Badge, List } from "antd";
 import {
   UserOutlined,
   EnvironmentOutlined,
@@ -16,7 +16,6 @@ import {
 import { useMemo, useState } from "react";
 import styles from "@/styles/user_settings.module.scss";
 import { UserPageUniProps } from "./page";
-import { whereUserFrom } from "@/hooks/useUser";
 import { useI18n } from "@/lib/i18n/i18n";
 import { EditAvatarBtn } from "./page";
 const { Title, Text } = Typography;
@@ -26,17 +25,20 @@ interface UserSettingsProps extends UserPageUniProps {}
 
 export default function UserSettings({
   userId,
-  username,
-  user,
-  userInfo,
-  loading,
-  setLoading,
-  messageApi,
   setPage,
+  messageApi,
   client,
   flushUser,
+  authUser,
+  userInfo,
+  username,
+  avatar,
+  isSelf,
+  loading,
+  updateUserInfo,
 }: UserSettingsProps) {
   const { t } = useI18n();
+
   const [nickname, setNickname] = useState(userInfo?.nickname || "");
   const [desc, setDesc] = useState(userInfo?.desc || "");
   const [location, setLocation] = useState(userInfo?.location || "");
@@ -45,28 +47,16 @@ export default function UserSettings({
   const [twitter, setTwitter] = useState(userInfo?.twitter || "");
   const [currentUserInfo, setCurrentUserInfo] = useState(userInfo);
 
-  // 获取头像URL的优先级：自定义头像 > Google头像 > 默认
-  const getAvatarSrc = () => {
-    if (currentUserInfo?.avatar) {
-      return currentUserInfo.avatar;
-    }
-    if (whereUserFrom(user) === "google" && user?.user_metadata?.picture) {
-      return user.user_metadata.picture;
-    }
-    return undefined;
-  };
-
   const handleAvatarUpdate = (avatarUrl: string) => {
     // 更新本地状态
-    setCurrentUserInfo((prev) =>
+    setCurrentUserInfo((prev: any) =>
       prev ? { ...prev, avatar: avatarUrl } : null
     );
   };
 
   const handleSave = async (values: any) => {
-    setLoading(true);
     try {
-      const updateUserInfo: Partial<UserInfo> = {
+      const updateData: Partial<UserInfo> = {
         nickname,
         desc,
         location,
@@ -74,18 +64,11 @@ export default function UserSettings({
         github,
         twitter,
       };
-      const success = await dbApi.userInfo.update(
-        client,
-        userId,
-        updateUserInfo
-      );
-      if (success) {
-        messageApi.success(t("user.setting.saveSuccess"));
-      }
+      
+      await updateUserInfo(updateData);
+      messageApi.success(t("user.setting.saveSuccess"));
     } catch (error) {
       messageApi.error(t("user.setting.saveError"));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -116,7 +99,7 @@ export default function UserSettings({
 
   const addLink = (linkType: string) => {};
 
-  if (!userInfo || !user) {
+  if (!userInfo) {
     return (
       <div className={styles.settings}>
         <Text>loading...</Text>
@@ -137,9 +120,9 @@ export default function UserSettings({
             <Avatar
               size={68}
               className={styles.avatar}
-              src={getAvatarSrc()}
+              src={avatar}
               style={{
-                fontSize: 48,
+                fontSize: 32,
                 backgroundColor: "#22CCEE",
                 border: "none",
               }}
@@ -173,13 +156,17 @@ export default function UserSettings({
       >
         {t("space.pub.title")}
       </Button>
-      <div className={styles.settings_}>
-
+      <div className={styles.settings_spaces}>
+        <div className={styles.settings_spaces_title}>
+          {t("user.profile.mySpace")}
+        </div>
+        <List dataSource={[]} renderItem={(item) => {
+          return <List.Item></List.Item>;
+        }}></List>
       </div>
     </div>
   );
 }
-
 
 // function Modal(){
 //   return <div className={styles.settings_form}>
