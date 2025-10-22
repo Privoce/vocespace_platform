@@ -30,6 +30,7 @@ import { EditOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
 import { dbApi } from "@/lib/api/db";
 import { BucketApiErrMsg } from "@/lib/api/error";
+import styles from "@/styles/user_settings.module.scss";
 
 export type UserPageType = "profile" | "settings";
 
@@ -107,20 +108,7 @@ export default function UserPage({
     <div className="uni-page-container">
       <HomeHeader ref={HomeHeaderRef} messageApi={messageApi} />
       {contextHolder}
-      {page === "profile" ? (
-        <UserProfile
-          flushUser={flushUser}
-          client={client}
-          userId={params.userId}
-          username={username}
-          user={user}
-          userInfo={userInfo}
-          loading={loading}
-          setLoading={setLoading}
-          messageApi={messageApi}
-          setPage={setPage}
-        />
-      ) : (
+      <div className={styles.user_view}>
         <UserSettings
           flushUser={flushUser}
           client={client}
@@ -133,7 +121,19 @@ export default function UserPage({
           setPage={setPage}
           messageApi={messageApi}
         />
-      )}
+        <UserProfile
+          flushUser={flushUser}
+          client={client}
+          userId={params.userId}
+          username={username}
+          user={user}
+          userInfo={userInfo}
+          loading={loading}
+          setLoading={setLoading}
+          messageApi={messageApi}
+          setPage={setPage}
+        />
+      </div>
     </div>
   );
 }
@@ -145,6 +145,7 @@ interface EditAvatarBtnProps {
   client: SupabaseClient;
   messageApi: MessageInstance;
   afterUpdate: () => void;
+  children: React.ReactNode;
 }
 
 export function EditAvatarBtn({
@@ -152,6 +153,7 @@ export function EditAvatarBtn({
   client,
   messageApi,
   afterUpdate,
+  children
 }: EditAvatarBtnProps) {
   const { t } = useI18n();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -263,14 +265,15 @@ export function EditAvatarBtn({
         showUploadList={false}
         accept="image/*"
       >
-        <Button
+        {/* <Button
           icon={<EditOutlined />}
           type="default"
           loading={uploading}
           disabled={uploading}
         >
           {uploading ? t("common.uploading") : t("user.setting.editAvatar")}
-        </Button>
+        </Button> */}
+        {children}
       </Upload>
     </ImgCrop>
   );

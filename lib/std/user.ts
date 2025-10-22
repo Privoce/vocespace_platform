@@ -21,6 +21,8 @@ export interface UserInfo {
   linkedin: Nullable<string>;
   github: Nullable<string>;
   twitter: Nullable<string>;
+  website: Nullable<string>;
+  wx: Nullable<string>;
   has_space: boolean;
   avatar: Nullable<string>;
 }
@@ -38,6 +40,8 @@ export const DEFAULT_USER_INFO = (id: string): UserInfo => ({
   twitter: null,
   has_space: true,
   avatar: null,
+  website: null,
+  wx: null,
 });
 
 export interface User {

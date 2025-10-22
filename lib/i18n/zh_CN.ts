@@ -46,6 +46,10 @@ export default {
       placeholder: {
         desc: "这位用户很懒，什么都没有留下。",
       },
+      joinUs: {
+        title: "加入Vocespace",
+        user: "在Vocespace上加入"
+      }
     },
     setting: {
       title: "用户设置",
@@ -56,6 +60,8 @@ export default {
       linkedin: "领英",
       github: "GitHub",
       twitter: "推特",
+      website: "个人网站",
+      wx: "微信",
       save: "保存设置",
       saving: "正在保存...",
       editAvatar: "更改头像",

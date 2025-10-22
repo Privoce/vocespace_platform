@@ -34,6 +34,9 @@ import {
   PlayCircleOutlined,
   DeleteOutlined,
   MoreOutlined,
+  RightOutlined,
+  UsergroupAddOutlined,
+  CommentOutlined,
 } from "@ant-design/icons";
 import { Pie } from "@ant-design/charts";
 import { HomeHeader } from "@/app/home/header";
@@ -55,6 +58,8 @@ import { EditAvatarBtn, UserPageType, UserPageUniProps } from "./page";
 import { useI18n } from "@/lib/i18n/i18n";
 import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
 import { dbApi } from "@/lib/api/db";
+import { useJoinUsBtn } from "./widgets/join";
+import { useShareBtn } from "./widgets/share";
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {
@@ -185,7 +190,8 @@ export function UserProfile({
   //     interactions: [{ type: "element-active" }],
   //     color: ["#1890ff", "#52c41a", "#faad14", "#f5222d"],
   //   };
-
+  const { JoinUsBtn, JoinUsModal, JoinUserBtn } = useJoinUsBtn({ username });
+  const { ShareBtn } = useShareBtn({ username });
   function getSpaceTypeName(type: SpaceType) {
     const typeNames = {
       [SpaceType.Tech]: "技术",
@@ -232,6 +238,96 @@ export function UserProfile({
     }
   };
 
+  const links = useMemo(() => {
+    return [
+      {
+        label: t("user.profile.selfVocespace"),
+        url: selfVocespaceUrl,
+        icon: <VocespaceLogo height={24} width={24} />,
+      },
+      {
+        label: t("user.setting.email"),
+        url: `mailto:${user?.email}`,
+        icon: <MailOutlined style={{ fontSize: 24 }} />,
+      },
+      ...(userInfo?.github
+        ? [
+            {
+              label: t("user.setting.github"),
+              url: userInfo.github,
+              icon: <GithubOutlined style={{ fontSize: 24 }} />,
+            },
+          ]
+        : []),
+      ...(userInfo?.twitter
+        ? [
+            {
+              label: t("user.setting.twitter"),
+              url: userInfo.twitter,
+              icon: <TwitterOutlined style={{ fontSize: 24 }} />,
+            },
+          ]
+        : []),
+      ...(userInfo?.linkedin
+        ? [
+            {
+              label: t("user.setting.linkedin"),
+              url: userInfo.linkedin,
+              icon: <LinkedinOutlined style={{ fontSize: 24 }} />,
+            },
+          ]
+        : []),
+      ...(userInfo?.website
+        ? [
+            {
+              label: t("user.setting.website"),
+              url: userInfo.website,
+              icon: <GlobalOutlined style={{ fontSize: 24 }} />,
+            },
+          ]
+        : []),
+      ...(userInfo?.wx
+        ? [
+            {
+              label: t("user.setting.wx"),
+              url: userInfo.wx,
+              icon: <GlobalOutlined style={{ fontSize: 24 }} />,
+            },
+          ]
+        : []),
+    ];
+  }, [userInfo, selfVocespaceUrl, t, user]);
+
+  const metaInfo = useMemo(() => {
+    return [
+      // {
+      //   icon: <CalendarOutlined className={styles.icon} />,
+      //   label: dayjs(user?.created_at).format("YYYY-MM"),
+      // },
+      ...(userInfo?.location
+        ? [
+            {
+              icon: <EnvironmentOutlined className={styles.icon} />,
+              label:
+                userInfo.location || t("user.profile.placeholder.location"),
+            },
+          ]
+        : []),
+      {
+        icon: <CommentOutlined className={styles.icon} />,
+        label: `${t("user.profile.publishs")} : ${
+          (userInfo?.publishs?.length || 0) + 1
+        }`,
+      },
+      {
+        icon: <TrophyOutlined className={styles.icon} />,
+        label: `${t("user.profile.subscribes")} : ${
+          userInfo?.subscribes?.length || 0
+        }`,
+      },
+    ];
+  }, [userInfo, user, t]);
+
   return (
     <div className={styles.userProfile}>
       {loading ? (
@@ -250,11 +346,23 @@ export function UserProfile({
       ) : (
         <div className={styles.container}>
           {/* 个人资料头部 */}
-          <Card className={styles.profileHeader}>
-            <div className={styles.headerContent}>
+          <Card
+            style={{ borderRadius: 16, height: "100%" }}
+            styles={{
+              body: {
+                padding: 16,
+                height: "100%",
+              },
+            }}
+          >
+            <div className={styles.profile}>
+              <div className={styles.header}>
+                <div>{JoinUsBtn}</div>
+                <div>{ShareBtn}</div>
+              </div>
               <div className={styles.avatarSection}>
                 <Avatar
-                  size={120}
+                  size={80}
                   className={styles.avatar}
                   src={
                     whereUserFrom(user) === "google"
@@ -269,231 +377,49 @@ export function UserProfile({
                 >
                   {username.charAt(0).toUpperCase() || <UserOutlined />}
                 </Avatar>
-                <EditAvatarBtn
-                  userId={userId}
-                  client={client}
-                  messageApi={messageApi}
-                  afterUpdate={flushUser}
-                />
               </div>
-
               <div className={styles.profileInfo}>
-                <h1 className={styles.username}>{username}</h1>
-                {/* <div className={styles.email}>{user.email}</div> */}
-
+                <div className={styles.username}>{username}</div>
                 <div className={styles.bio}>
                   {userInfo?.desc || t("user.profile.placeholder.desc")}
                 </div>
-                <div className={styles.metaInfo}>
-                  <div className={styles.metaItem}>
-                    <CalendarOutlined className={styles.icon} />
-                    {`${t("user.profile.joinAt")} ${dayjs(
-                      user.created_at
-                    ).format("YYYY年MM月")}`}
-                  </div>
-                  {userInfo?.location && (
-                    <div className={styles.metaItem}>
-                      <EnvironmentOutlined className={styles.icon} />
-                      {userInfo.location}
-                    </div>
-                  )}
-
-                  <div className={styles.metaItem}>
-                    <VocespaceLogo></VocespaceLogo>
-                    <a
-                      href={selfVocespaceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {t("user.profile.selfVocespace")}
-                    </a>
-                  </div>
-                </div>
-
                 <div className={styles.socialLinks}>
-                  <Tooltip title="Vocespace">
-                    <Button type="default">
+                  {links.map((link, index) => (
+                    <Tooltip title={link.label} key={index}>
                       <a
-                        href={selfVocespaceUrl}
+                        href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <VocespaceLogo></VocespaceLogo>
+                        <Button
+                          type="text"
+                          shape="circle"
+                          icon={link.icon}
+                        ></Button>
                       </a>
-                    </Button>
-                  </Tooltip>
-                  {userInfo?.github && (
-                    <Tooltip title="GitHub">
-                      <Button type="default">
-                        <a
-                          href={userInfo.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <GithubOutlined />
-                        </a>
-                      </Button>
                     </Tooltip>
-                  )}
-                  {userInfo?.twitter && (
-                    <Tooltip title="Twitter">
-                      <Button type="default">
-                        <a
-                          href={userInfo.twitter}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <TwitterOutlined />
-                        </a>
-                      </Button>
-                    </Tooltip>
-                  )}
-                  {userInfo?.linkedin && (
-                    <Tooltip title="LinkedIn">
-                      <Button type="default">
-                        <a
-                          href={userInfo.linkedin}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <LinkedinOutlined />
-                        </a>
-                      </Button>
-                    </Tooltip>
-                  )}
+                  ))}
                 </div>
-              </div>
-
-              <div className={styles.profileActions}>
-                <Button
-                  type="primary"
-                  icon={<EditOutlined />}
-                  onClick={handleEditProfile}
-                >
-                  {t("user.profile.edit")}
-                </Button>
-                {/* <Button
-                  icon={<SettingOutlined />}
-                  onClick={() => message.info("设置功能待实现")}
-                >
-                  设置
-                </Button> */}
-              </div>
-            </div>
-          </Card>
-
-          <div className={styles.profileStats}>
-            <Card
-              className={styles.statCard}
-              onClick={() => {
-                setOpenPublishModal(true);
-              }}
-              style={{ cursor: "pointer" }}
-            >
-              <div className={styles.statValue}>
-                {(userInfo?.publishs?.length || 0) + 1}
-              </div>
-              <div className={styles.statLabel}>
-                {t("user.profile.publishs")}
-              </div>
-            </Card>
-            <Card className={styles.statCard}>
-              <div className={styles.statValue}>
-                {userInfo?.subscribes?.length || 0}
-              </div>
-              <div className={styles.statLabel}>
-                {t("user.profile.subscribes")}
-              </div>
-            </Card>
-            {/* <Card className={styles.statCard}>
-              <div className={styles.statValue}>
-                {userStats.overview.total_participation_hours}h
-              </div>
-              <div className={styles.statLabel}>参与时长</div>
-            </Card>
-            <Card className={styles.statCard}>
-              <div className={styles.statValue}>
-                {userStats.overview.current_streak_days}
-              </div>
-              <div className={styles.statLabel}>连续天数</div>
-            </Card> */}
-          </div>
-          <Card className={styles.sectionCard} style={{ width: "100%" }}>
-            <div className={styles.sectionCard_inner}>
-              <div
-                className={styles.sectionTitle}
-                style={{
-                  marginBottom: "16px",
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  gap: "8px",
-                }}
-              >
-                <TeamOutlined className={styles.icon} />
-                我创建的空间 ({userSpaces.length})
-              </div>
-
-              <List
-                pagination={{
-                  pageSize: 3,
-                  position: "bottom",
-                  size: "small",
-                  simple: { readOnly: true },
-                }}
-                split={false}
-                bordered={false}
-                dataSource={userSpaces}
-                renderItem={(item) => (
-                  <List.Item
-                    style={{
-                      height: "120px",
-                      padding: "0",
-                    }}
-                  >
-                    <SpaceCard {...item} cardType="edit" />
-                  </List.Item>
-                )}
-              ></List>
-            </div>
-          </Card>
-          {/* <div className={styles.contentGrid}>
-            <div className={styles.mainContent}>
-
-              <Card className={styles.sectionCard}>
-                <div className={styles.sectionCard_inner}>
-                  <div className={styles.sectionTitle}>
-                    <TeamOutlined className={styles.icon} />
-                    我创建的空间 ({userSpaces.length})
-                  </div>
-
+                <div className={styles.metaInfo}>
                   <List
-                    pagination={{
-                      pageSize: 3,
-                      position: "bottom",
-                      size: "small",
-                      simple: { readOnly: true },
-                    }}
-                    split={false}
-                    bordered={false}
-                    dataSource={userSpaces}
+                    style={{ width: "100%" }}
+                    dataSource={metaInfo}
                     renderItem={(item) => (
-                      <List.Item
-                        style={{
-                          height: "120px",
-                          padding: "0",
-                        }}
-                      >
-                        <SpaceCard {...item} cardType="edit" />
+                      <List.Item className={styles.metaItem}>
+                        <div className={styles.metaItem_content}>
+                          <div>{item.icon}</div>
+                          <div>{item.label}</div>
+                        </div>
+                        <RightOutlined></RightOutlined>
                       </List.Item>
                     )}
                   ></List>
                 </div>
-              </Card>
-
-              <Card className={styles.sectionCard}>
+              </div>
+              <footer className={styles.profileActions}>{JoinUserBtn}</footer>
+            </div>
+          </Card>
+          {/* <Card className={styles.sectionCard}>
                 <div className={styles.sectionCard_inner}>
                   <div className={styles.sectionTitle}>
                     <FireOutlined className={styles.icon} />
@@ -553,53 +479,7 @@ export function UserProfile({
                     <span>较多</span>
                   </div>
                 </div>
-              </Card>
-            </div>
-            <div className={styles.sidebar}>
-              <Card className={styles.sectionCard}>
-                <div className={styles.sectionTitle}>
-                  <ClockCircleOutlined style={{ color: "#22CCEE" }} />
-                  最近活动
-                </div>
-
-                <List
-                  pagination={{
-                    pageSize: 8,
-                    position: "bottom",
-                    size: "small",
-                    simple: { readOnly: true },
-                  }}
-                  bordered={false}
-                  dataSource={[
-                    {
-                      title: '参加了 "前端技术交流"',
-                      time: "2小时前",
-                      icon: <PlayCircleOutlined></PlayCircleOutlined>,
-                    },
-                    {
-                      title: '创建了新空间 "React进阶"',
-                      time: "1天前",
-                      icon: <TeamOutlined></TeamOutlined>,
-                    },
-                    {
-                      title: '订阅了 "设计师聚会"',
-                      time: "3天前",
-                      icon: <UserOutlined></UserOutlined>,
-                    },
-                  ]}
-                  renderItem={(item) => (
-                    <List.Item className={styles.activityItem}>
-                      <div className={styles.activityIcon}>{item.icon}</div>
-                      <div className={styles.activityContent}>
-                        <div className={styles.activityText}>{item.title}</div>
-                        <div className={styles.activityTime}>{item.time}</div>
-                      </div>
-                    </List.Item>
-                  )}
-                ></List>
-              </Card>
-            </div>
-          </div> */}
+              </Card> */}
         </div>
       )}
       <EasyPubSpaceModal
@@ -608,6 +488,7 @@ export function UserProfile({
         messageApi={messageApi}
         onSave={confirmCreateSpace}
       />
+      {JoinUsModal}
     </div>
   );
 }
