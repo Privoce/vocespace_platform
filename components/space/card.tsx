@@ -131,11 +131,11 @@ export function SpaceCard({
               </div>
             </div>
           </div>
-          <div className={styles.spaceCard_edit_opts}>
-            {/* <Button type="primary" block onClick={()=> {}}>
+          {/* <div className={styles.spaceCard_edit_opts}>
+            <Button type="primary" block onClick={()=> {}}>
               编辑
-            </Button> */}
-          </div>
+            </Button>
+          </div> */}
         </div>
       </Card>
     );

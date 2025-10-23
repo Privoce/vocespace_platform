@@ -38,6 +38,7 @@ import {
   UsergroupAddOutlined,
   CommentOutlined,
   WechatFilled,
+  PlusCircleFilled,
 } from "@ant-design/icons";
 import { Pie } from "@ant-design/charts";
 import { HomeHeader } from "@/app/home/header";
@@ -49,6 +50,7 @@ import {
   SpaceState,
   FrequencyInterval,
   vocespaceUrl,
+  vocespaceUrlVisit,
 } from "@/lib/std/space";
 import styles from "@/styles/user_profile.module.scss";
 import dayjs from "dayjs";
@@ -136,27 +138,19 @@ export function UserProfile({
   isSelf,
   loading,
   updateUserInfo,
+  spaces,
 }: UserProfileProps) {
   const { t } = useI18n();
-  const [userSpaces, setUserSpaces] = useState<Space[]>([]);
-  const [openPublishModal, setOpenPublishModal] = useState(false);
 
+  const [openPublishModal, setOpenPublishModal] = useState(false);
+  const [openPubSpace, setOpenPubSpace] = useState(false);
   const selfVocespaceUrl = useMemo(() => {
-    if (user && userInfo.nickname) {
+    if (user && userInfo?.nickname) {
       return vocespaceUrl(user.id, userInfo.nickname, whereUserFrom(user));
     } else {
       return "";
     }
   }, [user?.id, userInfo]);
-
-  useEffect(() => {
-    const fetchUserSpaces = async () => {
-      const spaces = await dbApi.space.getByUserId(client, userId);
-      console.warn("Fetched user spaces:", spaces);
-      setUserSpaces(spaces);
-    };
-    fetchUserSpaces();
-  }, [userId]);
 
   // 空间类型偏好图表配置
   //   const pieConfig = {
@@ -181,7 +175,16 @@ export function UserProfile({
     username: userInfo?.nickname,
   });
   const { ShareBtn, ShareModal } = useShareBtn({ userInfo });
-
+  const [createSpaceOpen, setCreateSpaceOpen] = useState<boolean>(false);
+  const createNewSpace = async (space: Space) => {
+    try {
+      await dbApi.space.insert(client, space);
+      messageApi.success(t("space.pub.success"));
+      setCreateSpaceOpen(false);
+    } catch (error) {
+      messageApi.error(t("space.pub.fail"));
+    }
+  };
   function getSpaceTypeName(type: SpaceType) {
     const typeNames = {
       [SpaceType.Tech]: "技术",
@@ -232,7 +235,7 @@ export function UserProfile({
     return [
       {
         label: t("user.profile.selfVocespace"),
-        url: selfVocespaceUrl,
+        url: (isSelf && userInfo) ? selfVocespaceUrl : vocespaceUrlVisit(userInfo?.nickname || ""),
         icon: <VocespaceLogo height={24} width={24} />,
       },
       {
@@ -305,9 +308,24 @@ export function UserProfile({
         : []),
       {
         icon: <CommentOutlined className={styles.icon} />,
-        label: `${t("user.profile.publishs")} : ${
-          (userSpaces.length || 0) + 1
-        }`,
+        label: `${t("user.profile.publishs")} : ${spaces.length}`,
+        onclick: () => setOpenPubSpace(!openPubSpace),
+        collapsed: (
+          <List
+            dataSource={spaces}
+            renderItem={(item) => {
+              return (
+                <List.Item>
+                  <SpaceCard
+                    space={item}
+                    cardType="edit"
+                    style={{ padding: 0, margin: 0 }}
+                  ></SpaceCard>
+                </List.Item>
+              );
+            }}
+          ></List>
+        ),
       },
       {
         icon: <TrophyOutlined className={styles.icon} />,
@@ -316,7 +334,7 @@ export function UserProfile({
         }`,
       },
     ];
-  }, [userInfo, user, t]);
+  }, [userInfo, user, t, openPubSpace, spaces]);
 
   return (
     <div className={styles.userProfile}>
@@ -360,20 +378,28 @@ export function UserProfile({
                 <div>{ShareBtn}</div>
               </div>
               <div className={styles.avatarSection}>
-                <Avatar
-                  size={80}
-                  className={styles.avatar}
-                  src={avatar}
-                  style={{
-                    fontSize: 48,
-                    backgroundColor: avatar ? "transparent" : "#22CCEE",
-                    border: "none",
-                  }}
+                <EditAvatarBtn
+                  userId={userId}
+                  client={client}
+                  messageApi={messageApi}
+                  afterUpdate={flushUser}
+                  disabled={!isSelf}
                 >
-                  {userInfo.nickname.charAt(0).toUpperCase() || (
-                    <UserOutlined />
-                  )}
-                </Avatar>
+                  <Avatar
+                    size={96}
+                    className={styles.avatar}
+                    src={avatar}
+                    style={{
+                      fontSize: 48,
+                      backgroundColor: avatar ? "transparent" : "#22CCEE",
+                      border: "none",
+                    }}
+                  >
+                    {userInfo.nickname.charAt(0).toUpperCase() || (
+                      <UserOutlined />
+                    )}
+                  </Avatar>
+                </EditAvatarBtn>
               </div>
               <div className={styles.profileInfo}>
                 <div className={styles.username}>{userInfo.nickname}</div>
@@ -402,18 +428,41 @@ export function UserProfile({
                     style={{ width: "100%" }}
                     dataSource={metaInfo}
                     renderItem={(item) => (
-                      <List.Item className={styles.metaItem}>
-                        <div className={styles.metaItem_content}>
-                          <div>{item.icon}</div>
-                          <div>{item.label}</div>
+                      <List.Item
+                        onClick={item.onclick}
+                        style={{ width: "100%", display: "flex", flexWrap: "wrap" }}
+                      >
+                        <div className={styles.metaItem}>
+                          <div className={styles.metaItem_content}>
+                            <div>{item.icon}</div>
+                            <div>{item.label}</div>
+                          </div>
+                          <RightOutlined></RightOutlined>
                         </div>
-                        <RightOutlined></RightOutlined>
+                        {item.collapsed && openPubSpace && (
+                          <div style={{ width: "100%" }}>{item.collapsed}</div>
+                        )}
                       </List.Item>
                     )}
                   ></List>
                 </div>
               </div>
-              <footer className={styles.profileActions}>{JoinUserBtn}</footer>
+              <footer className={styles.profileActions}>
+                {isSelf ? (
+                  <Button
+                    icon={<PlusCircleFilled></PlusCircleFilled>}
+                    type="primary"
+                    shape="round"
+                    size="large"
+                    onClick={() => setCreateSpaceOpen(true)}
+                    style={{ boxShadow: "0 4px 8px #136c7d" }}
+                  >
+                    {t("space.pub.title")}
+                  </Button>
+                ) : (
+                  JoinUserBtn
+                )}
+              </footer>
             </div>
           </Card>
           {/* <Card className={styles.sectionCard}>
@@ -479,15 +528,15 @@ export function UserProfile({
               </Card> */}
         </div>
       )}
-      <EasyPubSpaceModal
-        open={openPublishModal}
-        setOpen={setOpenPublishModal}
-        messageApi={messageApi}
-        onSave={confirmCreateSpace}
-        ownerId={userId}
-      />
       {JoinUsModal}
       {ShareModal}
+      <EasyPubSpaceModal
+        ownerId={userId}
+        open={createSpaceOpen}
+        setOpen={setCreateSpaceOpen}
+        messageApi={messageApi}
+        onSave={createNewSpace}
+      ></EasyPubSpaceModal>
     </div>
   );
 }

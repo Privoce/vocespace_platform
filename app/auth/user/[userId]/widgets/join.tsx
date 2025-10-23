@@ -34,8 +34,7 @@ export const useJoinUsBtn = ({ username }: UseJoinUsBtnProps) => {
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
-        width={600}
-        // styles={{content: {padding: 0}}}
+        width={480}
       >
         <div className={styles.join}>
           <div className={styles.join_content}>
@@ -73,6 +72,7 @@ export const useJoinUsBtn = ({ username }: UseJoinUsBtnProps) => {
         size="large"
         type="primary"
         onClick={() => setOpen(true)}
+        style={{ boxShadow: '0 4px 8px #136c7d' }}
       >
         {`${t("user.profile.joinUs.user")}${username?.substring(0, 16)}`}
       </Button>

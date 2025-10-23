@@ -9,9 +9,10 @@ import { Avatar, Button, Input, Modal, Tooltip } from "antd";
 import { useMemo, useState } from "react";
 import styles from "@/styles/user_profile.module.scss";
 import { vocespaceUrlVisit } from "@/lib/std/space";
+import { Nullable } from "@/lib/std";
 
 interface UseShareBtnProps {
-  userInfo: UserInfo;
+  userInfo: Nullable<UserInfo>;
 }
 
 export const useShareBtn = ({ userInfo }: UseShareBtnProps) => {
@@ -34,22 +35,24 @@ export const useShareBtn = ({ userInfo }: UseShareBtnProps) => {
   }, [t]);
 
   const ShareModal = useMemo(() => {
+    if (!userInfo) return <></>;
+
     return (
       <Modal
         title={t("share.title")}
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
-        width={600}
+        width={480}
       >
         <div className={styles.share}>
           <Avatar
             size={88}
             // className={styles.avatar}
-            src={userInfo.avatar}
+            src={userInfo?.avatar}
             style={{
               fontSize: 52,
-              backgroundColor: userInfo.avatar ? "transparent" : "#22CCEE",
+              backgroundColor: userInfo?.avatar ? "transparent" : "#22CCEE",
               border: "none",
             }}
           >

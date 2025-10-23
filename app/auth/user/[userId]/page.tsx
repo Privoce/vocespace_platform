@@ -4,7 +4,7 @@ import { UserProfile } from "./profile";
 import UserSettings from "./settings";
 import OnboardingDrive from "./drive";
 import { useUser } from "@/hooks/useUser";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseClient, User } from "@supabase/supabase-js";
 import { UserInfo } from "@/lib/std/user";
 import { GetProp, message, Upload, UploadFile, UploadProps } from "antd";
 import { HomeHeader, HomeHeaderExports } from "@/app/home/header";
@@ -16,7 +16,7 @@ import { dbApi } from "@/lib/api/db";
 import { BucketApiErrMsg } from "@/lib/api/error";
 import styles from "@/styles/user_settings.module.scss";
 import { Space } from "@/lib/std/space";
-import { isMobile } from "@/lib/std";
+import { isMobile, Nullable } from "@/lib/std";
 
 export type UserPageType = "profile" | "settings" | "onboarding";
 
@@ -27,8 +27,8 @@ export interface UserPageUniProps {
   client: SupabaseClient;
   flushUser: () => Promise<void>;
   // 从父组件传递的用户数据
-  user: any;
-  userInfo: any;
+  user: Nullable<User>;
+  userInfo: Nullable<UserInfo>;
   avatar: string | null;
   isSelf: boolean;
   loading: boolean;
@@ -192,6 +192,7 @@ interface EditAvatarBtnProps {
   messageApi: MessageInstance;
   afterUpdate: () => void;
   children: React.ReactNode;
+  disabled?: boolean;
 }
 
 export function EditAvatarBtn({
@@ -200,6 +201,7 @@ export function EditAvatarBtn({
   messageApi,
   afterUpdate,
   children,
+  disabled = false,
 }: EditAvatarBtnProps) {
   const { t } = useI18n();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -310,6 +312,7 @@ export function EditAvatarBtn({
         onPreview={onPreview}
         showUploadList={false}
         accept="image/*"
+        disabled={disabled}
       >
         {/* <Button
           icon={<EditOutlined />}
