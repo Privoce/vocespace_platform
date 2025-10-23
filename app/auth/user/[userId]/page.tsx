@@ -15,6 +15,7 @@ import ImgCrop from "antd-img-crop";
 import { dbApi } from "@/lib/api/db";
 import { BucketApiErrMsg } from "@/lib/api/error";
 import styles from "@/styles/user_settings.module.scss";
+import { Space } from "@/lib/std/space";
 
 export type UserPageType = "profile" | "settings" | "onboarding";
 
@@ -27,10 +28,10 @@ export interface UserPageUniProps {
   // 从父组件传递的用户数据
   user: any;
   userInfo: any;
-  username: string;
   avatar: string | null;
   isSelf: boolean;
   loading: boolean;
+  spaces: Space[];
   updateUserInfo: (updates: any) => Promise<boolean>;
 }
 
@@ -53,14 +54,14 @@ export default function UserPage({
   const {
     user,
     userInfo,
-    username,
+    spaces,
     avatar,
     isSelf,
     loading,
     error,
     needsOnboarding,
     client,
-    getUser,
+    refreshUserData,
     updateUserInfo,
   } = useUser({
     userId: params.userId,
@@ -112,7 +113,7 @@ export default function UserPage({
   }, [urlSearchParams, searchParams, getPageParam]);
 
   const flushUser = async () => {
-    await getUser();
+    await refreshUserData();
     if (HomeHeaderRef.current) {
       await HomeHeaderRef.current.flush();
     }
@@ -156,8 +157,8 @@ export default function UserPage({
             messageApi={messageApi}
             user={user}
             userInfo={userInfo}
-            username={username}
             avatar={avatar}
+            spaces={spaces}
             isSelf={isSelf}
             loading={loading}
             updateUserInfo={updateUserInfo}
@@ -169,9 +170,9 @@ export default function UserPage({
           userId={params.userId}
           messageApi={messageApi}
           setPage={setPage}
+           spaces={spaces}
           user={user}
           userInfo={userInfo}
-          username={username}
           avatar={avatar}
           isSelf={isSelf}
           loading={loading}

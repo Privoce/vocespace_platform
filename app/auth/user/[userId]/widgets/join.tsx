@@ -5,7 +5,7 @@ import { Button, Modal, Tooltip } from "antd";
 import { useMemo, useState } from "react";
 
 interface UseJoinUsBtnProps {
-  username: string;
+  username?: string;
 }
 
 export const useJoinUsBtn = ({ username }: UseJoinUsBtnProps) => {
@@ -41,7 +41,7 @@ export const useJoinUsBtn = ({ username }: UseJoinUsBtnProps) => {
         type="primary"
         onClick={() => setOpen(true)}
       >
-        {`${t("user.profile.joinUs.user")}${username.substring(0, 16)}`}
+        {`${t("user.profile.joinUs.user")}${username?.substring(0, 16)}`}
       </Button>
     );
   }, [t, username]);

@@ -104,7 +104,7 @@ export default {
       website: "个人网站",
       links: "社交链接",
       wx: "微信",
-      save: "保存",
+      save: "保存设置",
       cancel: "取消",
       saving: "正在保存...",
       editAvatar: "更改头像",

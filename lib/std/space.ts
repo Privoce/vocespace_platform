@@ -28,13 +28,13 @@ export interface Space {
   id?: string;
   name: string;
   desc?: string;
-  created_at: String;
-  expired_at: String;
+  created_at: string;
+  expired_at: string;
   /**
    * Start time as UNIX timestamp
    */
-  start_at?: String;
-  end_at?: String;
+  start_at?: string;
+  end_at?: string;
   freq: Frequency;
   fee: number;
   owner_id: string;

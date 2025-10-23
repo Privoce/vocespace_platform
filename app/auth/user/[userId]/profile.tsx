@@ -37,6 +37,7 @@ import {
   RightOutlined,
   UsergroupAddOutlined,
   CommentOutlined,
+  WechatFilled,
 } from "@ant-design/icons";
 import { Pie } from "@ant-design/charts";
 import { HomeHeader } from "@/app/home/header";
@@ -131,7 +132,6 @@ export function UserProfile({
   flushUser,
   user,
   userInfo,
-  username,
   avatar,
   isSelf,
   loading,
@@ -142,12 +142,12 @@ export function UserProfile({
   const [openPublishModal, setOpenPublishModal] = useState(false);
 
   const selfVocespaceUrl = useMemo(() => {
-    if (user && username) {
-      return vocespaceUrl(user.id, username, whereUserFrom(user));
+    if (user && userInfo.nickname) {
+      return vocespaceUrl(user.id, userInfo.nickname, whereUserFrom(user));
     } else {
       return "";
     }
-  }, [user?.id, username]);
+  }, [user?.id, userInfo]);
 
   useEffect(() => {
     const fetchUserSpaces = async () => {
@@ -177,8 +177,10 @@ export function UserProfile({
   //     interactions: [{ type: "element-active" }],
   //     color: ["#1890ff", "#52c41a", "#faad14", "#f5222d"],
   //   };
-  const { JoinUsBtn, JoinUsModal, JoinUserBtn } = useJoinUsBtn({ username });
-  const { ShareBtn } = useShareBtn({ username });
+  const { JoinUsBtn, JoinUsModal, JoinUserBtn } = useJoinUsBtn({
+    username: userInfo?.nickname,
+  });
+  const { ShareBtn } = useShareBtn({ username: userInfo?.nickname });
 
   function getSpaceTypeName(type: SpaceType) {
     const typeNames = {
@@ -279,7 +281,7 @@ export function UserProfile({
             {
               label: t("user.setting.wx"),
               url: userInfo.wx,
-              icon: <GlobalOutlined style={{ fontSize: 24 }} />,
+              icon: <WechatFilled style={{ fontSize: 24 }} />,
             },
           ]
         : []),
@@ -368,11 +370,13 @@ export function UserProfile({
                     border: "none",
                   }}
                 >
-                  {username.charAt(0).toUpperCase() || <UserOutlined />}
+                  {userInfo.nickname.charAt(0).toUpperCase() || (
+                    <UserOutlined />
+                  )}
                 </Avatar>
               </div>
               <div className={styles.profileInfo}>
-                <div className={styles.username}>{username}</div>
+                <div className={styles.username}>{userInfo.nickname}</div>
                 <div className={styles.bio}>
                   {userInfo?.desc || t("user.profile.placeholder.desc")}
                 </div>

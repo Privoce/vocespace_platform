@@ -10,7 +10,7 @@ import {
   PlusCircleFilled,
   WechatOutlined,
 } from "@ant-design/icons";
-import { ChangeEvent, useMemo, useState } from "react";
+import { ChangeEvent, useMemo, useState, useEffect } from "react";
 import styles from "@/styles/user_settings.module.scss";
 import { UserPageUniProps } from "./page";
 import { useI18n } from "@/lib/i18n/i18n";
@@ -18,6 +18,7 @@ import { EditAvatarBtn } from "./page";
 import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
 import { Space } from "@/lib/std/space";
 import { dbApi } from "@/lib/api/db";
+import { SpaceCard } from "@/components/space/card";
 const { TextArea } = Input;
 
 interface UserSettingsProps extends UserPageUniProps {}
@@ -31,7 +32,7 @@ export default function UserSettings({
   flushUser,
   user,
   userInfo,
-  username,
+  spaces,
   avatar,
   isSelf,
   loading,
@@ -46,6 +47,17 @@ export default function UserSettings({
   const [descEditOpen, setDescEditOpen] = useState(false);
   const [linksEditOpen, setLinksEditOpen] = useState<boolean>(false);
   const [createSpaceOpen, setCreateSpaceOpen] = useState<boolean>(false);
+
+  // 当 userInfo 更新时，同步更新本地状态
+  useEffect(() => {
+    if (userInfo) {
+      setDesc(userInfo.desc || "");
+      setLinkedin(userInfo.linkedin || "");
+      setGithub(userInfo.github || "");
+      setTwitter(userInfo.twitter || "");
+      setWx(userInfo.wx || "");
+    }
+  }, [userInfo]);
 
   const links = useMemo(() => {
     return [
@@ -164,12 +176,14 @@ export default function UserSettings({
                 border: "none",
               }}
             >
-              {username.charAt(0).toUpperCase() || <UserOutlined />}
+              {userInfo.nickname.charAt(0).toUpperCase() || <UserOutlined />}
             </Avatar>
           </EditAvatarBtn>
         </div>
         <div className={styles.settings_userInfo}>
-          <div className={styles.settings_userInfo_username}>{username}</div>
+          <div className={styles.settings_userInfo_username}>
+            {userInfo.nickname}
+          </div>
           <div
             className={styles.settings_userInfo_desc}
             onClick={() => handleEditProfile("desc")}
@@ -208,9 +222,13 @@ export default function UserSettings({
           {t("user.profile.mySpace")}
         </div>
         <List
-          dataSource={[]}
+          dataSource={spaces}
           renderItem={(item) => {
-            return <List.Item></List.Item>;
+            return (
+              <List.Item>
+                <SpaceCard space={item} cardType="edit" style={{padding: 0, margin: 0}}></SpaceCard>
+              </List.Item>
+            );
           }}
         ></List>
       </div>

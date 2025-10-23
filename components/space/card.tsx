@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Button, Card, Tag } from "antd";
 import {
   UserOutlined,
@@ -13,25 +13,14 @@ import { Space, SpaceState, FrequencyInterval } from "@/lib/std/space";
 import styles from "@/styles/space_card.module.scss";
 import { useRouter } from "next/navigation";
 
-export interface SpaceCardProps extends Space {
+export interface SpaceCardProps  {
+  space: Space;
   cardType?: "default" | "edit";
   style?: React.CSSProperties;
 }
 
 export function SpaceCard({
-  id,
-  name,
-  desc,
-  created_at,
-  start_at,
-  end_at,
-  freq,
-  fee,
-  state,
-  sub_count,
-  online_count,
-  url,
-  images,
+  space,
   style,
   cardType = "default",
 }: SpaceCardProps) {
@@ -56,17 +45,17 @@ export function SpaceCard({
     }
   };
 
-  const formatTime = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleTimeString("zh-CN", {
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString("zh-CN", {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
   const formatDuration = () => {
-    if (!start_at || !end_at) return "";
+    if (!space.start_at || !space.end_at) return "";
 
-    const duration = end_at - start_at;
+    const duration = new Date(space.end_at).getTime() - new Date(space.start_at).getTime();
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration % 3600) / 60);
 
@@ -81,19 +70,25 @@ export function SpaceCard({
     // Handle join space logic
     // window.open(url, "_blank");
     // jump to space detail page
-    router.push("/space/" + id);
+    router.push("/space/" + space.id);
   };
 
   const handleCardClick = () => {
     // Navigate to space detail page
-    console.log("Navigate to space:", id);
-    router.push("/space/" + id);
+    console.log("Navigate to space:", space.id);
+    router.push("/space/" + space.id);
   };
 
-  const defaultImage =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='0.3em' font-family='Arial, sans-serif' font-size='14' fill='%23999'%3E空间封面图%3C/text%3E%3C/svg%3E";
-  const spaceImage =
-    images && images.length > 0 ? images[0] : "/images/default_space.jpg";
+  const defaultImage = "/images/default_space.jpg";
+
+  const spaceImage = useMemo(() => {
+    if (space.images.length > 0) {
+      console.warn(space.images.length, space.images);
+      return space.images[0] || defaultImage;
+    } else {
+      return defaultImage;
+    }
+  }, [space]);
 
   if (cardType === "edit") {
     return (
@@ -106,41 +101,40 @@ export function SpaceCard({
           <div className={styles.spaceCard_edit_imageSection}>
             <img
               src={spaceImage}
-              alt={name}
               onError={(e) => {
                 e.currentTarget.src = defaultImage;
               }}
             />
           </div>
           <div className={styles.spaceCard_edit_content}>
-            <div className={styles.spaceCard_edit_content_name}>{name}</div>
-            <div className={styles.spaceCard_edit_content_desc} title={desc}>
-              {desc}
+            <div className={styles.spaceCard_edit_content_name}>{space.name}</div>
+            <div className={styles.spaceCard_edit_content_desc} title={space.desc}>
+              {space.desc}
             </div>
             <div className={styles.spaceCard_edit_content_info}>
               <CalendarOutlined className={styles.icon} />
-              订阅频率: {formatFrequency(freq)}
+              订阅频率: {formatFrequency(space.freq)}
             </div>
 
             <div className={styles.content_inline}>
               <div className={styles.flex_line}>
                 <UserOutlined className={styles.icon} />
-                <span className={styles.value}>{sub_count}</span>
+                <span className={styles.value}>{space.sub_count}</span>
               </div>
               <div className={styles.flex_line}>
                 <EyeOutlined className={styles.icon} />
-                <span className={styles.value}>{online_count}</span>
+                <span className={styles.value}>{space.online_count}</span>
               </div>
               <div className={styles.flex_line}>
                 <DollarOutlined className={styles.icon} />
-                <span className={styles.value}>¥{fee}</span>
+                <span className={styles.value}>¥{space.fee}</span>
               </div>
             </div>
           </div>
           <div className={styles.spaceCard_edit_opts}>
-            <Button type="primary" block>
+            {/* <Button type="primary" block onClick={()=> {}}>
               编辑
-            </Button>
+            </Button> */}
           </div>
         </div>
       </Card>
@@ -156,35 +150,34 @@ export function SpaceCard({
         <div className={styles.imageSection}>
           <img
             src={spaceImage}
-            alt={name}
             onError={(e) => {
               e.currentTarget.src = defaultImage;
             }}
           />
 
-          <div className={`${styles.feeTag} ${fee === 0 ? styles.free : ""}`}>
-            {fee === 0 ? "免费" : `¥${fee}`}
+          <div className={`${styles.feeTag} ${space.fee === 0 ? styles.free : ""}`}>
+            {space.fee === 0 ? "免费" : `¥${space.fee}`}
           </div>
         </div>
 
         <div className={styles.content}>
           <div className={styles.content_line}>
-            <div className={styles.name}>{name}</div>
+            <div className={styles.name}>{space.name}</div>
           </div>
 
-          <div className={styles.content_line_desc}>{desc}</div>
+          <div className={styles.content_line_desc}>{space.desc}</div>
 
           <div className={styles.content_line}>
             <div className={styles.flex_line}>
               <CalendarOutlined className={styles.icon} />
-              订阅频率: {formatFrequency(freq)}
+              订阅频率: {formatFrequency(space.freq)}
             </div>
           </div>
           <div className={styles.content_line}>
-            {start_at && end_at && (
+            {space.start_at && space.end_at && (
               <div className={styles.flex_line}>
                 <ClockCircleOutlined className={styles.icon} />
-                {formatTime(start_at)} - {formatTime(end_at)} (持续{" "}
+                {formatTime(space.start_at)} - {formatTime(space.end_at)} (持续{" "}
                 {formatDuration()})
               </div>
             )}
@@ -193,15 +186,15 @@ export function SpaceCard({
           <div className={styles.content_inline}>
             <div className={styles.flex_line}>
               <UserOutlined className={styles.icon} />
-              <span className={styles.value}>{sub_count}</span>
+              <span className={styles.value}>{space.sub_count}</span>
             </div>
             <div className={styles.flex_line}>
               <EyeOutlined className={styles.icon} />
-              <span className={styles.value}>{online_count}</span>
+              <span className={styles.value}>{space.online_count}</span>
             </div>
             <div className={styles.flex_line}>
               <DollarOutlined className={styles.icon} />
-              <span className={styles.value}>¥{fee}</span>
+              <span className={styles.value}>¥{space.fee}</span>
             </div>
           </div>
 
@@ -215,10 +208,10 @@ export function SpaceCard({
               <span>状态:</span>
               <Tag
                 bordered={true}
-                color={state === SpaceState.Active ? "success" : "warning"}
+                color={space.state === SpaceState.Active ? "success" : "warning"}
               >
                 {" "}
-                {state === SpaceState.Active ? "活跃" : "等待中"}
+                {space.state === SpaceState.Active ? "活跃" : "等待中"}
               </Tag>
             </div>
           </div>
