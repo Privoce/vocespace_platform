@@ -320,7 +320,16 @@ export function UserProfile({
     <div className={styles.userProfile}>
       {loading ? (
         <div className={styles.container}>
-          <Card className={styles.profileHeader}>
+          <Card
+            className={styles.profileHeader}
+            style={{ borderRadius: 16, height: "100%" }}
+            styles={{
+              body: {
+                padding: 16,
+                height: "100%",
+              },
+            }}
+          >
             <Skeleton avatar paragraph={{ rows: 4 }} active />
           </Card>
           <Skeleton.Node active style={{ width: "100%" }} />
@@ -471,6 +480,7 @@ export function UserProfile({
         setOpen={setOpenPublishModal}
         messageApi={messageApi}
         onSave={confirmCreateSpace}
+        ownerId={userId}
       />
       {JoinUsModal}
     </div>

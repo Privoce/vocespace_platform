@@ -62,10 +62,12 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
   const client = createClient();
 
   // 判断是否在查看自己的信息
-  const isSelf = !userId || (currentAuthUser && userId === currentAuthUser.id);
-  
+  const isSelf = useMemo(() => {
+    return !userId || (currentAuthUser && userId === currentAuthUser.id);
+  }, [userId, currentAuthUser]);
+
   // 是否已认证
-  const isAuthenticated = !!currentAuthUser;
+  const isAuthenticated = useMemo(()=>{return !!currentAuthUser}, [currentAuthUser]);
 
   // 计算用户名（优先级：nickname > email（仅自己） > "User"）
   const username = useMemo(() => {
@@ -80,7 +82,8 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
   const avatar = useMemo(() => {
     if (userInfo?.avatar) return userInfo.avatar;
     // 只有查看自己时才使用 OAuth 头像
-    if (isSelf && user?.user_metadata?.avatar_url) return user.user_metadata.avatar_url;
+    if (isSelf && user?.user_metadata?.avatar_url)
+      return user.user_metadata.avatar_url;
     return null;
   }, [userInfo?.avatar, isSelf, user?.user_metadata?.avatar_url]);
 
@@ -88,14 +91,16 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
   const needsOnboarding = useMemo(() => {
     if (!isSelf || !isAuthenticated || loading) return false;
     // 如果没有nickname，则认为需要onboarding
-    return !userInfo?.nickname || userInfo.nickname.trim() === '';
+    return !userInfo?.nickname || userInfo.nickname.trim() === "";
   }, [isSelf, isAuthenticated, loading, userInfo?.nickname]);
 
   // 初始化：获取当前认证用户
   useEffect(() => {
     const getCurrentAuthUser = async () => {
       try {
-        const { data: { user } } = await client.auth.getUser();
+        const {
+          data: { user },
+        } = await client.auth.getUser();
         setCurrentAuthUser(user);
       } catch (err) {
         console.error("Failed to get current auth user:", err);
@@ -105,7 +110,9 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
     getCurrentAuthUser();
 
     // 监听认证状态变化
-    const { data: { subscription } } = client.auth.onAuthStateChange(async (event, session) => {
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange(async (event, session) => {
       setCurrentAuthUser(session?.user || null);
     });
 
@@ -133,7 +140,10 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
         } else {
           // 没有 userId：获取当前认证用户的信息
           if (currentAuthUser) {
-            const userInfo = await dbApi.userInfo.get(client, currentAuthUser.id);
+            const userInfo = await dbApi.userInfo.get(
+              client,
+              currentAuthUser.id
+            );
             setUser(currentAuthUser);
             setUserInfo(userInfo);
           } else {
@@ -161,7 +171,8 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
       throw new Error("User not authenticated");
     }
 
-    const displayName = userInfo.nickname || currentAuthUser.email || "Unknown User";
+    const displayName =
+      userInfo.nickname || currentAuthUser.email || "Unknown User";
 
     try {
       const response = await vocespace.createSpace(
@@ -218,7 +229,9 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
       // 否则获取当前认证用户信息
       try {
         setLoading(true);
-        const { data: { user } } = await client.auth.getUser();
+        const {
+          data: { user },
+        } = await client.auth.getUser();
         setUser(user);
         setCurrentAuthUser(user);
 

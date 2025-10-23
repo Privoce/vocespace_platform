@@ -28,19 +28,19 @@ export interface Space {
   id?: string;
   name: string;
   desc?: string;
-  created_at: number;
-  expired_at: number;
+  created_at: String;
+  expired_at: String;
   /**
    * Start time as UNIX timestamp
    */
-  start_at?: number;
-  end_at?: number;
+  start_at?: String;
+  end_at?: String;
   freq: Frequency;
   fee: number;
   owner_id: string;
   state?: SpaceState;
   sub_count: number;
-  online_count: number;
+  online_count?: number;
   /**
    * space url, link to join or view the space
    */
@@ -64,7 +64,11 @@ export interface Space {
  * - needed fields: name, url, owner_id
  */
 export const initSpace = (partial: Partial<Space>): Space | null => {
-  const now = Math.floor(Date.now() / 1000);
+  const now = Date.now();
+  const nowString = new Date(now).toLocaleString();
+  const default_expired_at = new Date(
+    now + 365 * 24 * 3600 * 1000
+  ).toLocaleString();
   if (!partial.name || !partial.url || !partial.owner_id) {
     return null;
   } else {
@@ -73,12 +77,11 @@ export const initSpace = (partial: Partial<Space>): Space | null => {
       desc: partial.desc || "",
       url: partial.url,
       owner_id: partial.owner_id,
-      created_at: partial.created_at || now,
-      expired_at: partial.expired_at || now + 365 * 24 * 3600, // default 1 year later
+      created_at: partial.created_at || nowString,
+      expired_at: partial.expired_at || default_expired_at, // default 1 year later
       freq: partial.freq || { interval: FrequencyInterval.Flexible },
       fee: partial.fee || 0,
       sub_count: partial.sub_count || 0,
-      online_count: partial.online_count || 0,
       images: partial.images || [],
       ty: partial.ty || SpaceType.Meeting,
       public: partial.public !== undefined ? partial.public : false,
@@ -102,6 +105,10 @@ export const vocespaceUrl = (
   return `https://vocespace.com/${
     spaceName || username
   }?auth=${authFrom}&userId=${userId}&username=${username}`;
+};
+
+export const vocespaceUrlVisit = (spaceName: string) => {
+  return `https://vocespace.com/${spaceName}`;
 };
 
 export const vocespaceName = (username: string, spaceName?: string) => {

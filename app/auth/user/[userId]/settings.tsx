@@ -1,27 +1,27 @@
 "use client";
 
 import { UserInfo } from "@/lib/std/user";
-import { dbApi } from "@/lib/api/db";
-import { Input, Button, Typography, Avatar, Badge, List } from "antd";
+import { Input, Button, Avatar, Badge, List, Modal, Skeleton } from "antd";
 import {
   UserOutlined,
-  EnvironmentOutlined,
   GithubOutlined,
   LinkedinOutlined,
   TwitterOutlined,
-  LeftOutlined,
   PlusCircleFilled,
   WechatOutlined,
 } from "@ant-design/icons";
-import { useMemo, useState } from "react";
+import { ChangeEvent, useMemo, useState } from "react";
 import styles from "@/styles/user_settings.module.scss";
 import { UserPageUniProps } from "./page";
 import { useI18n } from "@/lib/i18n/i18n";
 import { EditAvatarBtn } from "./page";
-const { Title, Text } = Typography;
+import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
+import { Space } from "@/lib/std/space";
+import { dbApi } from "@/lib/api/db";
 const { TextArea } = Input;
 
 interface UserSettingsProps extends UserPageUniProps {}
+type Links = "github" | "linkedin" | "twitter" | "wx";
 
 export default function UserSettings({
   userId,
@@ -38,71 +38,108 @@ export default function UserSettings({
   updateUserInfo,
 }: UserSettingsProps) {
   const { t } = useI18n();
-
-  const [nickname, setNickname] = useState(userInfo?.nickname || "");
   const [desc, setDesc] = useState(userInfo?.desc || "");
-  const [location, setLocation] = useState(userInfo?.location || "");
   const [linkedin, setLinkedin] = useState(userInfo?.linkedin || "");
   const [github, setGithub] = useState(userInfo?.github || "");
   const [twitter, setTwitter] = useState(userInfo?.twitter || "");
-  const [currentUserInfo, setCurrentUserInfo] = useState(userInfo);
-
-  const handleAvatarUpdate = (avatarUrl: string) => {
-    // 更新本地状态
-    setCurrentUserInfo((prev: any) =>
-      prev ? { ...prev, avatar: avatarUrl } : null
-    );
-  };
-
-  const handleSave = async (values: any) => {
-    try {
-      const updateData: Partial<UserInfo> = {
-        nickname,
-        desc,
-        location,
-        linkedin,
-        github,
-        twitter,
-      };
-      
-      await updateUserInfo(updateData);
-      messageApi.success(t("user.setting.saveSuccess"));
-    } catch (error) {
-      messageApi.error(t("user.setting.saveError"));
-    }
-  };
-
-  const handleEditProfile = () => {
-    messageApi.info("头像更改功能正在开发中，敬请期待！");
-  };
+  const [wx, setWx] = useState(userInfo?.wx || "");
+  const [descEditOpen, setDescEditOpen] = useState(false);
+  const [linksEditOpen, setLinksEditOpen] = useState<boolean>(false);
+  const [createSpaceOpen, setCreateSpaceOpen] = useState<boolean>(false);
 
   const links = useMemo(() => {
     return [
       {
         icon: <GithubOutlined style={{ fontSize: 20, cursor: "pointer" }} />,
-        value: "github",
+        key: "github",
+        placeholder: t("user.setting.placeholder.github"),
+        value: github,
+        onChange: (e: ChangeEvent<HTMLInputElement>) =>
+          setGithub(e.target.value),
       },
       {
         icon: <LinkedinOutlined style={{ fontSize: 20, cursor: "pointer" }} />,
-        value: "linkedin",
+        key: "linkedin",
+        placeholder: t("user.setting.placeholder.linkedin"),
+        value: linkedin,
+        onChange: (e: ChangeEvent<HTMLInputElement>) =>
+          setLinkedin(e.target.value),
       },
       {
         icon: <WechatOutlined style={{ fontSize: 20, cursor: "pointer" }} />,
-        value: "wx",
+        key: "wx",
+        placeholder: t("user.setting.placeholder.wx"),
+        value: wx,
+        onChange: (e: ChangeEvent<HTMLInputElement>) => setWx(e.target.value),
       },
       {
         icon: <TwitterOutlined style={{ fontSize: 20, cursor: "pointer" }} />,
-        value: "twitter",
+        key: "twitter",
+        placeholder: t("user.setting.placeholder.twitter"),
+        value: twitter,
+        onChange: (e: ChangeEvent<HTMLInputElement>) =>
+          setTwitter(e.target.value),
       },
     ];
-  }, [userInfo]);
+  }, [userInfo, github, linkedin, twitter, wx, t]);
 
-  const addLink = (linkType: string) => {};
+  const saveDesc = async () => {
+    try {
+      const updateData: Partial<UserInfo> = {
+        desc,
+      };
 
-  if (!userInfo) {
+      await updateUserInfo(updateData);
+      messageApi.success(t("user.setting.saveSuccess"));
+      setDescEditOpen(false);
+    } catch (error) {
+      messageApi.error(t("user.setting.saveError"));
+    }
+  };
+
+  const handleEditProfile = (ty: "desc" | Links) => {
+    if (ty === "desc") {
+      // 编辑个人简介
+      setDescEditOpen(true);
+    } else {
+      // 编辑社交链接
+      setLinksEditOpen(true);
+    }
+  };
+
+  const saveLinks = async () => {
+    try {
+      const updateData: Partial<UserInfo> = {
+        linkedin,
+        github,
+        twitter,
+        wx,
+      };
+
+      await updateUserInfo(updateData);
+      messageApi.success(t("user.setting.saveSuccess"));
+      setLinksEditOpen(false);
+    } catch (error) {
+      messageApi.error(t("user.setting.saveError"));
+    }
+  };
+
+  const createNewSpace = async (space: Space) => {
+    try {
+      await dbApi.space.insert(client, space);
+      messageApi.success(t("space.pub.success"));
+      setCreateSpaceOpen(false);
+    } catch (error) {
+      messageApi.error(t("space.pub.fail"));
+    }
+  };
+
+  if (!userInfo || loading) {
     return (
       <div className={styles.settings}>
-        <Text>loading...</Text>
+        <div className={styles.settings_header}>
+          <Skeleton avatar paragraph={{ rows: 3 }} active />
+        </div>
       </div>
     );
   }
@@ -133,13 +170,22 @@ export default function UserSettings({
         </div>
         <div className={styles.settings_userInfo}>
           <div className={styles.settings_userInfo_username}>{username}</div>
-          <div className={styles.settings_userInfo_desc}>
+          <div
+            className={styles.settings_userInfo_desc}
+            onClick={() => handleEditProfile("desc")}
+          >
             {userInfo?.desc || t("user.profile.placeholder.desc")}
           </div>
           <div className={styles.settings_userInfo_links}>
             {links.map((link) => (
-              <Badge count={<PlusCircleFilled></PlusCircleFilled>} key={link.value}>
-                <div onClick={() => addLink(link.value)} key={link.value}>
+              <Badge
+                count={<PlusCircleFilled></PlusCircleFilled>}
+                key={link.key}
+              >
+                <div
+                  onClick={() => handleEditProfile(link.key as Links)}
+                  key={link.key}
+                >
                   {link.icon}
                 </div>
               </Badge>
@@ -153,6 +199,7 @@ export default function UserSettings({
         size="large"
         shape="round"
         style={{ width: "80%", maxWidth: 460 }}
+        onClick={() => setCreateSpaceOpen(true)}
       >
         {t("space.pub.title")}
       </Button>
@@ -160,102 +207,66 @@ export default function UserSettings({
         <div className={styles.settings_spaces_title}>
           {t("user.profile.mySpace")}
         </div>
-        <List dataSource={[]} renderItem={(item) => {
-          return <List.Item></List.Item>;
-        }}></List>
+        <List
+          dataSource={[]}
+          renderItem={(item) => {
+            return <List.Item></List.Item>;
+          }}
+        ></List>
       </div>
+      <Modal
+        open={descEditOpen}
+        onCancel={() => setDescEditOpen(false)}
+        title={t("user.setting.desc")}
+        okText={t("user.setting.save")}
+        cancelText={t("user.setting.cancel")}
+        onOk={saveDesc}
+      >
+        <TextArea
+          placeholder={t("user.setting.placeholder.desc")}
+          showCount
+          maxLength={60}
+          rows={4}
+          value={desc}
+          onChange={(e) => {
+            setDesc(e.target.value);
+          }}
+          style={{ resize: "none", marginBottom: 16 }}
+        />
+      </Modal>
+      <Modal
+        open={linksEditOpen}
+        onCancel={() => setLinksEditOpen(false)}
+        title={t("user.setting.links")}
+        okText={t("user.setting.save")}
+        cancelText={t("user.setting.cancel")}
+        onOk={saveLinks}
+      >
+        <div>
+          {links.map((link, index) => {
+            return (
+              <Input
+                style={{
+                  margin: "8px 0",
+                }}
+                key={index}
+                placeholder={link.placeholder}
+                prefix={link.icon}
+                size="large"
+                value={link.value}
+                onChange={link.onChange}
+              />
+            );
+          })}
+        </div>
+      </Modal>
+      <EasyPubSpaceModal
+        ownerId={userId}
+        open={createSpaceOpen}
+        setOpen={setCreateSpaceOpen}
+        messageApi={messageApi}
+        onSave={createNewSpace}
+      ></EasyPubSpaceModal>
     </div>
   );
 }
-
-// function Modal(){
-//   return <div className={styles.settings_form}>
-//         <div className={styles.settings_form_row}>
-//           <div className={styles.inline}>{t("user.setting.username")}:</div>
-//           <Input
-//             placeholder={t("user.setting.placeholder.username")}
-//             size="large"
-//             value={nickname}
-//             onChange={(e) => {
-//               setNickname(e.target.value);
-//             }}
-//           />
-//         </div>
-//         <div className={styles.settings_form_row}>
-//           <div className={styles.inline}>{t("user.setting.desc")}:</div>
-//           <TextArea
-//             placeholder={t("user.setting.placeholder.desc")}
-//             showCount
-//             maxLength={60}
-//             rows={4}
-//             value={desc}
-//             onChange={(e) => {
-//               setDesc(e.target.value);
-//             }}
-//             style={{ resize: "none" }}
-//           />
-//         </div>
-//         <div className={styles.settings_form_row}>
-//           <div className={styles.inline}>{t("user.setting.location")}:</div>
-//           <Input
-//             placeholder={t("user.setting.placeholder.location")}
-//             prefix={<EnvironmentOutlined />}
-//             size="large"
-//             value={location}
-//             onChange={(e) => {
-//               setLocation(e.target.value);
-//             }}
-//           />
-//         </div>
-//         <div className={styles.settings_form_row}>
-//           <div className={styles.inline}>{t("user.setting.linkedin")}:</div>
-//           <Input
-//             placeholder={t("user.setting.placeholder.linkedin")}
-//             prefix={<LinkedinOutlined />}
-//             size="large"
-//             value={linkedin}
-//             onChange={(e) => {
-//               setLinkedin(e.target.value);
-//             }}
-//           />
-//         </div>
-//         <div className={styles.settings_form_row}>
-//           <div className={styles.inline}>{t("user.setting.github")}:</div>
-//           <Input
-//             placeholder={t("user.setting.placeholder.github")}
-//             prefix={<GithubOutlined />}
-//             size="large"
-//             value={github}
-//             onChange={(e) => {
-//               setGithub(e.target.value);
-//             }}
-//           />
-//         </div>
-//         <div className={styles.settings_form_row}>
-//           <div className={styles.inline}>{t("user.setting.twitter")}:</div>
-//           <Input
-//             placeholder={t("user.setting.placeholder.twitter")}
-//             prefix={<TwitterOutlined />}
-//             size="large"
-//             value={twitter}
-//             onChange={(e) => {
-//               setTwitter(e.target.value);
-//             }}
-//           />
-//         </div>
-//         <div
-//           className={styles.settings_form_row}
-//           style={{ justifyContent: "flex-end" }}
-//         >
-//           <Button
-//             size="large"
-//             style={{ width: 220 }}
-//             type="primary"
-//             loading={loading}
-//             onClick={handleSave}
-//           >
-//             {t("user.setting.save")}
-//           </Button>
-//         </div>
-//       </div>
-// }

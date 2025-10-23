@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/i18n";
-import { initSpace, Space } from "@/lib/std/space";
+import { initSpace, Space, vocespaceUrl, vocespaceUrlVisit } from "@/lib/std/space";
 import styles from "@/styles/space_pub.module.scss";
 import { Input, Modal, Radio } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
@@ -10,6 +10,7 @@ export interface PubSpaceModalProps {
   setOpen: (open: boolean) => void;
   messageApi: MessageInstance;
   onSave: (space: Space) => Promise<void>;
+  ownerId: string;
 }
 
 export function EasyPubSpaceModal({
@@ -17,11 +18,11 @@ export function EasyPubSpaceModal({
   setOpen,
   messageApi,
   onSave,
+  ownerId
 }: PubSpaceModalProps) {
   const { t } = useI18n();
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [url, setUrl] = useState("");
   const [pub, setPub] = useState(true);
 
   const confirmCreateSpace = async () => {
@@ -30,15 +31,13 @@ export function EasyPubSpaceModal({
       messageApi.error(t("space.pub.validation.name"));
       return;
     }
-    if (!url.trim()) {
-      messageApi.error(t("space.pub.validation.url"));
-      return;
-    }
+
     const space = initSpace({
       name: name.trim(),
       desc: desc.trim(),
-      url: url.trim(),
+      url: vocespaceUrlVisit(name.trim()),
       public: pub,
+      owner_id: ownerId
     });
 
     if (!space) {
@@ -72,7 +71,7 @@ export function EasyPubSpaceModal({
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className={styles.easy_form_row}>
+          {/* <div className={styles.easy_form_row}>
             <div className={styles.easy_form_label}>{t("space.pub.url")}:</div>
             <Input
               size="large"
@@ -81,7 +80,7 @@ export function EasyPubSpaceModal({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
-          </div>
+          </div> */}
           <div className={styles.easy_form_row}>
             <div className={styles.easy_form_label}>{t("space.pub.desc")}:</div>
             <Input.TextArea
