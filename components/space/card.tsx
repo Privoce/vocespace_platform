@@ -13,7 +13,7 @@ import { Space, SpaceState, FrequencyInterval } from "@/lib/std/space";
 import styles from "@/styles/space_card.module.scss";
 import { useRouter } from "next/navigation";
 
-export interface SpaceCardProps  {
+export interface SpaceCardProps {
   space: Space;
   cardType?: "default" | "edit";
   style?: React.CSSProperties;
@@ -55,7 +55,8 @@ export function SpaceCard({
   const formatDuration = () => {
     if (!space.start_at || !space.end_at) return "";
 
-    const duration = new Date(space.end_at).getTime() - new Date(space.start_at).getTime();
+    const duration =
+      new Date(space.end_at).getTime() - new Date(space.start_at).getTime();
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration % 3600) / 60);
 
@@ -96,6 +97,9 @@ export function SpaceCard({
         className={styles.spaceCard}
         styles={{ body: { padding: 0 } }}
         style={style}
+        onClick={() => {
+          window.open(space.url, "_blank");
+        }}
       >
         <div className={styles.spaceCard_edit}>
           <div className={styles.spaceCard_edit_imageSection}>
@@ -107,8 +111,13 @@ export function SpaceCard({
             />
           </div>
           <div className={styles.spaceCard_edit_content}>
-            <div className={styles.spaceCard_edit_content_name}>{space.name}</div>
-            <div className={styles.spaceCard_edit_content_desc} title={space.desc}>
+            <div className={styles.spaceCard_edit_content_name}>
+              {space.name}
+            </div>
+            <div
+              className={styles.spaceCard_edit_content_desc}
+              title={space.desc}
+            >
               {space.desc}
             </div>
             <div className={styles.spaceCard_edit_content_info}>
@@ -155,7 +164,9 @@ export function SpaceCard({
             }}
           />
 
-          <div className={`${styles.feeTag} ${space.fee === 0 ? styles.free : ""}`}>
+          <div
+            className={`${styles.feeTag} ${space.fee === 0 ? styles.free : ""}`}
+          >
             {space.fee === 0 ? "免费" : `¥${space.fee}`}
           </div>
         </div>
@@ -208,7 +219,9 @@ export function SpaceCard({
               <span>状态:</span>
               <Tag
                 bordered={true}
-                color={space.state === SpaceState.Active ? "success" : "warning"}
+                color={
+                  space.state === SpaceState.Active ? "success" : "warning"
+                }
               >
                 {" "}
                 {space.state === SpaceState.Active ? "活跃" : "等待中"}

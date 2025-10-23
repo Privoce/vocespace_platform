@@ -140,6 +140,7 @@ export default function UserSettings({
       await dbApi.space.insert(client, space);
       messageApi.success(t("space.pub.success"));
       setCreateSpaceOpen(false);
+      flushUser();
     } catch (error) {
       messageApi.error(t("space.pub.fail"));
     }
@@ -173,6 +174,7 @@ export default function UserSettings({
                 fontSize: 32,
                 backgroundColor: avatar ? "transparent" : "#22CCEE",
                 border: "none",
+                cursor: "pointer",
               }}
             >
               {userInfo?.nickname.charAt(0).toUpperCase() || <UserOutlined />}
@@ -212,7 +214,14 @@ export default function UserSettings({
         size="large"
         shape="round"
         style={{ width: "80%", maxWidth: 460 }}
-        onClick={() => setCreateSpaceOpen(true)}
+        onClick={() => {
+          if (spaces.length >= 2) {
+            messageApi.error(t("space.pub.validation.limit2"));
+            return;
+          } else {
+            setCreateSpaceOpen(true);
+          }
+        }}
       >
         {t("space.pub.title")}
       </Button>
@@ -225,7 +234,11 @@ export default function UserSettings({
           renderItem={(item) => {
             return (
               <List.Item>
-                <SpaceCard space={item} cardType="edit" style={{padding: 0, margin: 0}}></SpaceCard>
+                <SpaceCard
+                  space={item}
+                  cardType="edit"
+                  style={{ padding: 0, margin: 0 }}
+                ></SpaceCard>
               </List.Item>
             );
           }}

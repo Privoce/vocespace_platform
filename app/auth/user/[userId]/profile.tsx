@@ -180,6 +180,7 @@ export function UserProfile({
       await dbApi.space.insert(client, space);
       messageApi.success(t("space.pub.success"));
       setCreateSpaceOpen(false);
+      flushUser();
     } catch (error) {
       messageApi.error(t("space.pub.fail"));
     }
@@ -234,7 +235,10 @@ export function UserProfile({
     return [
       {
         label: t("user.profile.selfVocespace"),
-        url: (isSelf && userInfo) ? selfVocespaceUrl : vocespaceUrlVisit(userInfo?.nickname || ""),
+        url:
+          isSelf && userInfo
+            ? selfVocespaceUrl
+            : vocespaceUrlVisit(userInfo?.nickname || ""),
         icon: <VocespaceLogo height={24} width={24} />,
       },
       {
@@ -392,6 +396,7 @@ export function UserProfile({
                       fontSize: 48,
                       backgroundColor: avatar ? "transparent" : "#22CCEE",
                       border: "none",
+                      cursor: isSelf ? "pointer" : "default",
                     }}
                   >
                     {userInfo.nickname.charAt(0).toUpperCase() || (
@@ -429,7 +434,11 @@ export function UserProfile({
                     renderItem={(item) => (
                       <List.Item
                         onClick={item.onclick}
-                        style={{ width: "100%", display: "flex", flexWrap: "wrap" }}
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          flexWrap: "wrap",
+                        }}
                       >
                         <div className={styles.metaItem}>
                           <div className={styles.metaItem_content}>
@@ -453,7 +462,14 @@ export function UserProfile({
                     type="primary"
                     shape="round"
                     size="large"
-                    onClick={() => setCreateSpaceOpen(true)}
+                    onClick={() => {
+                      if (spaces.length >= 2) {
+                        messageApi.error(t("space.pub.validation.limit2"));
+                        return;
+                      } else {
+                        setCreateSpaceOpen(true);
+                      }
+                    }}
                     style={{ boxShadow: "0 4px 8px #136c7d" }}
                   >
                     {t("space.pub.title")}

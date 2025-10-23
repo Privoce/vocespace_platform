@@ -45,6 +45,7 @@ export default {
         url: "请输入空间地址",
       },
       validation: {
+        limit2: "每个用户当前最多只能创建两个空间",
         name: "空间名称不能为空",
         url: "空间地址不能为空",
         failed: "空间创建失败，请检查必填项是否填写完整",
