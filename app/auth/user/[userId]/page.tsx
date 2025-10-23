@@ -6,7 +6,16 @@ import OnboardingDrive from "./drive";
 import { useUser } from "@/hooks/useUser";
 import { SupabaseClient, User } from "@supabase/supabase-js";
 import { UserInfo } from "@/lib/std/user";
-import { GetProp, message, Upload, UploadFile, UploadProps } from "antd";
+import {
+  Card,
+  GetProp,
+  message,
+  Result,
+  Skeleton,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
 import { HomeHeader, HomeHeaderExports } from "@/app/home/header";
 import { useI18n } from "@/lib/i18n/i18n";
 import { MessageInstance } from "antd/es/message/interface";
@@ -18,10 +27,7 @@ import styles from "@/styles/user_settings.module.scss";
 import { Space } from "@/lib/std/space";
 import { isMobile, Nullable } from "@/lib/std";
 
-export type UserPageType = "profile" | "settings" | "onboarding";
-
 export interface UserPageUniProps {
-  setPage: (page: UserPageType) => void;
   userId: string;
   messageApi: MessageInstance;
   client: SupabaseClient;
@@ -36,21 +42,12 @@ export interface UserPageUniProps {
   updateUserInfo: (updates: any) => Promise<boolean>;
 }
 
-export default function UserPage({
-  params,
-  searchParams,
-}: {
-  params: { userId: string };
-  searchParams: {
-    page?: UserPageType;
-  };
-}) {
-  const [page, setPage] = useState<UserPageType>("profile");
+export default function UserPage({ params }: { params: { userId: string } }) {
   const [messageApi, contextHolder] = message.useMessage();
   const HomeHeaderRef = useRef<HomeHeaderExports>(null);
-  const urlSearchParams = useSearchParams();
-  const router = useRouter();
-
+  // const urlSearchParams = useSearchParams();
+  // const router = useRouter();
+  const { t } = useI18n();
   // 使用新的 useUser hook
   const {
     user,
@@ -68,50 +65,12 @@ export default function UserPage({
     userId: params.userId,
   });
 
-  // 创建一个可靠的参数获取函数
-  const getPageParam = useCallback(() => {
-    return (
-      (urlSearchParams?.get("page") as UserPageType) ||
-      searchParams?.page ||
-      (typeof window !== "undefined"
-        ? (new URLSearchParams(window.location.search).get(
-            "page"
-          ) as UserPageType)
-        : null) ||
-      "profile"
-    );
-  }, [urlSearchParams, searchParams]);
-
   useEffect(() => {
     if (error) {
       console.warn("Error loading user data:", error, params.userId);
       messageApi.error(error);
     }
   }, [error, messageApi, params.userId]);
-
-  // 处理onboarding重定向
-  useEffect(() => {
-    if (!loading && isSelf && needsOnboarding) {
-      const currentPage = getPageParam();
-      if (currentPage !== "onboarding") {
-        // 自动重定向到onboarding页面
-        router.replace(`/auth/user/${params.userId}?page=onboarding`);
-        setPage("onboarding");
-        return;
-      }
-    }
-  }, [loading, isSelf, needsOnboarding, getPageParam, router, params.userId]);
-
-  useEffect(() => {
-    const pageParam = getPageParam();
-    if (
-      pageParam === "profile" ||
-      pageParam === "settings" ||
-      pageParam === "onboarding"
-    ) {
-      setPage(pageParam);
-    }
-  }, [urlSearchParams, searchParams, getPageParam]);
 
   const flushUser = async () => {
     await refreshUserData();
@@ -120,66 +79,74 @@ export default function UserPage({
     }
   };
 
-  // 处理onboarding完成后的跳转
-  const handleOnboardingComplete = () => {
-    router.push(`/auth/user/${params.userId}?page=profile`);
-    setPage("profile");
-  };
-
+  // 如果查看的不是自己的页面，且用户存在但昵称未设置，显示该用户无法访问
   // 如果是onboarding页面，显示onboarding组件
-  if (page === "onboarding" && isSelf && user) {
-    return (
-      <>
-        {contextHolder}
-        <OnboardingDrive
-          flushUser={flushUser}
-          user={user}
-          userInfo={userInfo}
-          client={client}
-          messageApi={messageApi}
-          onComplete={handleOnboardingComplete}
-          updateUserInfo={updateUserInfo}
-        />
-      </>
-    );
-  }
-
   return (
     <div className="uni-page-container">
       <HomeHeader ref={HomeHeaderRef} messageApi={messageApi} />
       {contextHolder}
-      <div className={styles.user_view}>
-        {isSelf && !isMobile() && (
-          <UserSettings
+      {loading && !user && (
+        <Card style={{ height: "calc(100vh - 98px)", width: "460px" }}>
+          <Skeleton avatar paragraph={{ rows: 3 }} active />
+        </Card>
+      )}
+      {!loading && userInfo && !userInfo.nickname && (
+        <>
+          {isSelf && user && needsOnboarding ? (
+            <OnboardingDrive
+              flushUser={flushUser}
+              user={user}
+              userInfo={userInfo}
+              client={client}
+              messageApi={messageApi}
+              onComplete={flushUser}
+              updateUserInfo={updateUserInfo}
+            />
+          ) : (
+            <Result
+              status="404"
+              title={t("login.visit.un")}
+              subTitle={
+                <span style={{ color: "#8c8c8c" }}>
+                  {t("login.visit.unFinished")}
+                </span>
+              }
+            ></Result>
+          )}
+        </>
+      )}
+      {userInfo && !needsOnboarding && userInfo.nickname && (
+        <div className={styles.user_view}>
+          {isSelf && !isMobile() && (
+            <UserSettings
+              flushUser={flushUser}
+              client={client}
+              userId={params.userId}
+              messageApi={messageApi}
+              user={user}
+              userInfo={userInfo}
+              avatar={avatar}
+              spaces={spaces}
+              isSelf={isSelf}
+              loading={loading}
+              updateUserInfo={updateUserInfo}
+            />
+          )}
+          <UserProfile
             flushUser={flushUser}
             client={client}
             userId={params.userId}
-            setPage={setPage}
             messageApi={messageApi}
+            spaces={spaces}
             user={user}
             userInfo={userInfo}
             avatar={avatar}
-            spaces={spaces}
             isSelf={isSelf}
             loading={loading}
             updateUserInfo={updateUserInfo}
           />
-        )}
-        <UserProfile
-          flushUser={flushUser}
-          client={client}
-          userId={params.userId}
-          messageApi={messageApi}
-          setPage={setPage}
-           spaces={spaces}
-          user={user}
-          userInfo={userInfo}
-          avatar={avatar}
-          isSelf={isSelf}
-          loading={loading}
-          updateUserInfo={updateUserInfo}
-        />
-      </div>
+        </div>
+      )}
     </div>
   );
 }

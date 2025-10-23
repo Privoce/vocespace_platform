@@ -37,10 +37,11 @@ export function UserBox({
   const handleLogout = async () => {
     try {
       await signOut();
-      messageApi.success("退出登录成功");
+      messageApi.success(t("login.out.success"));
       router.push("/");
+      window.location.reload();
     } catch (error) {
-      messageApi.error("退出登录失败");
+      messageApi.error(t("login.out.error"));
       console.error("Logout error:", error);
     }
   };
@@ -70,7 +71,7 @@ export function UserBox({
                 key: "profile",
                 label: t("user.box.profile"),
                 onClick: () =>
-                  router.push(`/auth/user/${user.id}?page=profile`),
+                  router.push(`/auth/user/${user.id}`),
               },
               {
                 key: "logout",
@@ -109,7 +110,7 @@ export function UserBox({
           onClick={toLogin}
           icon={<UserOutlined></UserOutlined>}
         >
-          登陆
+          {t("login.title")}
         </Button>
       )}
     </div>

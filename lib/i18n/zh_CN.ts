@@ -4,6 +4,18 @@ export default {
     cancel: "取消",
     uploading: "上传中...",
   },
+  login: {
+    title: "登陆",
+    out: {
+      title: "退出登陆",
+      success: "您已成功退出登录。",
+      error: "退出登录时出错，请重试。",
+    },
+    visit: {
+      un: "该用户无法访问",
+      unFinished: "抱歉，您要查看的用户还未完成注册流程。",
+    }
+  },
   join: {
     title: "加入Vocespace获取您的专属空间!",
     subTitle: "让更多同好发现您的空间与您一起交流",

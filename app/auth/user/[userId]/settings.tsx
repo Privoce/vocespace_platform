@@ -26,7 +26,6 @@ type Links = "github" | "linkedin" | "twitter" | "wx";
 
 export default function UserSettings({
   userId,
-  setPage,
   messageApi,
   client,
   flushUser,
@@ -176,7 +175,7 @@ export default function UserSettings({
                 border: "none",
               }}
             >
-              {userInfo.nickname.charAt(0).toUpperCase() || <UserOutlined />}
+              {userInfo?.nickname.charAt(0).toUpperCase() || <UserOutlined />}
             </Avatar>
           </EditAvatarBtn>
         </div>

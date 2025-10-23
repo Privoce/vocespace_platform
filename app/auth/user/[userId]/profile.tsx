@@ -57,7 +57,7 @@ import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
 import { whereUserFrom } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
-import { EditAvatarBtn, UserPageType, UserPageUniProps } from "./page";
+import { EditAvatarBtn, UserPageUniProps } from "./page";
 import { useI18n } from "@/lib/i18n/i18n";
 import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
 import { dbApi } from "@/lib/api/db";
@@ -128,7 +128,6 @@ interface UserProfileProps extends UserPageUniProps {}
 
 export function UserProfile({
   userId,
-  setPage,
   messageApi,
   client,
   flushUser,
