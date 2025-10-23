@@ -1,5 +1,6 @@
 "use client";
 import { dbApi } from "@/lib/api/db";
+import { isMobile } from "@/lib/std";
 import { vocespaceUrl } from "@/lib/std/space";
 import { UserInfo } from "@/lib/std/user";
 import { createClient } from "@/lib/supabase/client";
@@ -201,7 +202,7 @@ export default function Page({ searchParams }: LoginPageProps) {
       {contextHolder}
       <div className={styles.login_left}>
         <header className={styles.login_left_header}>
-          <img src="/logo.svg"></img>
+          <img src="/logo.svg" onClick={() => router.push("/")} style={{ cursor: "pointer" }}></img>
         </header>
         <main className={styles.login_left_main}>
           <div className={styles.login_left_main_tt}>
@@ -324,16 +325,18 @@ export default function Page({ searchParams }: LoginPageProps) {
           © 2025 VoceSpace, Inc. 保留所有权利。
         </footer>
       </div>
-      <div className={styles.login_right}>
-        <div className={styles.login_right_content}>
-          <h2 className={styles.login_right_content_title}>
-            VoceSpace高清会议软件：4K分辨率，60帧，2M码率
-          </h2>
-          <h3 className={styles.login_right_content_subtitle}>
-            体验水晶般清晰的视频会议，4K分辨率，60帧流畅表现，2M码率带来无与伦比的质量。完美适合专业演示和远程协作。
-          </h3>
+      {!isMobile() && (
+        <div className={styles.login_right}>
+          <div className={styles.login_right_content}>
+            <h2 className={styles.login_right_content_title}>
+              VoceSpace高清会议软件：4K分辨率，60帧，2M码率
+            </h2>
+            <h3 className={styles.login_right_content_subtitle}>
+              体验水晶般清晰的视频会议，4K分辨率，60帧流畅表现，2M码率带来无与伦比的质量。完美适合专业演示和远程协作。
+            </h3>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

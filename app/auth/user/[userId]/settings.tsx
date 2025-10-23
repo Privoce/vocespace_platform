@@ -172,7 +172,7 @@ export default function UserSettings({
               src={avatar}
               style={{
                 fontSize: 32,
-                backgroundColor: "#22CCEE",
+                backgroundColor: avatar ? "transparent" : "#22CCEE",
                 border: "none",
               }}
             >

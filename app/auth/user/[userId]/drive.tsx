@@ -290,9 +290,9 @@ export default function OnboardingDrive({
                 src={avatar}
                 style={{
                   fontSize: 40,
-                  backgroundColor: "#22CCEE",
                   border: "none",
                   cursor: "pointer",
+                  backgroundColor: avatar ? "transparent" : "#22CCEE",
                 }}
               >
                 <UserOutlined />

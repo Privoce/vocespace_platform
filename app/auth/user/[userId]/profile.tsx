@@ -180,7 +180,7 @@ export function UserProfile({
   const { JoinUsBtn, JoinUsModal, JoinUserBtn } = useJoinUsBtn({
     username: userInfo?.nickname,
   });
-  const { ShareBtn } = useShareBtn({ username: userInfo?.nickname });
+  const { ShareBtn, ShareModal } = useShareBtn({ userInfo });
 
   function getSpaceTypeName(type: SpaceType) {
     const typeNames = {
@@ -366,7 +366,7 @@ export function UserProfile({
                   src={avatar}
                   style={{
                     fontSize: 48,
-                    backgroundColor: "#22CCEE",
+                    backgroundColor: avatar ? "transparent" : "#22CCEE",
                     border: "none",
                   }}
                 >
@@ -487,6 +487,7 @@ export function UserProfile({
         ownerId={userId}
       />
       {JoinUsModal}
+      {ShareModal}
     </div>
   );
 }

@@ -25,7 +25,7 @@ export interface HomeHeaderExports {
 export const HomeHeader = forwardRef<HomeHeaderExports, HomeHeaderProps>(
   ({ messageApi }: HomeHeaderProps, ref) => {
     const router = useRouter();
-    const { user, userInfo, loading, error, getUser } = useUser({});
+    const { user, userInfo, loading, error, refreshUserData } = useUser({});
 
     const username = useMemo(() => {
       return getUsername(user, userInfo);
@@ -38,7 +38,7 @@ export const HomeHeader = forwardRef<HomeHeaderExports, HomeHeaderProps>(
     }, [error]);
 
     useImperativeHandle(ref, () => ({
-      flush: getUser,
+      flush: refreshUserData,
     }));
 
     return (

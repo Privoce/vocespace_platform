@@ -26,7 +26,7 @@ export function UserBox({
   loading = false,
   userInfo,
 }: UserBoxProps) {
-  const {t} = useI18n();
+  const { t } = useI18n();
   const router = useRouter();
   const { signOut } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
@@ -88,7 +88,13 @@ export function UserBox({
                 : userInfo?.avatar
             }
             style={{
-              backgroundColor: "#22CCEE",
+              backgroundColor: (
+                whereUserFrom(user) === "google"
+                  ? user.user_metadata?.picture
+                  : userInfo?.avatar
+              )
+                ? "transparent"
+                : "#22CCEE",
               cursor: "pointer",
               border: "none",
             }}

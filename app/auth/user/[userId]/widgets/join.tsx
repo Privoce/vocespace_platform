@@ -1,9 +1,10 @@
 import { VocespaceLogo } from "@/components/widget/logo";
 import { useI18n } from "@/lib/i18n/i18n";
 import { UserAddOutlined } from "@ant-design/icons";
-import { Button, Modal, Tooltip } from "antd";
+import { Button, Input, Modal, Tooltip } from "antd";
 import { useMemo, useState } from "react";
-
+import styles from "@/styles/user_profile.module.scss";
+import { useRouter } from "next/navigation";
 interface UseJoinUsBtnProps {
   username?: string;
 }
@@ -11,8 +12,8 @@ interface UseJoinUsBtnProps {
 export const useJoinUsBtn = ({ username }: UseJoinUsBtnProps) => {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-
-  /**
+  const router = useRouter();
+  /** 
    * join us button, after click open Join Us Modal
    */
   const JoinUsBtn = useMemo(() => {
@@ -28,9 +29,41 @@ export const useJoinUsBtn = ({ username }: UseJoinUsBtnProps) => {
   }, [t]);
 
   const JoinUsModal = useMemo(() => {
-    return <Modal open={open} onCancel={() => setOpen(false)}>
-        ceshi
-    </Modal>;
+    return (
+      <Modal
+        open={open}
+        onCancel={() => setOpen(false)}
+        footer={null}
+        width={600}
+        // styles={{content: {padding: 0}}}
+      >
+        <div className={styles.join}>
+          <div className={styles.join_content}>
+            <h1 className={styles.join_title}>{t("join.title")}</h1>
+            <p className={styles.join_subtitle}>{t("join.subTitle")}</p>
+            <div style={{ width: "300px" }}>
+              <Input
+                size="large"
+                prefix={"vocespace.com/"}
+                placeholder="username"
+                style={{ width: 300 }}
+              ></Input>
+              <Button
+               onClick={() => {
+                router.push("/auth/login");
+               }}
+                size="large"
+                shape="round"
+                type="primary"
+                style={{ marginTop: 24, padding: "24px 48px" }}
+              >
+                {t("join.signUpNow")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+    );
   }, [open]);
 
   const JoinUserBtn = useMemo(() => {

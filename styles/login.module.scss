@@ -6,7 +6,7 @@
   justify-content: space-between;
   &_left {
     height: 100%;
-    width: 44%;
+    flex: 1;
     background-color: #1e1e1e;
     display: flex;
     align-items: flex-start;
@@ -22,9 +22,9 @@
     }
     &_main {
       height: calc(100% - 150px);
-      width: 64%;
+      width: 72%;
       max-width: 500px;
-      min-width: 220px;
+      min-width: 240px;
       display: flex;
       align-items: center;
       justify-content: center;

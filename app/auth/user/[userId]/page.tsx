@@ -16,6 +16,7 @@ import { dbApi } from "@/lib/api/db";
 import { BucketApiErrMsg } from "@/lib/api/error";
 import styles from "@/styles/user_settings.module.scss";
 import { Space } from "@/lib/std/space";
+import { isMobile } from "@/lib/std";
 
 export type UserPageType = "profile" | "settings" | "onboarding";
 
@@ -148,7 +149,7 @@ export default function UserPage({
       <HomeHeader ref={HomeHeaderRef} messageApi={messageApi} />
       {contextHolder}
       <div className={styles.user_view}>
-        {isSelf && (
+        {isSelf && !isMobile() && (
           <UserSettings
             flushUser={flushUser}
             client={client}

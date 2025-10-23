@@ -4,6 +4,16 @@ export default {
     cancel: "取消",
     uploading: "上传中...",
   },
+  join: {
+    title: "加入Vocespace获取您的专属空间!",
+    subTitle: "让更多同好发现您的空间与您一起交流",
+    signUpNow: "立即注册",
+  },
+  share: {
+    title: "分享您的Vocespace",
+    subTitle: "复制以下链接分析您的专属Vocespace空间",
+    copy: "复制链接",
+  },
   space: {
     pub: {
       intro: "快速创建您的空间，您可以随时编辑和管理它。",
@@ -50,8 +60,8 @@ export default {
       },
       joinUs: {
         title: "加入Vocespace",
-        user: "在Vocespace上加入"
-      }
+        user: "在Vocespace上加入",
+      },
     },
     onboarding: {
       welcome: {
