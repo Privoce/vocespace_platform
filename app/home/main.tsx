@@ -186,34 +186,34 @@ export function DisplaySpaces() {
           dataSource={spaces}
           renderItem={(space) => (
             <List.Item>
-              <SpaceCard key={space.id} {...space} />
+              {/* <SpaceCard key={space.id} {...space} /> */}
             </List.Item>
           )}
         ></List>
       ),
     },
-    {
-      key: SpaceType.Meeting,
-      label: "会议",
-      children: (
-        <div className={styles.spaceGrid}>
-          {spaces.map((space) => (
-            <SpaceCard key={space.id} {...space} />
-          ))}
-        </div>
-      ),
-    },
-    {
-      key: SpaceType.Class,
-      label: "课程",
-      children: (
-        <div className={styles.spaceGrid}>
-          {spaces.map((space) => (
-            <SpaceCard key={space.id} {...space} />
-          ))}
-        </div>
-      ),
-    },
+    // {
+    //   key: SpaceType.Meeting,
+    //   label: "会议",
+    //   children: (
+    //     <div className={styles.spaceGrid}>
+    //       {spaces.map((space) => (
+    //         <SpaceCard key={space.id} {...space} />
+    //       ))}
+    //     </div>
+    //   ),
+    // },
+    // {
+    //   key: SpaceType.Class,
+    //   label: "课程",
+    //   children: (
+    //     <div className={styles.spaceGrid}>
+    //       {spaces.map((space) => (
+    //         <SpaceCard key={space.id} {...space} />
+    //       ))}
+    //     </div>
+    //   ),
+    // },
     {
       key: SpaceType.Hobbies,
       label: "兴趣",
@@ -236,7 +236,7 @@ export function DisplaySpaces() {
           minHeight: "200px",
         }}
       >
-        <Spin size="large" />
+        {/* <Spin size="large" /> */}
       </div>
     );
   }

@@ -1,6 +1,6 @@
 const nextConfig = {
   reactStrictMode: false,
-  output: 'standalone',
+  output: "standalone",
   productionBrowserSourceMaps: true,
   webpack: (config, { isServer }) => {
     if (!isServer) {

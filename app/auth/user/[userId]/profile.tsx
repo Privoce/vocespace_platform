@@ -142,7 +142,7 @@ export function UserProfile({
   const { t } = useI18n();
 
   const [openPublishModal, setOpenPublishModal] = useState(false);
-  const [openPubSpace, setOpenPubSpace] = useState(false);
+  const [openPubSpace, setOpenPubSpace] = useState(true);
   const selfVocespaceUrl = useMemo(() => {
     if (user && userInfo?.nickname) {
       return vocespaceUrl(user.id, userInfo.nickname, whereUserFrom(user));

@@ -42,27 +42,16 @@
     - [x] 活动统计
     - [x] 热力图
 - [x] 整理版本 
-
----
-
-- [x] 用户设置 
-  - [x] 头像 (supabase storage)
-    - [x] 裁剪
-    - [x] storage api
-  - [x] 基础设置
-  - [ ] 推特 -> wx
-- [ ] 创建空间
-- [ ] 空间编辑
-- [ ] 主页空间搜索
-- [ ] 空间订阅
-- [x] i18n
-  - [x] i18n切换器
-  - [x] 替换文本
 - [ ] 空间发布
 - [ ] 后台页面
-- [ ] 每个用户的space最多两个
-- [ ] 暂时去除url作为必填参数
-- [ ] nickname不重复
----
-
 - [ ] 图片/视频审核(Google Vision SafeSearch)
+- [x] 默认展开空间列表
+- [x] 创建空间 -> 我的空间
+- [ ] 昵称默认为google登陆元数据(如果有)
+- [ ] 订阅空间 -> 历史记录
+- [x] 左侧icon Button -> icon
+- [ ] vocespace.com google登陆 loading page 覆盖login页面
+- [x] profile左侧settings page可以去除
+- [ ] vocespace -> 更多 -> 个人主页
+- [ ] right menu增加个人主页选项
+- [x] 优化loading 骨架屏

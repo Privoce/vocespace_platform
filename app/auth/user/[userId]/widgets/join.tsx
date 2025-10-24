@@ -19,11 +19,9 @@ export const useJoinUsBtn = ({ username }: UseJoinUsBtnProps) => {
   const JoinUsBtn = useMemo(() => {
     return (
       <Tooltip title={t("user.profile.joinUs.title")} trigger={"hover"}>
-        <Button
-          shape="circle"
-          icon={<VocespaceLogo></VocespaceLogo>}
-          onClick={() => setOpen(true)}
-        ></Button>
+        <div onClick={() => setOpen(true)} className={styles.join_us_btn} style={{cursor: 'pointer'}}>
+          <VocespaceLogo height={32} width={32}></VocespaceLogo>
+        </div>
       </Tooltip>
     );
   }, [t]);

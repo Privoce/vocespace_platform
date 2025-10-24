@@ -49,7 +49,7 @@ export function UserBox({
   if (loading) {
     return (
       <div>
-        <Spin size="default" />
+        {/* <Spin size="default" /> */}
       </div>
     );
   }

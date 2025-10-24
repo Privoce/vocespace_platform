@@ -86,8 +86,43 @@ export default function UserPage({ params }: { params: { userId: string } }) {
       <HomeHeader ref={HomeHeaderRef} messageApi={messageApi} />
       {contextHolder}
       {loading && !user && (
-        <Card style={{ height: "calc(100vh - 98px)", width: "460px" }}>
-          <Skeleton avatar paragraph={{ rows: 3 }} active />
+        <Card
+          style={{
+            height: "calc(100vh - 98px)",
+            width: "460px",
+            backgroundColor: "#1E1E1E",
+            border: "1px solid #1E1E1E",
+            borderRadius: 16,
+          }}
+          styles={{
+            body: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              alignContent: "flex-start",
+              gap: "16px",
+              padding: "36px 0",
+              flexWrap: "wrap",
+              position: "relative",
+              height: "100%",
+            },
+          }}
+        >
+          <Skeleton.Avatar active size={96} />
+          <Skeleton.Input active style={{ width: 400 }} />
+          <Skeleton.Input active style={{ width: 400 }} />
+          <Skeleton.Input active style={{ width: 400 }} />
+          <Skeleton.Input active style={{ width: 400 }} />
+          <Skeleton.Button
+            active
+            style={{
+              width: 200,
+              position: "absolute",
+              bottom: 36,
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          />
         </Card>
       )}
       {!loading && userInfo && !userInfo.nickname && (
@@ -117,7 +152,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
       )}
       {userInfo && !needsOnboarding && userInfo.nickname && (
         <div className={styles.user_view}>
-          {isSelf && !isMobile() && (
+          {/* {isSelf && !isMobile() && (
             <UserSettings
               flushUser={flushUser}
               client={client}
@@ -131,7 +166,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
               loading={loading}
               updateUserInfo={updateUserInfo}
             />
-          )}
+          )} */}
           <UserProfile
             flushUser={flushUser}
             client={client}
