@@ -126,7 +126,6 @@ export default function UserSettings({
         twitter,
         wx,
       };
-
       await updateUserInfo(updateData);
       messageApi.success(t("user.setting.saveSuccess"));
       setLinksEditOpen(false);

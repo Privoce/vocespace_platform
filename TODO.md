@@ -52,6 +52,4 @@
 - [x] 左侧icon Button -> icon
 - [ ] vocespace.com google登陆 loading page 覆盖login页面
 - [x] profile左侧settings page可以去除
-- [ ] vocespace -> 更多 -> 个人主页
-- [ ] right menu增加个人主页选项
 - [x] 优化loading 骨架屏

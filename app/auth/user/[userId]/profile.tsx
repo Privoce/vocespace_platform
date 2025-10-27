@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, ChangeEvent } from "react";
 import {
   Avatar,
   Button,
@@ -15,6 +15,7 @@ import {
   List,
   Skeleton,
   Result,
+  Input,
 } from "antd";
 import {
   EditOutlined,
@@ -43,7 +44,7 @@ import {
 import { Pie } from "@ant-design/charts";
 import { HomeHeader } from "@/app/home/header";
 import { SpaceCard } from "@/components/space/card";
-import { User, UserStats } from "@/lib/std/user";
+import { User, UserInfo, UserStats } from "@/lib/std/user";
 import {
   Space,
   SpaceType,
@@ -63,6 +64,7 @@ import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
 import { dbApi } from "@/lib/api/db";
 import { useJoinUsBtn } from "./widgets/join";
 import { useShareBtn } from "./widgets/share";
+import TextArea from "antd/es/input/TextArea";
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {
@@ -143,6 +145,14 @@ export function UserProfile({
 
   const [openPublishModal, setOpenPublishModal] = useState(false);
   const [openPubSpace, setOpenPubSpace] = useState(true);
+  const [descEditOpen, setDescEditOpen] = useState(false);
+  const [linksEditOpen, setLinksEditOpen] = useState<boolean>(false);
+  const [linkedin, setLinkedin] = useState(userInfo?.linkedin || "");
+  const [github, setGithub] = useState(userInfo?.github || "");
+  const [twitter, setTwitter] = useState(userInfo?.twitter || "");
+  const [wx, setWx] = useState(userInfo?.wx || "");
+  const [website, setWebsite] = useState(userInfo?.website || "");
+  const [desc, setDesc] = useState(userInfo?.desc || "");
   const selfVocespaceUrl = useMemo(() => {
     if (user && userInfo?.nickname) {
       return vocespaceUrl(user.id, userInfo.nickname, whereUserFrom(user));
@@ -235,64 +245,108 @@ export function UserProfile({
     return [
       {
         label: t("user.profile.selfVocespace"),
+        visible: true,
         url:
           isSelf && userInfo
             ? selfVocespaceUrl
             : vocespaceUrlVisit(userInfo?.nickname || ""),
         icon: <VocespaceLogo height={24} width={24} />,
+        key: "vocespace",
+        placeholder: t("user.setting.placeholder.vocespace"),
+        value:
+          isSelf && userInfo
+            ? selfVocespaceUrl
+            : vocespaceUrlVisit(userInfo?.nickname || ""),
+        onChange: (e: ChangeEvent<HTMLInputElement>) => {},
       },
       {
         label: t("user.setting.email"),
         url: `mailto:${user?.email}`,
+        visible: true,
         icon: <MailOutlined style={{ fontSize: 24 }} />,
+        key: "email",
+        placeholder: t("user.setting.placeholder.email"),
+        value: user?.email || "",
+        onChange: (e: ChangeEvent<HTMLInputElement>) => {},
       },
-      ...(userInfo?.github
+      {
+        label: t("user.setting.github"),
+        url: userInfo?.github,
+        visible: userInfo?.github ? true : false,
+        icon: <GithubOutlined style={{ fontSize: 24 }} />,
+        key: "github",
+        placeholder: t("user.setting.placeholder.github"),
+        value: github,
+        onChange: (e: ChangeEvent<HTMLInputElement>) => {
+          setGithub(e.target.value);
+        },
+      },
+      {
+        label: t("user.setting.twitter"),
+        visible: userInfo?.twitter ? true : false,
+        url: userInfo?.twitter,
+        icon: <TwitterOutlined style={{ fontSize: 24 }} />,
+        key: "twitter",
+        placeholder: t("user.setting.placeholder.twitter"),
+        value: twitter,
+        onChange: (e: ChangeEvent<HTMLInputElement>) => {
+          setTwitter(e.target.value);
+        },
+      },
+      {
+        label: t("user.setting.linkedin"),
+        url: userInfo?.linkedin,
+        visible: userInfo?.linkedin ? true : false,
+        icon: <LinkedinOutlined style={{ fontSize: 24 }} />,
+        key: "linkedin",
+        placeholder: t("user.setting.placeholder.linkedin"),
+        value: userInfo?.linkedin || "",
+        onChange: (e: ChangeEvent<HTMLInputElement>) => {
+          setLinkedin(e.target.value);
+        },
+      },
+      {
+        label: t("user.setting.website"),
+        url: userInfo?.website,
+        visible: userInfo?.website ? true : false,
+        icon: <GlobalOutlined style={{ fontSize: 24 }} />,
+        key: "website",
+        placeholder: t("user.setting.placeholder.website"),
+        value: website,
+        onChange: (e: ChangeEvent<HTMLInputElement>) => {
+          setWebsite(e.target.value);
+        },
+      },
+      {
+        label: t("user.setting.wx"),
+        url: userInfo?.wx,
+        visible: userInfo?.wx ? true : false,
+        icon: <WechatFilled style={{ fontSize: 24 }} />,
+        key: "wx",
+        placeholder: t("user.setting.placeholder.wx"),
+        value: wx,
+        onChange: (e: ChangeEvent<HTMLInputElement>) => {
+          setWx(e.target.value);
+        },
+      },
+      ...(isSelf
         ? [
             {
-              label: t("user.setting.github"),
-              url: userInfo.github,
-              icon: <GithubOutlined style={{ fontSize: 24 }} />,
-            },
-          ]
-        : []),
-      ...(userInfo?.twitter
-        ? [
-            {
-              label: t("user.setting.twitter"),
-              url: userInfo.twitter,
-              icon: <TwitterOutlined style={{ fontSize: 24 }} />,
-            },
-          ]
-        : []),
-      ...(userInfo?.linkedin
-        ? [
-            {
-              label: t("user.setting.linkedin"),
-              url: userInfo.linkedin,
-              icon: <LinkedinOutlined style={{ fontSize: 24 }} />,
-            },
-          ]
-        : []),
-      ...(userInfo?.website
-        ? [
-            {
-              label: t("user.setting.website"),
-              url: userInfo.website,
-              icon: <GlobalOutlined style={{ fontSize: 24 }} />,
-            },
-          ]
-        : []),
-      ...(userInfo?.wx
-        ? [
-            {
-              label: t("user.setting.wx"),
-              url: userInfo.wx,
-              icon: <WechatFilled style={{ fontSize: 24 }} />,
+              label: t("user.setting.editLinks"),
+              url: "",
+              visible: true,
+              icon: <PlusCircleFilled style={{ fontSize: 24 }} />,
+              key: "editLinks",
+              placeholder: "",
+              value: "",
+              onChange: (e: ChangeEvent<HTMLInputElement>) => {
+                setLinksEditOpen(true);
+              },
             },
           ]
         : []),
     ];
-  }, [userInfo, selfVocespaceUrl, t, user]);
+  }, [userInfo, selfVocespaceUrl, t, user, github, linkedin, twitter, wx, website, isSelf]);
 
   const metaInfo = useMemo(() => {
     return [
@@ -338,6 +392,42 @@ export function UserProfile({
       },
     ];
   }, [userInfo, user, t, openPubSpace, spaces]);
+
+  const handleDesc = () => {
+    if (!isSelf) return;
+    setDescEditOpen(true);
+  };
+
+  const saveLinks = async () => {
+    try {
+      const updateData: Partial<UserInfo> = {
+        linkedin,
+        github,
+        twitter,
+        wx,
+        website
+      };
+      await updateUserInfo(updateData);
+      messageApi.success(t("user.setting.saveSuccess"));
+      setLinksEditOpen(false);
+    } catch (error) {
+      messageApi.error(t("user.setting.saveError"));
+    }
+  };
+
+  const saveDesc = async () => {
+    try {
+      const updateData: Partial<UserInfo> = {
+        desc,
+      };
+
+      await updateUserInfo(updateData);
+      messageApi.success(t("user.setting.saveSuccess"));
+      setDescEditOpen(false);
+    } catch (error) {
+      messageApi.error(t("user.setting.saveError"));
+    }
+  };
 
   return (
     <div className={styles.userProfile}>
@@ -407,25 +497,38 @@ export function UserProfile({
               </div>
               <div className={styles.profileInfo}>
                 <div className={styles.username}>{userInfo.nickname}</div>
-                <div className={styles.bio}>
+                <div className={styles.bio} onClick={handleDesc} style={{cursor: isSelf ? 'pointer' : 'default'}}>
                   {userInfo?.desc || t("user.profile.placeholder.desc")}
                 </div>
                 <div className={styles.socialLinks}>
-                  {links.map((link, index) => (
-                    <Tooltip title={link.label} key={index}>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button
-                          type="text"
-                          shape="circle"
-                          icon={link.icon}
-                        ></Button>
-                      </a>
-                    </Tooltip>
-                  ))}
+                  {links.map((link, index) =>
+                    link.visible ? (
+                      <Tooltip title={link.label} key={index}>
+                        {link.key === "editLinks" ? (
+                          <Button
+                            type="text"
+                            shape="circle"
+                            icon={link.icon}
+                            onClick={() => setLinksEditOpen(true)}
+                          ></Button>
+                        ) : (
+                          <a
+                            href={link.url!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button
+                              type="text"
+                              shape="circle"
+                              icon={link.icon}
+                            ></Button>
+                          </a>
+                        )}
+                      </Tooltip>
+                    ) : (
+                      <></>
+                    )
+                  )}
                 </div>
                 <div className={styles.metaInfo}>
                   <List
@@ -545,6 +648,59 @@ export function UserProfile({
       )}
       {JoinUsModal}
       {ShareModal}
+      <Modal
+        open={descEditOpen}
+        onCancel={() => setDescEditOpen(false)}
+        title={t("user.setting.desc")}
+        okText={t("user.setting.save")}
+        cancelText={t("user.setting.cancel")}
+        onOk={saveDesc}
+      >
+        <TextArea
+          placeholder={t("user.setting.placeholder.desc")}
+          showCount
+          maxLength={60}
+          rows={4}
+          value={desc}
+          onChange={(e) => {
+            setDesc(e.target.value);
+          }}
+          style={{ resize: "none", marginBottom: 16 }}
+        />
+      </Modal>
+      <Modal
+        open={linksEditOpen}
+        onCancel={() => setLinksEditOpen(false)}
+        title={t("user.setting.links")}
+        okText={t("user.setting.save")}
+        cancelText={t("user.setting.cancel")}
+        onOk={saveLinks}
+      >
+        <div>
+          {links.map((link, index) => {
+            if (
+              link.key === "vocespace" ||
+              link.key === "email" ||
+              link.key === "editLinks"
+            ) {
+              return null;
+            }
+            return (
+              <Input
+                style={{
+                  margin: "8px 0",
+                }}
+                key={index}
+                placeholder={link.placeholder}
+                prefix={link.icon}
+                size="large"
+                value={link.value}
+                onChange={link.onChange}
+              />
+            );
+          })}
+        </div>
+      </Modal>
       <EasyPubSpaceModal
         ownerId={userId}
         open={createSpaceOpen}

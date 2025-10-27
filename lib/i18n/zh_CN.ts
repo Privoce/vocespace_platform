@@ -67,7 +67,7 @@ export default {
       edit: "编辑资料",
       mySpace: "我的空间",
       publishs: "我的空间",
-      subscribes: "订阅空间",
+      subscribes: "历史记录",
       placeholder: {
         desc: "这位用户很懒，什么都没有留下。",
       },
@@ -126,6 +126,7 @@ export default {
       twitter: "推特",
       website: "个人网站",
       links: "社交链接",
+      editLinks: "编辑链接",
       wx: "微信",
       save: "保存设置",
       cancel: "取消",
@@ -140,6 +141,7 @@ export default {
       loadError: "加载用户信息失败",
       saveSuccess: "设置保存成功",
       saveError: "保存失败，请重试",
+      email: "电子邮箱",
       placeholder: {
         username: "请输入用户名",
         nickname: "请输入昵称",
@@ -149,6 +151,7 @@ export default {
         github: "请输入GitHub个人主页链接",
         twitter: "请输入推特个人主页链接",
         wx: "请输入微信号",
+        website: "请输入个人网站链接",
       },
     },
   },
