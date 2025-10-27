@@ -17,7 +17,7 @@ import { UserInfo } from "@/lib/std/user";
 import { type User } from "@supabase/supabase-js";
 import { Nullable } from "@/lib/std";
 import styles from "./drive.module.scss";
-import { EditAvatarBtn } from "./page";
+import { EditAvatarBtn } from "./widgets/avatar";
 import { initSpace, vocespaceUrl, vocespaceUrlVisit } from "@/lib/std/space";
 
 const { Title, Text, Paragraph } = Typography;

@@ -41,13 +41,14 @@ import styles from "@/styles/user_profile.module.scss";
 import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
 import { whereUserFrom } from "@/hooks/useUser";
-import { EditAvatarBtn, UserPageUniProps } from "./page";
+import { EditAvatarBtn } from "./widgets/avatar";
 import { useI18n } from "@/lib/i18n/i18n";
 import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
 import { dbApi } from "@/lib/api/db";
 import { useJoinUsBtn } from "./widgets/join";
 import { useShareBtn } from "./widgets/share";
 import TextArea from "antd/es/input/TextArea";
+import { UserPageUniProps } from "./page";
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {

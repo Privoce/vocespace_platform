@@ -14,7 +14,7 @@ import { ChangeEvent, useMemo, useState, useEffect } from "react";
 import styles from "@/styles/user_settings.module.scss";
 import { UserPageUniProps } from "./page";
 import { useI18n } from "@/lib/i18n/i18n";
-import { EditAvatarBtn } from "./page";
+import { EditAvatarBtn } from "./widgets/avatar";
 import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
 import { Space } from "@/lib/std/space";
 import { dbApi } from "@/lib/api/db";
