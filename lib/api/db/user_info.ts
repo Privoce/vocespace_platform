@@ -13,24 +13,19 @@ export const get = async (
     .eq("id", uid)
     .single();
 
-  if (error) {
-    // 如果用户信息不存在，我们需要创建一个新的用户信息记录并更新数据库
-    if (error.code === "PGRST116") {
-      return create(client, uid);
-    }
-    throw error;
-  }
+  if (error) throw error;
 
   return data;
 };
 
 export const create = async (
   client: SupabaseClient,
-  uid: string
+  uid: string,
+  nickname: string
 ): Promise<UserInfo> => {
   const { data, error } = await client
     .from("user_info")
-    .insert(DEFAULT_USER_INFO(uid))
+    .insert(DEFAULT_USER_INFO(uid, nickname))
     .select()
     .single();
 
