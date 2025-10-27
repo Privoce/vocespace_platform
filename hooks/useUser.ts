@@ -84,24 +84,24 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
   const needsOnboarding = useMemo(() => {
     if (!isSelf || !isAuthenticated || loading) return false;
     // 如果没有nickname，则认为需要onboarding
-    return !userInfo?.nickname || userInfo.nickname.trim() === "";
+    return !userInfo || !userInfo?.nickname || userInfo.nickname.trim() === "";
   }, [isSelf, isAuthenticated, loading, userInfo?.nickname]);
 
   // 获取用户的spaces
-  const fetchSpaces =  async (userId: string) => {
-      try {
-        const userSpaces = await dbApi.space.getByUserId(client, userId);
-        setSpaces(userSpaces);
-      } catch (error) {
-        console.error("Error fetching spaces:", error);
-      }
-    };
+  const fetchSpaces = async (userId: string) => {
+    try {
+      const userSpaces = await dbApi.space.getByUserId(client, userId);
+      setSpaces(userSpaces);
+    } catch (error) {
+      console.error("Error fetching spaces:", error);
+    }
+  };
 
-    useEffect(() => {
-      if (userInfo) {
-        fetchSpaces(userInfo.id);
-      }
-    }, [userInfo]);
+  useEffect(() => {
+    if (userInfo) {
+      fetchSpaces(userInfo.id);
+    }
+  }, [userInfo]);
 
   // 初始化：获取当前认证用户
   useEffect(() => {
@@ -127,47 +127,50 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
 
     // return () => subscription.unsubscribe();
   }, []);
-const fetchUserData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        if (userId) {
-          // 有 userId：获取指定用户的信息
-          const userInfo = await dbApi.userInfo.get(client, userId);
-          setUserInfo(userInfo);
-          // 如果查看的是自己，user 就是当前认证用户
-          if (currentAuthUser && userId === currentAuthUser.id) {
-            setUser(currentAuthUser);
-          } else {
-            // 查看其他用户时，不设置 user 对象（因为无法安全获取其他用户的认证信息）
-            setUser(null);
-          }
+      if (userId) {
+        // 有 userId：获取指定用户的信息
+        const userInfo = await dbApi.userInfo.get(client, userId);
+        setUserInfo(userInfo);
+        // 如果查看的是自己，user 就是当前认证用户
+        if (currentAuthUser && userId === currentAuthUser.id) {
+          setUser(currentAuthUser);
         } else {
-          // 没有 userId：获取当前认证用户的信息
-          if (currentAuthUser) {
-            const userInfo = await dbApi.userInfo.get(
-              client,
-              currentAuthUser.id
-            );
-            setUser(currentAuthUser);
-            setUserInfo(userInfo);
-          } else {
-            setUser(null);
-            setUserInfo(null);
-          }
+          // 查看其他用户时，不设置 user 对象（因为无法安全获取其他用户的认证信息）
+          setUser(null);
         }
-      } catch (err) {
-        setError("Failed to fetch user data");
-        console.error(err);
-      } finally {
-        setLoading(false);
+      } else {
+        // 没有 userId：获取当前认证用户的信息
+        if (currentAuthUser) {
+          const userInfo = await dbApi.userInfo.get(client, currentAuthUser.id);
+          setUser(currentAuthUser);
+          setUserInfo(userInfo);
+        } else {
+          setUser(null);
+          setUserInfo(null);
+        }
       }
-    };
+    } catch (err) {
+      if (err === "PGRST116") {
+        // 用户不存在
+        // 如果user的授权信息是有的，需要转到引导页面
+        if (isSelf && isAuthenticated) {
+          setUserInfo(null);
+        }
+      }
+
+      setError("Failed to fetch user data");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   // 获取用户数据：根据是否有 userId 决定获取哪个用户的信息
   useEffect(() => {
-    
-
     // 只有在 currentAuthUser 已知的情况下才获取数据
     if (currentAuthUser !== null || !userId) {
       fetchUserData();
@@ -219,7 +222,6 @@ const fetchUserData = async () => {
       throw error;
     }
   };
-
 
   return {
     // 当前用户相关

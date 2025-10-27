@@ -114,6 +114,7 @@ export default {
       nicknameExists: "该昵称已被使用，请选择其他昵称",
       nicknameRequired: "请输入昵称",
       nicknameLength: "昵称长度应为2-20个字符",
+      nicknamePattern: "用户名只能包含字母、数字、中文、下划线和连字符且不可重复"
     },
     setting: {
       title: "用户设置",

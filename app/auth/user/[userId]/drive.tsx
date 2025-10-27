@@ -33,6 +33,7 @@ import { type User } from "@supabase/supabase-js";
 import { Nullable } from "@/lib/std";
 import styles from "./drive.module.scss";
 import { EditAvatarBtn } from "./page";
+import { initSpace, vocespaceUrlVisit } from "@/lib/std/space";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -64,7 +65,9 @@ export default function OnboardingDrive({
   const [form] = Form.useForm<DriveFormValues>();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(
+    user.user_metadata?.avatar_url
+  );
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [step, setStep] = useState(1);
 
@@ -108,65 +111,6 @@ export default function OnboardingDrive({
     }
   };
 
-  const uploadToSupabase = async (file: File): Promise<string> => {
-    if (!user) throw new Error("User not authenticated");
-
-    try {
-      setUploading(true);
-      const path = await dbApi.storage.update(client, user.id, file);
-      return await dbApi.storage.url(client, path);
-    } catch (error) {
-      throw error;
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const customUpload = async (options: any) => {
-    const { file, onSuccess, onError } = options;
-
-    try {
-      const avatarUrl = await uploadToSupabase(file);
-      setAvatar(avatarUrl);
-      onSuccess(avatarUrl);
-      setFileList([]);
-      messageApi.success("头像上传成功！");
-    } catch (error) {
-      onError(error);
-      if (error === BucketApiErrMsg.FILE_NO_EXT) {
-        messageApi.error("请上传有效的图片文件");
-      } else {
-        messageApi.error("头像上传失败，请重试");
-      }
-    }
-  };
-
-  const beforeUpload = (file: File) => {
-    const isAllowImg =
-      file.type === "image/jpeg" ||
-      file.type === "image/png" ||
-      file.type === "image/webp" ||
-      file.type === "image/svg+xml" ||
-      file.type === "image/gif";
-
-    if (!isAllowImg) {
-      messageApi.error(t("user.setting.imageFormatError"));
-      return false;
-    }
-
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      messageApi.error(t("user.setting.imageSizeError"));
-      return false;
-    }
-
-    return true;
-  };
-
-  const onChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
-  };
-
   const handleFinish = async (values: DriveFormValues) => {
     if (!user) {
       messageApi.error(t("user.onboarding.error"));
@@ -201,11 +145,25 @@ export default function OnboardingDrive({
       if (success) {
         messageApi.success(t("user.onboarding.successMessage"));
         setStep(3); // 显示成功页面
+        const space = initSpace({
+          name: updateData.nickname,
+          desc: "",
+          url: vocespaceUrlVisit(updateData.nickname),
+          public: true,
+          owner_id: user.id,
+        });
 
-        // 2秒后完成onboarding
-        setTimeout(() => {
-          onComplete();
-        }, 2000);
+        if (!space) {
+          messageApi.error(t("space.pub.validation.failed"));
+          return;
+        }
+
+        try {
+          await dbApi.space.insert(client, space);
+          messageApi.success(t("space.pub.success"));
+        } catch (error) {
+          messageApi.error(t("space.pub.fail"));
+        }
       } else {
         messageApi.error(t("user.onboarding.error"));
       }
@@ -275,6 +233,9 @@ export default function OnboardingDrive({
         onFinish={handleFinish}
         className={styles.form}
         requiredMark={false}
+        initialValues={{
+          nickname: user.email ? user.email.split("@")[0] : "",
+        }}
       >
         {/* 头像上传 */}
         <div className={styles.avatarSection}>
@@ -310,8 +271,7 @@ export default function OnboardingDrive({
             { max: 30, message: t("user.onboarding.nicknameLength") },
             {
               pattern: /^[a-zA-Z0-9\u4e00-\u9fa5_-]+$/,
-              message:
-                "用户名只能包含字母、数字、中文、下划线和连字符且不可重复",
+              message: t("user.onboarding.nicknamePattern"),
             },
           ]}
         >

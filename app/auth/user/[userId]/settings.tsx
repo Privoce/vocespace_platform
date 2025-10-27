@@ -139,7 +139,7 @@ export default function UserSettings({
       await dbApi.space.insert(client, space);
       messageApi.success(t("space.pub.success"));
       setCreateSpaceOpen(false);
-      flushUser();
+      await flushUser();
     } catch (error) {
       messageApi.error(t("space.pub.fail"));
     }

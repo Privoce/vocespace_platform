@@ -24,7 +24,7 @@ import ImgCrop from "antd-img-crop";
 import { dbApi } from "@/lib/api/db";
 import { BucketApiErrMsg } from "@/lib/api/error";
 import styles from "@/styles/user_settings.module.scss";
-import { Space } from "@/lib/std/space";
+import { initSpace, Space, vocespaceUrlVisit } from "@/lib/std/space";
 import { isMobile, Nullable } from "@/lib/std";
 
 export interface UserPageUniProps {
