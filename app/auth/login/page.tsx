@@ -1,5 +1,7 @@
 "use client";
+import { LangSelect } from "@/components/widget/lang";
 import { dbApi } from "@/lib/api/db";
+import { useI18n } from "@/lib/i18n/i18n";
 import { isMobile } from "@/lib/std";
 import { vocespaceUrl } from "@/lib/std/space";
 import { UserInfo } from "@/lib/std/user";
@@ -45,6 +47,7 @@ export interface LoginPageProps {
 }
 
 export default function Page({ searchParams }: LoginPageProps) {
+  const { t } = useI18n();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -91,6 +94,7 @@ export default function Page({ searchParams }: LoginPageProps) {
       redirectTo: redirectTo || undefined,
     };
   }, [urlSearchParams, searchParams]);
+
   const signInOrUp = async () => {
     try {
       setLoading(true);
@@ -104,7 +108,7 @@ export default function Page({ searchParams }: LoginPageProps) {
           },
         });
         if (error) throw error;
-        messageApi.success("注册成功，请检查邮箱进行验证");
+        messageApi.success(t("login.signupSuccess"));
         setEmail("");
         setPassword("");
         setIsSignUp(false);
@@ -119,7 +123,7 @@ export default function Page({ searchParams }: LoginPageProps) {
         await getUserAndRedirect();
       }
     } catch (e) {
-      messageApi.error(e instanceof Error ? e.message : "登录失败");
+      messageApi.error(e instanceof Error ? e.message : t("login.signinFail"));
     } finally {
       setLoading(false);
     }
@@ -129,34 +133,29 @@ export default function Page({ searchParams }: LoginPageProps) {
     const { data, error } = await client.auth.getUser();
 
     if (error) {
-      messageApi.error(`获取用户信息失败: ${error.message}`);
+      messageApi.error(`${t("common.getUserInfoFail")}: ${error.message}`);
       return;
     }
 
     const params = getParams();
+    let redirectTo = `/auth/user/${data.user.id}`;
 
-    if (params && params.from) {
-      if (params.from === "vocespace") {
-        // get userInfo
-        const userInfo: UserInfo = await dbApi.userInfo.get(
-          client,
-          data.user.id
-        );
-        // redirect to vocespace with params
-        const redirectUrl = vocespaceUrl(
+    if (params && params?.from === "vocespace") {
+      // get userInfo, if userInfo has nickname, do jump to vocespace meeting page or to drive page
+      const userInfo: UserInfo = await dbApi.userInfo.get(client, data.user.id);
+      if (userInfo && userInfo.nickname) {
+        redirectTo = vocespaceUrl(
           data.user.id,
-          userInfo?.nickname || data.user.email!,
+          userInfo.nickname,
           "vocespace",
           params.spaceName
         );
-        router.replace(redirectUrl);
-        return;
       } else {
-        // TODO: handle other from source
+        // add params to redirectTo
+        redirectTo += `?spaceName=${params.spaceName}`;
       }
     }
-
-    router.push(`/auth/user/${data.user.id}`);
+    router.push(redirectTo);
   };
 
   /**
@@ -166,6 +165,7 @@ export default function Page({ searchParams }: LoginPageProps) {
     try {
       setLoading(true);
       // if is directly, means with search params from vocespace
+      // just like email login, let it to auth/callback with all params
       let redirectTo = `${window.location.origin}/auth/callback`;
       if (directly) {
         const params = getParams();
@@ -183,7 +183,9 @@ export default function Page({ searchParams }: LoginPageProps) {
 
       if (error) throw error;
     } catch (e) {
-      messageApi.error(e instanceof Error ? e.message : "Google登录失败");
+      messageApi.error(
+        e instanceof Error ? e.message : t("login.googleSignInFail")
+      );
       setLoading(false);
     }
   };
@@ -200,17 +202,24 @@ export default function Page({ searchParams }: LoginPageProps) {
   return (
     <div className={styles.login}>
       {contextHolder}
+      <div className={styles.login_lang}>
+        <LangSelect></LangSelect>
+      </div>
       <div className={styles.login_left}>
         <header className={styles.login_left_header}>
-          <img src="/logo.svg" onClick={() => router.push("/")} style={{ cursor: "pointer" }}></img>
+          <img
+            src="/logo.svg"
+            onClick={() => router.push("/")}
+            style={{ cursor: "pointer" }}
+          ></img>
         </header>
         <main className={styles.login_left_main}>
           <div className={styles.login_left_main_tt}>
             <div className={styles.login_left_main_tt_title}>
-              欢迎使用VoceSpace
+              {t("login.welcome")}
             </div>
             <div className={styles.login_left_main_tt_subtitle}>
-              请登录以继续
+              {t("login.continue")}
             </div>
           </div>
           <div className={styles.login_left_main_others}>
@@ -249,16 +258,16 @@ export default function Page({ searchParams }: LoginPageProps) {
               <Input
                 value={email}
                 size="large"
-                placeholder="请输入邮箱"
+                placeholder={t("login.placeholder.email")}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
             <div className={styles.login_form_input}>
               <div className={styles.login_form_input_title}>
-                <span>密码</span>
+                <span>{t("login.password")}</span>
                 <a href="/auth/forget-password" style={{ color: "#22ccee" }}>
-                  忘记密码？
+                  {t("login.forgetPwd")}
                 </a>
               </div>
 
@@ -266,7 +275,7 @@ export default function Page({ searchParams }: LoginPageProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 size="large"
-                placeholder="请输入密码"
+                placeholder={t("login.placeholder.pwd")}
                 iconRender={(visible) =>
                   visible ? (
                     <EyeOutlined
@@ -292,47 +301,47 @@ export default function Page({ searchParams }: LoginPageProps) {
               onClick={signInOrUp}
               loading={loading}
             >
-              {isSignUp ? "注册" : "登录"}
+              {isSignUp ? t("login.signup") : t("login.signin")}
             </Button>
           </div>
           {isSignUp ? (
             <div className={styles.login_left_main_signup}>
-              以经有账号了？
+              {t("login.alreadyHaveAccount")}
               <a
                 onClick={() => setIsSignUp(false)}
                 style={{
                   color: "#22ccee",
                 }}
               >
-                立即登录
+                {t("login.alreadyHaveAccount")}
               </a>
             </div>
           ) : (
             <div className={styles.login_left_main_signup}>
-              还没有账号？
+              {t("login.noAccount")}
               <a
                 onClick={() => setIsSignUp(true)}
                 style={{
                   color: "#22ccee",
                 }}
               >
-                注册一个
+                {t("login.createAccount")}
               </a>
             </div>
           )}
         </main>
         <footer className={styles.login_left_footer}>
-          © 2025 VoceSpace, Inc. 保留所有权利。
+          {t("common.copyright")}
         </footer>
       </div>
       {!isMobile() && (
         <div className={styles.login_right}>
           <div className={styles.login_right_content}>
             <h2 className={styles.login_right_content_title}>
-              VoceSpace高清会议软件：4K分辨率，60帧，2M码率
+              {t("login.sideTitle")}
             </h2>
             <h3 className={styles.login_right_content_subtitle}>
-              体验水晶般清晰的视频会议，4K分辨率，60帧流畅表现，2M码率带来无与伦比的质量。完美适合专业演示和远程协作。
+              {t("login.sideSubtitle")}
             </h3>
           </div>
         </div>

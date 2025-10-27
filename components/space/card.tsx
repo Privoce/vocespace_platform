@@ -84,7 +84,6 @@ export function SpaceCard({
 
   const spaceImage = useMemo(() => {
     if (space.images.length > 0) {
-      console.warn(space.images.length, space.images);
       return space.images[0] || defaultImage;
     } else {
       return defaultImage;

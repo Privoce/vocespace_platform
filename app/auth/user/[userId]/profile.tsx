@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, ChangeEvent } from "react";
+import React, { useState, useMemo, ChangeEvent } from "react";
 import {
   Avatar,
   Button,
   Card,
-  Divider,
   Tooltip,
-  Tag,
   Modal,
-  message,
-  Dropdown,
   MenuProps,
   List,
   Skeleton,
@@ -19,8 +15,6 @@ import {
 } from "antd";
 import {
   EditOutlined,
-  SettingOutlined,
-  CalendarOutlined,
   UserOutlined,
   MailOutlined,
   EnvironmentOutlined,
@@ -29,27 +23,17 @@ import {
   TwitterOutlined,
   LinkedinOutlined,
   TrophyOutlined,
-  FireOutlined,
-  ClockCircleOutlined,
-  TeamOutlined,
-  PlayCircleOutlined,
   DeleteOutlined,
-  MoreOutlined,
   RightOutlined,
-  UsergroupAddOutlined,
   CommentOutlined,
   WechatFilled,
   PlusCircleFilled,
 } from "@ant-design/icons";
-import { Pie } from "@ant-design/charts";
-import { HomeHeader } from "@/app/home/header";
 import { SpaceCard } from "@/components/space/card";
-import { User, UserInfo, UserStats } from "@/lib/std/user";
+import { UserInfo, UserStats } from "@/lib/std/user";
 import {
   Space,
   SpaceType,
-  SpaceState,
-  FrequencyInterval,
   vocespaceUrl,
   vocespaceUrlVisit,
 } from "@/lib/std/space";
@@ -57,7 +41,6 @@ import styles from "@/styles/user_profile.module.scss";
 import dayjs from "dayjs";
 import { VocespaceLogo } from "@/components/widget/logo";
 import { whereUserFrom } from "@/hooks/useUser";
-import { useRouter } from "next/navigation";
 import { EditAvatarBtn, UserPageUniProps } from "./page";
 import { useI18n } from "@/lib/i18n/i18n";
 import { EasyPubSpaceModal } from "@/app/space/[spaceId]/edit/easy";
@@ -346,7 +329,18 @@ export function UserProfile({
           ]
         : []),
     ];
-  }, [userInfo, selfVocespaceUrl, t, user, github, linkedin, twitter, wx, website, isSelf]);
+  }, [
+    userInfo,
+    selfVocespaceUrl,
+    t,
+    user,
+    github,
+    linkedin,
+    twitter,
+    wx,
+    website,
+    isSelf,
+  ]);
 
   const metaInfo = useMemo(() => {
     return [
@@ -405,7 +399,7 @@ export function UserProfile({
         github,
         twitter,
         wx,
-        website
+        website,
       };
       await updateUserInfo(updateData);
       messageApi.success(t("user.setting.saveSuccess"));
@@ -497,7 +491,11 @@ export function UserProfile({
               </div>
               <div className={styles.profileInfo}>
                 <div className={styles.username}>{userInfo.nickname}</div>
-                <div className={styles.bio} onClick={handleDesc} style={{cursor: isSelf ? 'pointer' : 'default'}}>
+                <div
+                  className={styles.bio}
+                  onClick={handleDesc}
+                  style={{ cursor: isSelf ? "pointer" : "default" }}
+                >
                   {userInfo?.desc || t("user.profile.placeholder.desc")}
                 </div>
                 <div className={styles.socialLinks}>

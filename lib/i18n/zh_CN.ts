@@ -3,9 +3,31 @@ export default {
     save: "保存",
     cancel: "取消",
     uploading: "上传中...",
+    copyright: "© 2025 VoceSpace, Inc. 保留所有权利。",
+    getUserInfoFail: "获取用户信息失败",
   },
   login: {
     title: "登陆",
+    welcome: "欢迎使用VoceSpace",
+    continue: "请登录以继续",
+    password: "密码",
+    forgetPwd: "忘记密码？",
+    alreadyHaveAccount: "已有账号？",
+    loginNow: "立即登录",
+    noAccount: "还没有账号？",
+    createAccount: "注册一个",
+    sideTitle: "VoceSpace高清会议软件：4K分辨率，60帧，2M码率",
+    sideSubtitle:
+      "体验水晶般清晰的视频会议，4K分辨率，60帧流畅表现，2M码率带来无与伦比的质量。完美适合专业演示和远程协作。",
+    placeholder: {
+      email: "请输入您的电子邮箱",
+      pwd: "请输入您的密码",
+    },
+    signin: "登录",
+    signinFail: "登录失败",
+    googleSignInFail: "使用Google登录失败",
+    signup: "注册",
+    signupSuccess: "注册成功，请检查邮箱进行验证",
     out: {
       title: "退出登陆",
       success: "您已成功退出登录。",
@@ -14,7 +36,7 @@ export default {
     visit: {
       un: "该用户无法访问",
       unFinished: "抱歉，您要查看的用户还未完成注册流程。",
-    }
+    },
   },
   join: {
     title: "加入Vocespace获取您的专属空间!",
@@ -114,7 +136,8 @@ export default {
       nicknameExists: "该昵称已被使用，请选择其他昵称",
       nicknameRequired: "请输入昵称",
       nicknameLength: "昵称长度应为2-20个字符",
-      nicknamePattern: "用户名只能包含字母、数字、中文、下划线和连字符且不可重复"
+      nicknamePattern:
+        "用户名只能包含字母、数字、中文、下划线和连字符且不可重复",
     },
     setting: {
       title: "用户设置",

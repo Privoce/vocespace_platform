@@ -8,8 +8,8 @@ const API_BASE = "https://vocespace.com/api/space";
 export async function GET(request: NextRequest) {
   try {
     const userId = request.nextUrl.searchParams.get("userId");
-    const authGoogle = request.nextUrl.searchParams.get("auth") === "google";
-    if (userId && authGoogle) {
+
+    if (userId) {
       const client = await createClient();
       const user: PostgrestSingleResponse<User> = await client
         .from("users")

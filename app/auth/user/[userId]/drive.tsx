@@ -1,31 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  Card,
-  Form,
-  Input,
-  Button,
-  Avatar,
-  Upload,
-  message,
-  Typography,
-  Space,
-  Progress,
-  Divider,
-} from "antd";
+import React, { useState, useEffect, useCallback } from "react";
+import { Card, Form, Input, Button, Avatar, Typography, Progress } from "antd";
 import {
   UserOutlined,
-  PlusOutlined,
   CheckCircleOutlined,
   RightOutlined,
 } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n/i18n";
 import { dbApi } from "@/lib/api/db";
-import ImgCrop from "antd-img-crop";
-import type { UploadFile, UploadProps } from "antd";
-import { BucketApiErrMsg } from "@/lib/api/error";
+import type { UploadFile } from "antd";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { MessageInstance } from "antd/es/message/interface";
 import { UserInfo } from "@/lib/std/user";
@@ -33,7 +18,7 @@ import { type User } from "@supabase/supabase-js";
 import { Nullable } from "@/lib/std";
 import styles from "./drive.module.scss";
 import { EditAvatarBtn } from "./page";
-import { initSpace, vocespaceUrlVisit } from "@/lib/std/space";
+import { initSpace, vocespaceUrl, vocespaceUrlVisit } from "@/lib/std/space";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -68,9 +53,8 @@ export default function OnboardingDrive({
   const [avatar, setAvatar] = useState<string | null>(
     user.user_metadata?.avatar_url
   );
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [step, setStep] = useState(1);
-
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { t } = useI18n();
 
@@ -168,7 +152,21 @@ export default function OnboardingDrive({
         messageApi.error(t("user.onboarding.error"));
       }
       setTimeout(() => {
-        router.push(`/auth/user/${user.id}`);
+        // if has spaceName param, redirect to vocespace url
+        const spaceName = searchParams.get("spaceName");
+        if (spaceName) {
+          const redirectUrl = vocespaceUrl(
+            user.id,
+            updateData.nickname,
+            "vocespace",
+            spaceName
+          );
+
+          window.open(redirectUrl, "_self");
+          return;
+        } else {
+          router.push(`/auth/user/${user.id}`);
+        }
       }, 2000);
     } catch (error) {
       console.error("Error updating user info:", error);

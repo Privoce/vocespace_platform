@@ -47,8 +47,8 @@
 - [ ] 图片/视频审核(Google Vision SafeSearch)
 - [x] 默认展开空间列表
 - [x] 创建空间 -> 我的空间
-- [ ] 昵称默认为google登陆元数据(如果有)
-- [ ] 订阅空间 -> 历史记录
+- [x] 昵称默认为google登陆元数据(如果有)
+- [x] 订阅空间 -> 历史记录
 - [x] 左侧icon Button -> icon
 - [ ] vocespace.com google登陆 loading page 覆盖login页面
 - [x] profile左侧settings page可以去除
