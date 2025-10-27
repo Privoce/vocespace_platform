@@ -14,7 +14,7 @@ import {
 } from "@ant-design/icons";
 import { Button, Divider, Input, message } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 
 export interface LoginPageProps {
   /**
@@ -46,7 +46,8 @@ export interface LoginPageProps {
   };
 }
 
-export default function Page({ searchParams }: LoginPageProps) {
+// 将主要的登录逻辑提取到单独的组件中
+function LoginForm({ searchParams }: LoginPageProps) {
   const { t } = useI18n();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
@@ -347,5 +348,14 @@ export default function Page({ searchParams }: LoginPageProps) {
         </div>
       )}
     </div>
+  );
+}
+
+// 主页面组件，包装 LoginForm 在 Suspense 中
+export default function Page({ searchParams }: LoginPageProps) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm searchParams={searchParams} />
+    </Suspense>
   );
 }
