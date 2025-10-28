@@ -12,6 +12,7 @@ export interface UserBoxProps {
   userInfo: Nullable<UserInfo>;
   username: string;
   loading?: boolean;
+  avatar?: Nullable<string>;
 }
 
 /**
@@ -25,6 +26,7 @@ export function UserBox({
   username,
   loading = false,
   userInfo,
+  avatar,
 }: UserBoxProps) {
   const { t } = useI18n();
   const router = useRouter();
@@ -47,11 +49,7 @@ export function UserBox({
   };
 
   if (loading) {
-    return (
-      <div>
-        {/* <Spin size="default" /> */}
-      </div>
-    );
+    return <div>{/* <Spin size="default" /> */}</div>;
   }
 
   return (
@@ -70,8 +68,7 @@ export function UserBox({
               {
                 key: "profile",
                 label: t("user.box.profile"),
-                onClick: () =>
-                  router.push(`/auth/user/${user.id}`),
+                onClick: () => router.push(`/auth/user/${user.id}`),
               },
               {
                 key: "logout",
@@ -83,19 +80,9 @@ export function UserBox({
         >
           <Avatar
             size={"large"}
-            src={
-              whereUserFrom(user) === "google"
-                ? user.user_metadata?.picture
-                : userInfo?.avatar
-            }
+            src={avatar}
             style={{
-              backgroundColor: (
-                whereUserFrom(user) === "google"
-                  ? user.user_metadata?.picture
-                  : userInfo?.avatar
-              )
-                ? "transparent"
-                : "#22CCEE",
+              backgroundColor: avatar ? "transparent" : "#22CCEE",
               cursor: "pointer",
               border: "none",
             }}

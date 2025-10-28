@@ -320,6 +320,7 @@ export function UserProfile({
         collapsed: (
           <List
             dataSource={spaces}
+            split={false}
             renderItem={(item) => {
               return (
                 <List.Item>
@@ -476,17 +477,14 @@ export function UserProfile({
                             }}
                           ></Button>
                         ) : (
-                          <a
-                            href={link.url!}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Button
-                              type="text"
-                              shape="circle"
-                              icon={link.icon}
-                            ></Button>
-                          </a>
+                          <Button
+                            type="text"
+                            shape="circle"
+                            icon={link.icon}
+                            onClick={() => {
+                              window.open(link.url!, "_blank");
+                            }}
+                          ></Button>
                         )}
                       </Tooltip>
                     ) : (
@@ -498,6 +496,7 @@ export function UserProfile({
                   <List
                     style={{ width: "100%" }}
                     dataSource={metaInfo}
+                    split={false}
                     renderItem={(item) => (
                       <List.Item
                         onClick={item.onclick}

@@ -11,11 +11,18 @@ export const isMobile = (): boolean => {
   return /Mobi|Android/i.test(navigator.userAgent);
 };
 
-// 对spaceName进行分割形成名字
 // - 去除首尾空格
 // - 查找`-`,`_`,` `等分隔符，形成数组
 // - 如果是英语则将数组的每个首字母大写后就是结果
 // - 如果是中文则直接连接数组元素作为结果
+// ```
+//console.warn(createSpaceName("  live_kit-space test  ")); // LKST
+// console.warn(createSpaceName("  你好_世界-测试  ")); // 你世测
+// console.warn(createSpaceName("singleword")); // S
+// console.warn(createSpaceName("  多字节字符测试  ")); // 多
+// console.warn(createSpaceName("  mixed_语言-test  ")); // M语T
+// console.warn(createSpaceName("中文 交流")); // 中交
+// ```
 export const createSpaceName = (spaceName: string): string => {
   const trimmed = spaceName.trim();
   const separators = /[-_\s]+/;
@@ -26,16 +33,5 @@ export const createSpaceName = (spaceName: string): string => {
     return trimmed.slice(0, 1).toUpperCase();
   }
 
-  // 检查是否包含非ASCII字符（如中文）
-  const containsNonASCII = /[^\x00-\x7F]/.test(trimmed);
-
-  if (containsNonASCII) {
-    // 如果包含非ASCII字符，直接连接数组元素
-    return parts.join("");
-  } else {
-    // 否则，将每个部分的首字母大写后连接
-    return parts
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join("");
-  }
+  return parts.map((part) => part.charAt(0).toUpperCase()).join("");
 };

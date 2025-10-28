@@ -25,7 +25,7 @@ export interface HomeHeaderExports {
 export const HomeHeader = forwardRef<HomeHeaderExports, HomeHeaderProps>(
   ({ messageApi }: HomeHeaderProps, ref) => {
     const router = useRouter();
-    const { user, userInfo, loading, error, refreshUserData } = useUser({});
+    const { user, userInfo, loading, error, refreshUserData, avatar } = useUser({});
 
     const username = useMemo(() => {
       return getUsername(user, userInfo);
@@ -52,6 +52,7 @@ export const HomeHeader = forwardRef<HomeHeaderExports, HomeHeaderProps>(
           <div className={styles.home_header_right}>
             <LangSelect></LangSelect>
             <UserBox
+              avatar={avatar}
               user={user}
               username={username}
               loading={loading}
