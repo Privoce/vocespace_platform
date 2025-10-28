@@ -8,7 +8,7 @@ export const createAvatarStoragePath = (
   uid: string,
   fileExt: string
 ): string => {
-  return `${AVATAR_FOLDER}/${uid}.${fileExt}`;
+  return `${AVATAR_FOLDER}/${uid}_${Date.now()}.${fileExt}`;
 };
 
 const update = async (client: SupabaseClient, uid: string, file: File) => {

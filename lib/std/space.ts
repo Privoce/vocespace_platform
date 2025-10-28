@@ -57,6 +57,38 @@ export interface Space {
   public: boolean;
 }
 
+export interface SpaceJsonB {
+  id?: string;
+  name: string;
+  desc?: string;
+  created_at: string;
+  expired_at: string;
+  /**
+   * Start time as UNIX timestamp
+   */
+  start_at?: string;
+  end_at?: string;
+  freq: string;
+  fee: number;
+  owner_id: string;
+  state?: SpaceState;
+  sub_count: number;
+  online_count?: number;
+  url: string;
+  images: string;
+  readme?: string;
+  public: boolean;
+  ty: SpaceType | string;
+}
+
+export const castToSpace = (spaceJsonB: SpaceJsonB): Space => {
+  return {
+    ...spaceJsonB,
+    freq: JSON.parse(spaceJsonB.freq),
+    images: JSON.parse(spaceJsonB.images),
+  };
+};
+
 /**
  * Initialize a new space with default values
  * @param partial Partial space object

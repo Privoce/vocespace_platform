@@ -83,7 +83,7 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
   // 判断是否需要onboarding（只有查看自己时才需要判断）
   const needsOnboarding = useMemo(() => {
     if (!isSelf || !isAuthenticated || loading) return false;
-    // 如果没有nickname，则认为需要onboarding
+    // 如果没有nickname或没有userInfo，认为需要onboarding
     return !userInfo || !userInfo?.nickname || userInfo.nickname.trim() === "";
   }, [isSelf, isAuthenticated, loading, userInfo?.nickname]);
 
@@ -154,17 +154,17 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
           setUserInfo(null);
         }
       }
-    } catch (err) {
-      if (err === "PGRST116") {
+    } catch (err: any) {
+      if (err?.code === "PGRST116") {
         // 用户不存在
         // 如果user的授权信息是有的，需要转到引导页面
         if (isSelf && isAuthenticated) {
+          setUser(currentAuthUser);
           setUserInfo(null);
         }
+      } else {
+        setError("Failed to fetch user data");
       }
-
-      setError("Failed to fetch user data");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -212,10 +212,8 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
 
     try {
       await dbApi.userInfo.update(client, currentAuthUser.id, updates);
-
       // 更新本地状态
       setUserInfo((prev) => (prev ? { ...prev, ...updates } : null));
-
       return true;
     } catch (error) {
       console.error("Error updating user info:", error);

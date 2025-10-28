@@ -35,6 +35,18 @@ export const create = async (
   return data;
 };
 
+export const insert = async (
+  client: SupabaseClient,
+  info: UserInfo
+): Promise<boolean> => {
+  const { data, error } = await client.from("user_info").insert(info).single();
+
+  if (error) {
+    throw error;
+  }
+  return true;
+};
+
 export const update = async (
   client: SupabaseClient,
   uid: string,
@@ -66,6 +78,7 @@ export const remove = async (
 export const userInfo = {
   get,
   create,
+  insert,
   update,
   remove,
 };

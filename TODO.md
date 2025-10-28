@@ -53,3 +53,9 @@
 - [ ] vocespace.com google登陆 loading page 覆盖login页面
 - [x] profile左侧settings page可以去除
 - [x] 优化loading 骨架屏
+- [x] 多创建了一次自己的Vocespace空间
+- [x] email点击之后不要自动打开邮件，email和微信弹出modal进行手动复制
+- [x] 查询数据接口没有发
+- [x] 头像策略更换为加时间戳，然后删除原始图片
+- [x] Google用户信息转userInfo的json解析有问题
+- [x] 默认房间名为名字即可不用图片

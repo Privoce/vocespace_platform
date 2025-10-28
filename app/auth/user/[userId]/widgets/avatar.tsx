@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  GetProp,
-  Upload,
-  UploadFile,
-  UploadProps,
-} from "antd";
+import { GetProp, Upload, UploadFile, UploadProps } from "antd";
 import ImgCrop from "antd-img-crop";
 import { dbApi } from "@/lib/api/db";
 import { BucketApiErrMsg } from "@/lib/api/error";
@@ -13,11 +8,13 @@ import { useI18n } from "@/lib/i18n/i18n";
 import { useState } from "react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { MessageInstance } from "antd/es/message/interface";
+import { Nullable } from "@/lib/std";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface EditAvatarBtnProps {
   userId: string;
+  oldAvatar: Nullable<string>;
   client: SupabaseClient;
   messageApi: MessageInstance;
   afterUpdate: () => void;
@@ -30,6 +27,7 @@ export function EditAvatarBtn({
   client,
   messageApi,
   afterUpdate,
+  oldAvatar,
   children,
   disabled = false,
 }: EditAvatarBtnProps) {
@@ -41,6 +39,9 @@ export function EditAvatarBtn({
     try {
       setUploading(true);
       const path = await dbApi.storage.update(client, userId, file);
+      if (oldAvatar) {
+        await dbApi.storage.remove(client, oldAvatar);
+      }
       return await dbApi.storage.url(client, path);
     } catch (error) {
       throw error;

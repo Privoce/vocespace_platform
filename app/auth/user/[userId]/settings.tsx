@@ -164,6 +164,7 @@ export default function UserSettings({
             client={client}
             messageApi={messageApi}
             afterUpdate={flushUser}
+            oldAvatar={avatar}
           >
             <Avatar
               size={68}

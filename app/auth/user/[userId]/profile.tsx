@@ -126,8 +126,6 @@ export function UserProfile({
   spaces,
 }: UserProfileProps) {
   const { t } = useI18n();
-
-  const [openPublishModal, setOpenPublishModal] = useState(false);
   const [openPubSpace, setOpenPubSpace] = useState(true);
   const [descEditOpen, setDescEditOpen] = useState(false);
   const [linksEditOpen, setLinksEditOpen] = useState<boolean>(false);
@@ -137,6 +135,8 @@ export function UserProfile({
   const [wx, setWx] = useState(userInfo?.wx || "");
   const [website, setWebsite] = useState(userInfo?.website || "");
   const [desc, setDesc] = useState(userInfo?.desc || "");
+  const [linkShareModalOpen, setLinkShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
   const selfVocespaceUrl = useMemo(() => {
     if (user && userInfo?.nickname) {
       return vocespaceUrl(user.id, userInfo.nickname, whereUserFrom(user));
@@ -179,51 +179,6 @@ export function UserProfile({
       messageApi.error(t("space.pub.fail"));
     }
   };
-  function getSpaceTypeName(type: SpaceType) {
-    const typeNames = {
-      [SpaceType.Tech]: "技术",
-      [SpaceType.Meeting]: "会议",
-      [SpaceType.Class]: "课程",
-      [SpaceType.Hobbies]: "兴趣",
-    };
-    return typeNames[type] || type;
-  }
-
-  const getHeatmapLevel = (count: number) => {
-    if (count === 0) return 0;
-    if (count <= 1) return 1;
-    if (count <= 2) return 2;
-    if (count <= 3) return 3;
-    return 4;
-  };
-
-  const spaceActions: MenuProps["items"] = [
-    {
-      key: "edit",
-      label: "编辑空间",
-      icon: <EditOutlined />,
-    },
-    {
-      key: "delete",
-      label: "删除空间",
-      icon: <DeleteOutlined />,
-      danger: true,
-    },
-  ];
-
-  const confirmCreateSpace = async (space: Space) => {
-    try {
-      const success = await dbApi.space.insert(client, {
-        ...space,
-        owner_id: userId,
-      });
-      if (success) {
-        messageApi.success("space.pub.success");
-      }
-    } catch (error) {
-      messageApi.error(`${error}`);
-    }
-  };
 
   const links = useMemo(() => {
     return [
@@ -245,7 +200,7 @@ export function UserProfile({
       },
       {
         label: t("user.setting.email"),
-        url: `mailto:${user?.email}`,
+        url: user?.email,
         visible: true,
         icon: <MailOutlined style={{ fontSize: 24 }} />,
         key: "email",
@@ -472,6 +427,7 @@ export function UserProfile({
                   messageApi={messageApi}
                   afterUpdate={flushUser}
                   disabled={!isSelf}
+                  oldAvatar={avatar}
                 >
                   <Avatar
                     size={96}
@@ -503,12 +459,21 @@ export function UserProfile({
                   {links.map((link, index) =>
                     link.visible ? (
                       <Tooltip title={link.label} key={index}>
-                        {link.key === "editLinks" ? (
+                        {["editLinks", "email", "wx"].includes(link.key) ? (
                           <Button
                             type="text"
                             shape="circle"
                             icon={link.icon}
-                            onClick={() => setLinksEditOpen(true)}
+                            onClick={() => {
+                              if (link.key === "editLinks") {
+                                setLinksEditOpen(true);
+                                return;
+                              }
+                              if (link.key === "email" || link.key === "wx") {
+                                setShareUrl(link.url!);
+                                setLinkShareModalOpen(true);
+                              }
+                            }}
                           ></Button>
                         ) : (
                           <a
@@ -700,6 +665,42 @@ export function UserProfile({
           })}
         </div>
       </Modal>
+      {userInfo && (
+        <Modal
+          title={t("share.copy")}
+          open={linkShareModalOpen}
+          onCancel={() => setLinkShareModalOpen(false)}
+          footer={null}
+          width={480}
+        >
+          <div className={styles.share}>
+            <Avatar
+              size={88}
+              // className={styles.avatar}
+              src={userInfo?.avatar}
+              style={{
+                fontSize: 52,
+                backgroundColor: userInfo?.avatar ? "transparent" : "#22CCEE",
+                border: "none",
+              }}
+            >
+              {userInfo.nickname.charAt(0).toUpperCase() || <UserOutlined />}
+            </Avatar>
+            <div className={styles.share_username}>{userInfo.nickname}</div>
+            <div className={styles.share_url}>{shareUrl}</div>
+          </div>
+          <Button
+            size="large"
+            type="primary"
+            block
+            onClick={() => {
+              navigator.clipboard.writeText(shareUrl);
+            }}
+          >
+            {t("share.copy")}
+          </Button>
+        </Modal>
+      )}
       <EasyPubSpaceModal
         ownerId={userId}
         open={createSpaceOpen}

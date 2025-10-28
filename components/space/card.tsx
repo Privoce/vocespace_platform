@@ -12,6 +12,7 @@ import {
 import { Space, SpaceState, FrequencyInterval } from "@/lib/std/space";
 import styles from "@/styles/space_card.module.scss";
 import { useRouter } from "next/navigation";
+import { createSpaceName } from "@/lib/std";
 
 export interface SpaceCardProps {
   space: Space;
@@ -80,13 +81,11 @@ export function SpaceCard({
     router.push("/space/" + space.id);
   };
 
-  const defaultImage = "/images/default_space.jpg";
-
   const spaceImage = useMemo(() => {
     if (space.images.length > 0) {
-      return space.images[0] || defaultImage;
+      return space.images[0];
     } else {
-      return defaultImage;
+      return undefined;
     }
   }, [space]);
 
@@ -104,8 +103,18 @@ export function SpaceCard({
           <div className={styles.spaceCard_edit_imageSection}>
             <img
               src={spaceImage}
-              onError={(e) => {
-                e.currentTarget.src = defaultImage;
+              alt={createSpaceName(space.name)}
+              style={{
+                fontSize: 32,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: !spaceImage ? "#22ccee" : "transparent",
+                color: "#fff",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+              padding: !spaceImage ? 16 : 0
               }}
             />
           </div>
@@ -156,12 +165,7 @@ export function SpaceCard({
         style={style}
       >
         <div className={styles.imageSection}>
-          <img
-            src={spaceImage}
-            onError={(e) => {
-              e.currentTarget.src = defaultImage;
-            }}
-          />
+          <img src={spaceImage} alt={createSpaceName(space.name)} />
 
           <div
             className={`${styles.feeTag} ${space.fee === 0 ? styles.free : ""}`}

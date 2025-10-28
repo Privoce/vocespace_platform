@@ -124,11 +124,9 @@ export default function OnboardingDrive({
         avatar: avatar || null,
       };
 
-      const success = await updateUserInfo(updateData);
+      const success = await dbApi.userInfo.insert(client, updateData as UserInfo);
 
       if (success) {
-        messageApi.success(t("user.onboarding.successMessage"));
-        setStep(3); // 显示成功页面
         const space = initSpace({
           name: updateData.nickname,
           desc: "",
@@ -143,15 +141,21 @@ export default function OnboardingDrive({
         }
 
         try {
-          await dbApi.space.insert(client, space);
-          messageApi.success(t("space.pub.success"));
+          const mySpace = await dbApi.space.getByUserId(client, user.id);
+          if (mySpace.length == 0) {
+            await dbApi.space.insert(client, space);
+            messageApi.success(t("space.pub.success"));
+          }
         } catch (error) {
           messageApi.error(t("space.pub.fail"));
         }
+
+        messageApi.success(t("user.onboarding.successMessage"));
+        setStep(3); // 显示成功页面
       } else {
         messageApi.error(t("user.onboarding.error"));
       }
-      setTimeout(() => {
+      setTimeout(async () => {
         // if has spaceName param, redirect to vocespace url
         const spaceName = searchParams.get("spaceName");
         if (spaceName) {
@@ -165,7 +169,8 @@ export default function OnboardingDrive({
           window.open(redirectUrl, "_self");
           return;
         } else {
-          router.push(`/auth/user/${user.id}`);
+          // router.push(`/auth/user/${user.id}`);
+          await flushUser();
         }
       }, 2000);
     } catch (error) {
@@ -243,6 +248,7 @@ export default function OnboardingDrive({
               client={client}
               messageApi={messageApi}
               afterUpdate={flushUser}
+              oldAvatar={avatar}
             >
               <Avatar
                 size={80}

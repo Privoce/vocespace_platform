@@ -54,6 +54,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
   useEffect(() => {
     if (error) {
       console.warn("Error loading user data:", error, params.userId);
+     
       messageApi.error(error);
     }
   }, [error, messageApi, params.userId]);
@@ -64,6 +65,8 @@ export default function UserPage({ params }: { params: { userId: string } }) {
       await HomeHeaderRef.current.flush();
     }
   };
+
+
 
   // 如果查看的不是自己的页面，且用户存在但昵称未设置，显示该用户无法访问
   // 如果是onboarding页面，显示onboarding组件
@@ -111,7 +114,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
           />
         </Card>
       )}
-      {!loading && userInfo && !userInfo.nickname && (
+      {needsOnboarding && (
         <>
           {isSelf && user && needsOnboarding ? (
             <OnboardingDrive

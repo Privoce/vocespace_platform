@@ -1,4 +1,4 @@
-import { Space } from "@/lib/std/space";
+import { castToSpace, Space } from "@/lib/std/space";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 const TABLE = "space";
@@ -15,13 +15,16 @@ export const getById = async (
 
   if (error) throw error;
 
-  return data;
+  return castToSpace(data);
 };
 
-export const get = async (client: SupabaseClient) => {
+export const get = async (client: SupabaseClient): Promise<Space[]> => {
   const { data, error } = await client.from(TABLE).select("*");
   if (error) throw error;
-  return data;
+
+  return data.map((space) => {
+    return castToSpace(space);
+  });
 };
 
 export const getByUserId = async (
@@ -34,7 +37,9 @@ export const getByUserId = async (
     .eq("owner_id", uid);
 
   if (error) throw error;
-  return data;
+  return data.map((space) => {
+    return castToSpace(space);
+  });
 };
 
 export const insert = async (
