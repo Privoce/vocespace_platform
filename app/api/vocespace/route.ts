@@ -1,4 +1,6 @@
+import { dbApi } from "@/lib/api/db";
 import { CreateSpaceParams } from "@/lib/api/vocespace/space";
+import { UserInfo } from "@/lib/std/user";
 import { createClient } from "@/lib/supabase/server";
 import { PostgrestSingleResponse, User } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
@@ -42,13 +44,9 @@ export async function GET(request: NextRequest) {
     }
 
     const client = await createClient();
-    const user: PostgrestSingleResponse<User> = await client
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    const user: UserInfo = await dbApi.userInfo.get(client,userId);
 
-    if (user.error) {
+    if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
         headers: {
@@ -60,9 +58,8 @@ export async function GET(request: NextRequest) {
 
     return new Response(
       JSON.stringify({
-        email: user.data?.email,
-        username: user.data?.user_metadata?.full_name || user.data?.email,
-        avatar: user.data?.user_metadata?.picture,
+        username: user.nickname,
+        avatar: user.avatar,
       }),
       {
         status: 200,
