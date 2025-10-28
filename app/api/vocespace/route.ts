@@ -31,38 +31,55 @@ export async function GET(request: NextRequest) {
   try {
     const userId = request.nextUrl.searchParams.get("userId");
 
-    if (userId) {
-      const client = await createClient();
-      const user: PostgrestSingleResponse<User> = await client
-        .from("users")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      return new Response(
-        JSON.stringify({
-          email: user.data?.email,
-          username: user.data?.user_metadata.full_name || user.data?.email,
-          avatar: user.data?.user_metadata.picture,
-        }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            ...getCorsHeaders(request),
-          },
-        }
-      );
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "userId is required" }), {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          ...getCorsHeaders(request),
+        },
+      });
     }
 
-    return new Response("Bad Request", {
-      status: 400,
-      headers: getCorsHeaders(request),
-    });
+    const client = await createClient();
+    const user: PostgrestSingleResponse<User> = await client
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (user.error) {
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+        headers: {
+          "Content-Type": "application/json",
+          ...getCorsHeaders(request),
+        },
+      });
+    }
+
+    return new Response(
+      JSON.stringify({
+        email: user.data?.email,
+        username: user.data?.user_metadata?.full_name || user.data?.email,
+        avatar: user.data?.user_metadata?.picture,
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...getCorsHeaders(request),
+        },
+      }
+    );
   } catch (error) {
-    return new Response(`Internal Server Error: ${error}`, {
+    console.error("API Error:", error);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
-      headers: getCorsHeaders(request),
+      headers: {
+        "Content-Type": "application/json",
+        ...getCorsHeaders(request),
+      },
     });
   }
 }
