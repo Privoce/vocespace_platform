@@ -40,7 +40,7 @@ export function UserBox({
     try {
       await signOut();
       messageApi.success(t("login.out.success"));
-      router.push("/");
+      router.push("/auth/login");
       window.location.reload();
     } catch (error) {
       messageApi.error(t("login.out.error"));

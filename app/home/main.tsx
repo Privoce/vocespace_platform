@@ -13,7 +13,7 @@ import {
 } from "@/lib/std/space";
 import styles from "@/styles/home_main.module.scss";
 
-const mockSpaces: Space[] = []
+const mockSpaces: Space[] = [];
 // Mock data for demonstration
 // const mockSpaces: Space[] = [
 //   {
@@ -180,17 +180,20 @@ export function DisplaySpaces() {
     {
       key: "all",
       label: "全部",
-      children: (
-        <List
-          grid={{ gutter: 20, column: 3 }}
-          dataSource={spaces}
-          renderItem={(space) => (
-            <List.Item>
-              {/* <SpaceCard key={space.id} {...space} /> */}
-            </List.Item>
-          )}
-        ></List>
-      ),
+      children: <></>,
+      // spaces.length == 0 ? (
+      //   <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      // ) : (
+      //   <List
+      //     grid={{ gutter: 20, column: 3 }}
+      //     dataSource={spaces}
+      //     renderItem={(space) => (
+      //       <List.Item>
+      //         {/* <SpaceCard key={space.id} {...space} /> */}
+      //       </List.Item>
+      //     )}
+      //   ></List>
+      // ),
     },
     // {
     //   key: SpaceType.Meeting,
@@ -242,7 +245,13 @@ export function DisplaySpaces() {
   }
 
   if (spaces.length === 0) {
-    return <Empty description="暂无空间" style={{ margin: "40px 0" }} />;
+    return (
+      <Empty
+        description="暂无空间"
+        style={{ margin: "40px 0" }}
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+      />
+    );
   }
 
   return (

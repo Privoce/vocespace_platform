@@ -101,22 +101,27 @@ export function SpaceCard({
       >
         <div className={styles.spaceCard_edit}>
           <div className={styles.spaceCard_edit_imageSection}>
-            <img
-              src={spaceImage}
-              alt={createSpaceName(space.name)}
-              style={{
-                fontSize: 32,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: !spaceImage ? "#22ccee" : "transparent",
-                color: "#fff",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
-                overflow: "hidden",
-              padding: !spaceImage ? 16 : 0
-              }}
-            />
+            {spaceImage ? (
+              <img src={spaceImage} alt={createSpaceName(space.name)} />
+            ) : (
+              <div
+                style={{
+                  fontSize: 32,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: !spaceImage ? "#22ccee" : "transparent",
+                  color: "#fff",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  padding: !spaceImage ? 16 : 0,
+                  height: "100%"
+                }}
+              >
+                {createSpaceName(space.name)}
+              </div>
+            )}
           </div>
           <div className={styles.spaceCard_edit_content}>
             <div className={styles.spaceCard_edit_content_name}>

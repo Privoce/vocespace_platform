@@ -60,4 +60,11 @@
 - [x] Google用户信息转userInfo的json解析有问题
 - [x] 默认房间名为名字即可不用图片
 - [x] a标签打开的链接以domain作为了基础地址
-- [ ] header里的avatar没有使用更新的头像
+- [x] header里的avatar没有使用更新的头像
+- [x] 历史记录图标使用<HistoryOutlined />
+- [x] 首页Empty使用Empty.PRESENTED_IMAGE_SIMPLE 
+- [x] chrome中space card image alt 默认样式问题
+- [x] 退出重定向登陆页
+- [x] collapse 开启图标旋转
+- [x] google登陆资料页
+- [ ] vocespace.com google登陆失败（待复现）

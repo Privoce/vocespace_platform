@@ -28,6 +28,8 @@ import {
   CommentOutlined,
   WechatFilled,
   PlusCircleFilled,
+  HistoryOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
 import { SpaceCard } from "@/components/space/card";
 import { UserInfo, UserStats } from "@/lib/std/user";
@@ -336,7 +338,7 @@ export function UserProfile({
         ),
       },
       {
-        icon: <TrophyOutlined className={styles.icon} />,
+        icon: <HistoryOutlined className={styles.icon} />,
         label: `${t("user.profile.subscribes")} : ${
           userInfo?.subscribes?.length || 0
         }`,
@@ -511,7 +513,11 @@ export function UserProfile({
                             <div>{item.icon}</div>
                             <div>{item.label}</div>
                           </div>
-                          <RightOutlined></RightOutlined>
+                          {openPubSpace ? (
+                            <DownOutlined></DownOutlined>
+                          ) : (
+                            <RightOutlined></RightOutlined>
+                          )}
                         </div>
                         {item.collapsed && openPubSpace && (
                           <div style={{ width: "100%" }}>{item.collapsed}</div>
