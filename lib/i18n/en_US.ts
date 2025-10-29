@@ -94,7 +94,7 @@ export default {
       selfVocespace: "Personal Vocespace",
       edit: "Edit Profile",
       mySpace: "My Space",
-      publishes: "My Space",
+      publishs: "My Space",
       subscribes: "History",
       placeholder: {
         desc: "This user is lazy and leaves nothing.",
