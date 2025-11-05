@@ -16,9 +16,9 @@ export default {
     loginNow: "立即登录",
     noAccount: "还没有账号？",
     createAccount: "注册一个",
-    sideTitle: "VoceSpace高清会议软件：4K分辨率，60帧，2M码率",
+    sideTitle: "Ai辅助的远程工作平台",
     sideSubtitle:
-      "体验水晶般清晰的视频会议，4K分辨率，60帧流畅表现，2M码率带来无与伦比的质量。完美适合专业演示和远程协作。",
+      "一起工作，团队对齐，AI工作总结",
     placeholder: {
       email: "请输入您的电子邮箱",
       pwd: "请输入您的密码",

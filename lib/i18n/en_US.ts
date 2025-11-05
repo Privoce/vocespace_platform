@@ -17,9 +17,9 @@ export default {
     noAccount: "Don't have an account yet?",
     createAccount: "Register one",
     sideTitle:
-      "VoceSpace HD Conferencing Software: 4K Resolution, 60 Frames, 2Mbps",
+      "VoceSpace is for Remote Teams",
     sideSubtitle:
-      "Experience crystal-clear video conferencing with 4K resolution, smooth 60 fps, and 2Mbps for unparalleled quality. Perfect for professional presentations and remote collaboration.",
+      "AI Worklog, Team spaces, Private Rooms",
     placeholder: {
       email: "Please enter your email address",
       pwd: "Please enter your password",
