@@ -27,7 +27,7 @@ export interface LoginPageProps {
      * - vocespace: from vocespace meeting page (which need to get user login params and back to meeting with user info)
      * - unknown: unknown source (for future other platform need vocespace platform user login)
      */
-    from?: "vocespace" | "unknown";
+    from?: "vocespace" | "unknown" | "init";
     /**
      * redirect to which page after login success, if from is `vocespace` (this is not needed), it should container params see [`vocespaceUrl()`](../../../lib/std/space.ts)
      */

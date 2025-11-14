@@ -90,6 +90,7 @@ export default {
       mySpace: "我的空间",
       publishs: "我的空间",
       subscribes: "历史记录",
+      ai: "AI分析与待办",
       placeholder: {
         desc: "这位用户很懒，什么都没有留下。",
       },

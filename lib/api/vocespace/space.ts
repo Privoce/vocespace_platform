@@ -1,5 +1,3 @@
-import { UserInfo } from "@/lib/std/user";
-
 const VOCESPACE_API = "/api/vocespace";
 
 export interface CreateSpaceParams {

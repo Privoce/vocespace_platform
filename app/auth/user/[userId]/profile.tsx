@@ -30,6 +30,7 @@ import {
   PlusCircleFilled,
   HistoryOutlined,
   DownOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { SpaceCard } from "@/components/space/card";
 import { UserInfo, UserStats } from "@/lib/std/user";
@@ -51,6 +52,7 @@ import { useJoinUsBtn } from "./widgets/join";
 import { useShareBtn } from "./widgets/share";
 import TextArea from "antd/es/input/TextArea";
 import { UserPageUniProps } from "./page";
+import { useRouter } from "next/navigation";
 
 // Mock用户统计数据
 const mockUserStats: UserStats = {
@@ -114,6 +116,8 @@ function generateMockHeatmapData() {
 
 interface UserProfileProps extends UserPageUniProps {}
 
+type TabKey = "publishs" | "subscribes" | "ai";
+
 export function UserProfile({
   userId,
   messageApi,
@@ -128,7 +132,7 @@ export function UserProfile({
   spaces,
 }: UserProfileProps) {
   const { t } = useI18n();
-  const [openPubSpace, setOpenPubSpace] = useState(true);
+  const [openPubSpace, setOpenPubSpace] = useState<TabKey[]>([]);
   const [descEditOpen, setDescEditOpen] = useState(false);
   const [linksEditOpen, setLinksEditOpen] = useState<boolean>(false);
   const [linkedin, setLinkedin] = useState(userInfo?.linkedin || "");
@@ -139,6 +143,7 @@ export function UserProfile({
   const [desc, setDesc] = useState(userInfo?.desc || "");
   const [linkShareModalOpen, setLinkShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const router = useRouter();
   const selfVocespaceUrl = useMemo(() => {
     if (user && userInfo?.nickname) {
       return vocespaceUrl(user.id, userInfo.nickname, whereUserFrom(user));
@@ -316,9 +321,17 @@ export function UserProfile({
           ]
         : []),
       {
+        value: "publishs",
         icon: <CommentOutlined className={styles.icon} />,
         label: `${t("user.profile.publishs")} : ${spaces.length}`,
-        onclick: () => setOpenPubSpace(!openPubSpace),
+        open: openPubSpace.includes("publishs"),
+        onclick: () =>
+          setOpenPubSpace((prev) => {
+            if (prev.includes("publishs")) {
+              return prev.filter((item) => item !== "publishs");
+            }
+            return [...prev, "publishs"];
+          }),
         collapsed: (
           <List
             dataSource={spaces}
@@ -338,10 +351,21 @@ export function UserProfile({
         ),
       },
       {
+        value: "subscribes",
         icon: <HistoryOutlined className={styles.icon} />,
         label: `${t("user.profile.subscribes")} : ${
           userInfo?.subscribes?.length || 0
         }`,
+        open: openPubSpace.includes("subscribes"),
+        onclick: ()=> {}
+      },
+      {
+        icon: <AppstoreOutlined className={styles.icon} />,
+        label: `${t("user.profile.ai")} `,
+        open: openPubSpace.includes("ai"),
+        onclick: ()=> {
+          router.push(`/ai/${userId}`);
+        }
       },
     ];
   }, [userInfo, user, t, openPubSpace, spaces]);
@@ -513,13 +537,13 @@ export function UserProfile({
                             <div>{item.icon}</div>
                             <div>{item.label}</div>
                           </div>
-                          {openPubSpace ? (
+                          {item.open ? (
                             <DownOutlined></DownOutlined>
                           ) : (
                             <RightOutlined></RightOutlined>
                           )}
                         </div>
-                        {item.collapsed && openPubSpace && (
+                        {item.collapsed && item.open && (
                           <div style={{ width: "100%" }}>{item.collapsed}</div>
                         )}
                       </List.Item>
