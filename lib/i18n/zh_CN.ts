@@ -6,6 +6,12 @@ export default {
     copyright: "© 2025 VoceSpace, Inc. 保留所有权利。",
     getUserInfoFail: "获取用户信息失败",
   },
+  widgets: {
+    ai: {},
+    todo: {
+      empty: "暂无待办事项",
+    }
+  },
   login: {
     title: "登陆",
     welcome: "欢迎使用VoceSpace",
