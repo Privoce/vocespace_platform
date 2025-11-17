@@ -26,6 +26,7 @@ export interface LoginPageProps {
      * from where the user come
      * - vocespace: from vocespace meeting page (which need to get user login params and back to meeting with user info)
      * - unknown: unknown source (for future other platform need vocespace platform user login)
+     * - init: from vocespace.com initial page, act as "vocespace", after register/login, redirect to vocespace meeting page (self)
      */
     from?: "vocespace" | "unknown" | "init";
     /**
@@ -89,7 +90,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
         : null);
 
     return {
-      from: from as "vocespace" | "unknown" | undefined,
+      from: from as "vocespace" | "unknown" | "init" | undefined,
       spaceName: spaceName || "",
       auth: auth as "google" | "email" | undefined,
       redirectTo: redirectTo || undefined,
@@ -141,7 +142,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
     const params = getParams();
     let redirectTo = `/auth/user/${data.user.id}`;
 
-    if (params && params?.from === "vocespace") {
+    if (params && (params.from === "vocespace" || params.from === "init")) {
       // get userInfo, if userInfo has nickname, do jump to vocespace meeting page or to drive page
       const userInfo: UserInfo = await dbApi.userInfo.get(client, data.user.id);
       if (userInfo && userInfo.nickname) {
