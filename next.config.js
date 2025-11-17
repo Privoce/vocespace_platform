@@ -9,6 +9,8 @@ const nextConfig = {
         fs: false,
         encoding: false,
         'node-fetch': false,
+        child_process: false,
+        sharp: false,
       };
     }
 

@@ -12,6 +12,7 @@ import { MessageInstance } from "antd/es/message/interface";
 import styles from "@/styles/user_settings.module.scss";
 import { Space } from "@/lib/std/space";
 import { Nullable } from "@/lib/std";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export interface UserPageUniProps {
   userId: string;
@@ -31,6 +32,8 @@ export interface UserPageUniProps {
 export default function UserPage({ params }: { params: { userId: string } }) {
   const [messageApi, contextHolder] = message.useMessage();
   const HomeHeaderRef = useRef<HomeHeaderExports>(null);
+  const urlSearchParams = useSearchParams();
+  const router = useRouter();
   // const urlSearchParams = useSearchParams();
   // const router = useRouter();
   const { t } = useI18n();
@@ -65,6 +68,19 @@ export default function UserPage({ params }: { params: { userId: string } }) {
       await HomeHeaderRef.current.flush();
     }
   };
+
+  // 如果searchParam中包含logout=true，直接退出登陆
+  useEffect(() => {
+    if (urlSearchParams.get("logout") === "true") {
+      console.warn(client.auth);
+      client.auth.signOut().then(() => {
+        flushUser();
+        setTimeout(() => {
+          router.replace("/auth/login");
+        }, 500);
+      });
+    }
+  }, [urlSearchParams, client]);
 
   // 如果查看的不是自己的页面，且用户存在但昵称未设置，显示该用户无法访问
   // 如果是onboarding页面，显示onboarding组件

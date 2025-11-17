@@ -14,6 +14,18 @@ export async function middleware(request: NextRequest) {
     });
   }
 
+  // 如果 URL 包含 code 参数（OAuth 回调），重定向到 /auth/callback
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && request.nextUrl.pathname === "/") {
+    const callbackUrl = new URL("/auth/callback", request.url);
+    // 保留所有查询参数
+    request.nextUrl.searchParams.forEach((value, key) => {
+      callbackUrl.searchParams.set(key, value);
+    });
+    console.log("Redirecting OAuth callback from / to /auth/callback");
+    return NextResponse.redirect(callbackUrl);
+  }
+
   // 对于 vocespace API 路由，跳过身份验证，直接处理
   if (request.nextUrl.pathname.startsWith("/api/vocespace")) {
     // 直接返回 NextResponse.next() 而不调用 updateSession

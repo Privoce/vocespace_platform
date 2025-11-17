@@ -55,6 +55,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [hasTriggeredOAuth, setHasTriggeredOAuth] = useState(false);
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const client = createClient();
@@ -166,20 +167,27 @@ function LoginForm({ searchParams }: LoginPageProps) {
   const signInWithGoogle = async (directly = false) => {
     try {
       setLoading(true);
-      // if is directly, means with search params from vocespace
-      // just like email login, let it to auth/callback with all params
-      let redirectTo = `${window.location.origin}/auth/callback`;
+      
+      // 构建回调 URL
+      const isLocalEnv = process.env.NODE_ENV === "development" || window.location.hostname === "localhost";
+      const baseUrl = isLocalEnv ? window.location.origin : "https://home.vocespace.com";
+      let redirectTo = `${baseUrl}/auth/callback`;
+      
+      // 如果是直接登录（从 vocespace 跳转过来），添加 spaceName 参数
       if (directly) {
         const params = getParams();
         if (params.spaceName) {
-          redirectTo += `?spaceName=${params.spaceName}`;
+          redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}`;
         }
       }
+
+      console.log("Google OAuth redirectTo:", redirectTo);
 
       const { data, error } = await client.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo,
+          redirectTo: redirectTo,
+          skipBrowserRedirect: false,
         },
       });
 
@@ -193,13 +201,17 @@ function LoginForm({ searchParams }: LoginPageProps) {
   };
 
   useEffect(() => {
+    // 防止重复触发 OAuth 流程
+    if (hasTriggeredOAuth) return;
+
     const params = getParams();
 
     if (params && params.from === "vocespace" && params.auth === "google") {
       // directly use google oauth
+      setHasTriggeredOAuth(true);
       signInWithGoogle(true);
     }
-  }, [urlSearchParams, searchParams, getParams]);
+  }, [urlSearchParams, searchParams]);
 
   return (
     <div className={styles.login}>

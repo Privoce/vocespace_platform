@@ -14,42 +14,47 @@ export async function GET(request: NextRequest) {
   if (code) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error && data?.user) {
+    
+    if (error) {
+      console.error("OAuth error:", error);
+      return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${error.message}`);
+    }
+    
+    if (data?.user) {
       // 获取用户ID并重定向到用户页面
       const userId = data.user.id;
-      let userPageUrl = `/auth/user/${userId}`;
+      let redirectUrl: string;
+      
       // if contains spaceName, redirect to vocespace.com use vocespaceUrl()
       if (spaceName) {
         // let's get userInfo and check if nickname exists
         const userInfo: UserInfo = await dbApi.userInfo.get(supabase, userId);
-        // redirect to /auth/user/[userId], here will auto let user complete onboarding
+        
         if (userInfo && userInfo.nickname) {
-          // direct to vocespace url
-          userPageUrl = vocespaceUrl(
+          // 用户已有昵称，直接跳转到 vocespace.com
+          redirectUrl = vocespaceUrl(
             userId,
             userInfo.nickname,
-            "vocespace",
+            "google",
             spaceName
           );
-          return NextResponse.redirect(userPageUrl);
         } else {
-          // just redirect to /auth/user/[userId] to complete onboarding with params
-          userPageUrl = `/auth/user/${userId}?spaceName=${spaceName}`;
+          // 用户需要完成 onboarding，跳转到用户页面
+          const isLocalEnv = process.env.NODE_ENV === "development";
+          const baseUrl = isLocalEnv ? origin : "https://home.vocespace.com";
+          redirectUrl = `${baseUrl}/auth/user/${userId}?spaceName=${spaceName}`;
         }
+      } else {
+        // 没有 spaceName，跳转到用户页面
+        const isLocalEnv = process.env.NODE_ENV === "development";
+        const baseUrl = isLocalEnv ? origin : "https://home.vocespace.com";
+        redirectUrl = `${baseUrl}/auth/user/${userId}`;
       }
 
-      const isLocalEnv = process.env.NODE_ENV === "development";
-      if (isLocalEnv) {
-        // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-        return NextResponse.redirect(`${origin}${userPageUrl}`);
-      } else {
-        return NextResponse.redirect(
-          `https://home.vocespace.com${userPageUrl}`
-        );
-      }
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  return NextResponse.redirect(`${origin}/auth/auth-code-error?error=no_code`);
 }
