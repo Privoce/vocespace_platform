@@ -6,6 +6,7 @@ import { Col, message, Row } from "antd";
 import { useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
 import styles from "@/styles/ai.module.scss";
+import { AIAnalysis } from "./analysis";
 
 export default function Page({ params }: { params: { userId: string } }) {
   const { userId } = params;
@@ -38,16 +39,12 @@ export default function Page({ params }: { params: { userId: string } }) {
   return (
     <div className={styles.view}>
       {contextHolder}
-      {/* <div className={styles.view_todo}>
-        <Todo messageApi={messageApi} userId={userId} client={client}></Todo>
-      </div>
-      <div>AI</div> */}
       <Row gutter={16} style={{height: "100%"}}>
         <Col span={8}>
           <Todo messageApi={messageApi} userId={userId} client={client}></Todo>
         </Col>
         <Col span={16}>
-          <div>AI</div>
+          <AIAnalysis></AIAnalysis>
         </Col>
       </Row>
     </div>

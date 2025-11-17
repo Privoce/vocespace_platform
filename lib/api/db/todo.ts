@@ -1,8 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { DEFAULT_USER_INFO, UserInfo } from "../../std/user";
 import { mergeTodos, TodoItem, Todos } from "@/lib/std/todo";
-
-export const USER_INFO_API_URL = "/api/user_info";
 
 export const getAll = async (
   client: SupabaseClient,
