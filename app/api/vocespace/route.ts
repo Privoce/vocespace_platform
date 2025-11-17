@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     const client = await createClient();
-    const user: UserInfo = await dbApi.userInfo.get(client,userId);
+    const user = await dbApi.userInfo.getOrNull(client, userId);
 
     if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {

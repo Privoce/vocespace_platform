@@ -145,7 +145,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
 
     if (params && (params.from === "vocespace" || params.from === "init")) {
       // get userInfo, if userInfo has nickname, do jump to vocespace meeting page or to drive page
-      const userInfo: UserInfo = await dbApi.userInfo.get(client, data.user.id);
+      const userInfo = await dbApi.userInfo.getOrNull(client, data.user.id);
       if (userInfo && userInfo.nickname) {
         redirectTo = vocespaceUrl(
           data.user.id,
@@ -155,7 +155,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
         );
       } else {
         // add params to redirectTo
-        redirectTo += `?spaceName=${params.spaceName}`;
+        redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}`;
       }
     }
     router.push(redirectTo);

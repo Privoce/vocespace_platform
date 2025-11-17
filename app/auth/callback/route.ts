@@ -25,10 +25,13 @@ export async function GET(request: NextRequest) {
       const userId = data.user.id;
       let redirectUrl: string;
       
+      const isLocalEnv = process.env.NODE_ENV === "development";
+      const baseUrl = isLocalEnv ? origin : "https://home.vocespace.com";
+      
       // if contains spaceName, redirect to vocespace.com use vocespaceUrl()
       if (spaceName) {
-        // let's get userInfo and check if nickname exists
-        const userInfo: UserInfo = await dbApi.userInfo.get(supabase, userId);
+        // 获取用户信息（新用户可能不存在）
+        const userInfo = await dbApi.userInfo.getOrNull(supabase, userId);
         
         if (userInfo && userInfo.nickname) {
           // 用户已有昵称，直接跳转到 vocespace.com
@@ -40,17 +43,14 @@ export async function GET(request: NextRequest) {
           );
         } else {
           // 用户需要完成 onboarding，跳转到用户页面
-          const isLocalEnv = process.env.NODE_ENV === "development";
-          const baseUrl = isLocalEnv ? origin : "https://home.vocespace.com";
-          redirectUrl = `${baseUrl}/auth/user/${userId}?spaceName=${spaceName}`;
+          redirectUrl = `${baseUrl}/auth/user/${userId}?spaceName=${encodeURIComponent(spaceName)}`;
         }
       } else {
         // 没有 spaceName，跳转到用户页面
-        const isLocalEnv = process.env.NODE_ENV === "development";
-        const baseUrl = isLocalEnv ? origin : "https://home.vocespace.com";
         redirectUrl = `${baseUrl}/auth/user/${userId}`;
       }
 
+      console.log("Redirecting to:", redirectUrl);
       return NextResponse.redirect(redirectUrl);
     }
   }

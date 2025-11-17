@@ -13,7 +13,31 @@ export const get = async (
     .eq("id", uid)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+
+  return data;
+};
+
+/**
+ * Get user info by uid, returns null if not found (instead of throwing error)
+ */
+export const getOrNull = async (
+  client: SupabaseClient,
+  uid: string
+): Promise<UserInfo | null> => {
+  const { data, error } = await client
+    .from("user_info")
+    .select("*")
+    .eq("id", uid)
+    .maybeSingle();
+
+  if (error) {
+    console.error("API Error:", error);
+    return null;
+  }
 
   return data;
 };
@@ -77,6 +101,7 @@ export const remove = async (
 
 export const userInfo = {
   get,
+  getOrNull,
   create,
   insert,
   update,

@@ -68,7 +68,9 @@ export const convertBase64ToImgServer = async (
 
 /**
  * Convert Buffer to Blob (for API responses)
+ * Note: In Node.js, use Response with buffer directly instead
  */
 export const bufferToBlob = (buffer: Buffer, type = 'image/jpeg'): Blob => {
-  return new Blob([buffer], { type });
+  // Convert Buffer to Uint8Array for Blob compatibility
+  return new Blob([new Uint8Array(buffer)], { type });
 };
