@@ -56,7 +56,7 @@ export default {
     pub: {
       intro:
         "Quickly create your space. You can edit and manage it at any time.",
-      title: "Quickly create a space",
+      title: "create a space",
       public: {
         title: "Public space",
         pub: "Public",
@@ -150,7 +150,7 @@ export default {
     setting: {
       title: "User Settings",
       username: "Username",
-      username: "Nickname",
+      nickname: "Nickname",
       desc: "Personal Profile",
       location: "Location",
       linkedin: "LinkedIn",
@@ -176,7 +176,7 @@ export default {
       email: "Email address",
       placeholder: {
         username: "Please enter your username",
-        username: "Please enter your username",
+        nickname: "Please enter your nickname",
         desc: "Please enter your profile",
         location: "Please enter your location",
         linkedin: "Please enter your LinkedIn profile link",
