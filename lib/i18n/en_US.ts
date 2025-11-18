@@ -86,6 +86,7 @@ export default {
     box: {
       profile: "Personal Profile",
       logout: "Log Out",
+      settings: "Settings",
     },
     profile: {
       joinAt: "Joined at",
