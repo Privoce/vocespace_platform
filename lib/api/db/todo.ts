@@ -89,10 +89,41 @@ export const insertSingle = async (
   return await insert(client, todos);
 };
 
+const remove = async (
+  client: SupabaseClient,
+  uid: string,
+  date: string
+): Promise<boolean> => {
+  const { error } = await client
+    .from("todos")
+    .delete()
+    .eq("id", uid)
+    .eq("date", date);
+
+  if (error) {
+    throw error;
+  }
+  return true;
+};
+
+const removeAll = async (
+  client: SupabaseClient,
+  uid: string
+): Promise<boolean> => {
+  const { error } = await client.from("todos").delete().eq("id", uid);
+
+  if (error) {
+    throw error;
+  }
+  return true;
+}
+
 export const todos = {
   get,
   getAll,
   insert,
   insertSingle,
   update,
+  remove,
+  removeAll
 };

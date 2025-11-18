@@ -1,5 +1,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_USER_INFO, UserInfo } from "../../std/user";
+import { space } from "./space";
+import { storage } from "./storage";
+import { todos } from "./todo";
+import { ai } from "./ai";
 
 export const USER_INFO_API_URL = "/api/user_info";
 
@@ -98,7 +102,7 @@ export const offline = async (
     .from("user_info")
     .update({ online: false })
     .eq("id", uid);
-    
+
   if (error) {
     throw error;
   }
@@ -135,6 +139,35 @@ export const remove = async (
   return true;
 };
 
+const deleteAccount = async (
+  client: SupabaseClient,
+  uid: string
+): Promise<boolean> => {
+  // 删除 user_info 表中的用户信息 使用remove函数
+  try {
+    const success = await remove(client, uid);
+    if (success) {
+      // 删除空间数据
+      await space.remove(client, uid);
+      // 删除 todo 数据
+      await todos.removeAll(client, uid);
+      // 删除AI总结数据
+      await ai.removeAll(client, uid);
+      // 到storage中删除用户的所有文件 (头像/ai 分析数据等)
+      await storage.removeAll(client, uid);
+      // 删除认证用户
+      const { error } = await client.auth.admin.deleteUser(uid);
+      if (error) {
+        throw error;
+      }
+      return true;
+    }
+  } catch (e) {
+    throw e;
+  }
+  return false;
+};
+
 export const userInfo = {
   get,
   getOrNull,
@@ -143,5 +176,6 @@ export const userInfo = {
   update,
   remove,
   online,
-  offline
+  offline,
+  deleteAccount,
 };

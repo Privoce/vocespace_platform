@@ -88,6 +88,7 @@ export default {
     box: {
       profile: "个人资料",
       logout: "退出登录",
+      settings: "用户设置",
     },
     profile: {
       joinAt: "加入于",
@@ -147,6 +148,14 @@ export default {
         "用户名只能包含字母、数字、中文、下划线和连字符且不可重复",
     },
     setting: {
+      to_profile: "前往个人主页",
+      account: {
+        delete: "删除账号",
+        delete_confirm: "您确定要删除您的账号吗？此操作不可撤销。我们将删除您的所有个人数据和空间信息。",
+        delete_success: "账号删除成功，感谢您的使用！",
+        delete_error: "账号删除失败，请重试或联系支持团队。",
+        delete_btn: "删除账号",
+      },
       title: "用户设置",
       username: "用户名",
       nickname: "昵称",

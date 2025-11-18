@@ -68,3 +68,6 @@
 - [x] collapse 开启图标旋转
 - [x] google登陆资料页
 - [ ] vocespace.com google登陆失败（待复现）
+
+
+http://localhost:3001/auth/user/7792d9c6-bc73-4145-bfee-baa112567006?logout=true

@@ -78,9 +78,22 @@ export const insertOrUpdate = async (
   }
 };
 
+const removeAll = async (
+  client: SupabaseClient,
+  uid: string
+): Promise<boolean> => {
+  const { error } = await client.from("ai_analysis").delete().eq("id", uid);
+
+  if (error) {
+    throw error;
+  }
+  return true;
+};
+
 export const ai = {
   get,
   getAll,
   insertOrUpdate,
   update,
+  removeAll,
 };

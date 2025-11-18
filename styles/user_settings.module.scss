@@ -1,4 +1,3 @@
-/* User Settings Styles */
 .user_view {
   width: 100%;
   height: calc(100% - 98px);
@@ -10,88 +9,52 @@
   
 }
 
-.settings {
-  flex: 1;
-  max-width: 920px;
-  min-width: 460px;
+
+.container {
+  height: 100%;
+  width: 1080px;
+  padding: 16px;
+}
+
+.avatar_wrapper {
+  height: 60px;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  align-content: flex-start;
-  flex-wrap: wrap;
-  height: 100%;
-  padding: 16px;
-  border-right: 1px solid #222;
-  gap: 12px;
-  &_header {
-    padding: 12px 0 0 0;
-    width: 100%;
-    height: fit-content;
+  &_info {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 16px;
-  }
-  &_form {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 24px;
-    align-content: flex-start;
-    &_row {
-      width: 100%;
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
-      gap: 8px;
-    }
-  }
-  &_avatar {
-    width: fit-content;
-    height: fit-content;
-  }
-  &_userInfo {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-wrap: wrap;
     gap: 12px;
-    &_username {
-      width: 100%;
-      font-size: 16px;
-      font-weight: 700;
-    }
-    &_desc {
-      width: 100%;
-      font-size: 14px;
-      color: #8c8c8c;
-      cursor: pointer;
-    }
-    &_links {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 16px;
-      width: 100%;
-    }
   }
-  &_spaces {
-    width: 100%;
-    padding-top: 8px;
-    &_title {
-      font-weight: 700;
-    }
+  &_name {
+    font-size: 18px;
   }
 }
 
-.inline {
-  display: inline-block;
-  height: fit-content;
-  width: 120px;
-  padding-top: 4px;
+.items {
+  margin-top: 16px;
+  &_delete {
+    display: flex;
+    width: 100%;
+    height: fit-content;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 16px;
+    &_title {
+      height: fit-content;
+      width: 100%;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ff4d4f;
+      padding: 8px 0;
+      border-bottom: 1px solid #666;
+    }
+    &_desc {
+      width: 100%;
+      font-size: 16px;
+      color: #eee;
+    }
+  }
 }

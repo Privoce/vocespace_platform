@@ -73,6 +73,11 @@ export function UserBox({
                 onClick: () => router.push(`/auth/user/${user.id}`),
               },
               {
+                key: "settings",
+                label: t("user.box.settings"),
+                onClick: () => router.push(`/auth/user/${user.id}?pg=settings`),
+              },
+              {
                 key: "logout",
                 label: t("user.box.logout"),
                 onClick: handleLogout,

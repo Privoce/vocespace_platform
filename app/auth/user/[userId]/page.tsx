@@ -14,6 +14,7 @@ import { Space } from "@/lib/std/space";
 import { Nullable } from "@/lib/std";
 import { useRouter, useSearchParams } from "next/navigation";
 import { dbApi } from "@/lib/api/db";
+import { UserSettings } from "./settings";
 
 export interface UserPageUniProps {
   userId: string;
@@ -30,11 +31,14 @@ export interface UserPageUniProps {
   updateUserInfo: (updates: any) => Promise<boolean>;
 }
 
+type pageType = "settings" | "profile";
+
 export default function UserPage({ params }: { params: { userId: string } }) {
   const [messageApi, contextHolder] = message.useMessage();
   const HomeHeaderRef = useRef<HomeHeaderExports>(null);
   const urlSearchParams = useSearchParams();
   const router = useRouter();
+  const [userPageType, setUserPageType] = useState<pageType>("profile");
   // const urlSearchParams = useSearchParams();
   // const router = useRouter();
   const { t } = useI18n();
@@ -72,16 +76,42 @@ export default function UserPage({ params }: { params: { userId: string } }) {
 
   // 如果searchParam中包含logout=true，直接退出登陆
   useEffect(() => {
-    if (urlSearchParams.get("logout") === "true" && user) {
-      client.auth.signOut().then(async () => {
-        const _ = await dbApi.userInfo.offline(client, user!.id);
-        flushUser();
-        setTimeout(() => {
-          router.replace("/auth/login");
-        }, 500);
-      });
+    if (urlSearchParams.get("logout") === "true") {
+      if (user) {
+        client.auth.signOut().then(async () => {
+          const _ = await dbApi.userInfo.offline(client, user!.id);
+          flushUser();
+          setTimeout(() => {
+            router.replace("/auth/login");
+          }, 500);
+        });
+      } else {
+        router.replace("/auth/login");
+      }
+    }
+
+    if (urlSearchParams.get("pg") === "settings") {
+      setUserPageType("settings");
+    } else {
+      setUserPageType("profile");
     }
   }, [urlSearchParams, client, user]);
+
+  const deleteAccount = async () => {
+    if (!user || !userInfo) return;
+
+    try {
+      const success = await dbApi.userInfo.deleteAccount(client, user.id);
+      if (success) {
+        messageApi.success(t("user.setting.account.delete_success"));
+      } else {
+        throw new Error("Delete account failed");
+      }
+    } catch (e) {
+      messageApi.error(t("user.setting.account.delete_error"));
+      return;
+    }
+  };
 
   // 如果查看的不是自己的页面，且用户存在但昵称未设置，显示该用户无法访问
   // 如果是onboarding页面，显示onboarding组件
@@ -89,87 +119,100 @@ export default function UserPage({ params }: { params: { userId: string } }) {
     <div className="uni-page-container">
       <HomeHeader ref={HomeHeaderRef} messageApi={messageApi} />
       {contextHolder}
-      {loading && !user && (
-        <Card
-          style={{
-            height: "calc(100vh - 98px)",
-            width: "460px",
-            backgroundColor: "#1E1E1E",
-            border: "1px solid #1E1E1E",
-            borderRadius: 16,
-          }}
-          styles={{
-            body: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              alignContent: "flex-start",
-              gap: "16px",
-              padding: "36px 0",
-              flexWrap: "wrap",
-              position: "relative",
-              height: "100%",
-            },
-          }}
-        >
-          <Skeleton.Avatar active size={96} />
-          <Skeleton.Input active style={{ width: 400 }} />
-          <Skeleton.Input active style={{ width: 400 }} />
-          <Skeleton.Input active style={{ width: 400 }} />
-          <Skeleton.Input active style={{ width: 400 }} />
-          <Skeleton.Button
-            active
-            style={{
-              width: 200,
-              position: "absolute",
-              bottom: 36,
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          />
-        </Card>
-      )}
-      {needsOnboarding && (
+      {userPageType === "settings" && user && userInfo ? (
+        <UserSettings
+          userInfo={userInfo}
+          avatar={avatar}
+          user={user}
+          messageApi={messageApi}
+          setPageType={setUserPageType}
+          deleteAccount={deleteAccount}
+        ></UserSettings>
+      ) : (
         <>
-          {isSelf && user && needsOnboarding ? (
-            <OnboardingDrive
-              flushUser={flushUser}
-              user={user}
-              userInfo={userInfo}
-              client={client}
-              messageApi={messageApi}
-              onComplete={flushUser}
-              updateUserInfo={updateUserInfo}
-            />
-          ) : (
-            <Result
-              status="404"
-              title={t("login.visit.un")}
-              subTitle={
-                <span style={{ color: "#8c8c8c" }}>
-                  {t("login.visit.unFinished")}
-                </span>
-              }
-            ></Result>
+          {loading && !user && (
+            <Card
+              style={{
+                height: "calc(100vh - 98px)",
+                width: "460px",
+                backgroundColor: "#1E1E1E",
+                border: "1px solid #1E1E1E",
+                borderRadius: 16,
+              }}
+              styles={{
+                body: {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  alignContent: "flex-start",
+                  gap: "16px",
+                  padding: "36px 0",
+                  flexWrap: "wrap",
+                  position: "relative",
+                  height: "100%",
+                },
+              }}
+            >
+              <Skeleton.Avatar active size={96} />
+              <Skeleton.Input active style={{ width: 400 }} />
+              <Skeleton.Input active style={{ width: 400 }} />
+              <Skeleton.Input active style={{ width: 400 }} />
+              <Skeleton.Input active style={{ width: 400 }} />
+              <Skeleton.Button
+                active
+                style={{
+                  width: 200,
+                  position: "absolute",
+                  bottom: 36,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                }}
+              />
+            </Card>
+          )}
+          {needsOnboarding && (
+            <>
+              {isSelf && user && needsOnboarding ? (
+                <OnboardingDrive
+                  flushUser={flushUser}
+                  user={user}
+                  userInfo={userInfo}
+                  client={client}
+                  messageApi={messageApi}
+                  onComplete={flushUser}
+                  updateUserInfo={updateUserInfo}
+                />
+              ) : (
+                <Result
+                  status="404"
+                  title={t("login.visit.un")}
+                  subTitle={
+                    <span style={{ color: "#8c8c8c" }}>
+                      {t("login.visit.unFinished")}
+                    </span>
+                  }
+                ></Result>
+              )}
+            </>
+          )}
+          {userInfo && !needsOnboarding && userInfo.username && (
+            <div className={styles.user_view}>
+              <UserProfile
+                flushUser={flushUser}
+                client={client}
+                userId={params.userId}
+                messageApi={messageApi}
+                spaces={spaces}
+                user={user}
+                userInfo={userInfo}
+                avatar={avatar}
+                isSelf={isSelf}
+                loading={loading}
+                updateUserInfo={updateUserInfo}
+              />
+            </div>
           )}
         </>
-      )}
-      {userInfo && !needsOnboarding && userInfo.username && (
-        <div className={styles.user_view}>
-          <UserProfile
-            flushUser={flushUser}
-            client={client}
-            userId={params.userId}
-            messageApi={messageApi}
-            spaces={spaces}
-            user={user}
-            userInfo={userInfo}
-            avatar={avatar}
-            isSelf={isSelf}
-            loading={loading}
-            updateUserInfo={updateUserInfo}
-          />
-        </div>
       )}
     </div>
   );

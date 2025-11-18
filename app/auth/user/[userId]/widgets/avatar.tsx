@@ -40,7 +40,7 @@ export function EditAvatarBtn({
       setUploading(true);
       const path = await dbApi.storage.update(client, userId, file);
       if (oldAvatar) {
-        await dbApi.storage.remove(client, oldAvatar);
+        await dbApi.storage.removeAvatar(client, oldAvatar);
       }
       return await dbApi.storage.url(client, path);
     } catch (error) {

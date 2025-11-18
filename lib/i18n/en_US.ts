@@ -16,10 +16,8 @@ export default {
     loginNow: "Log in now",
     noAccount: "Don't have an account yet?",
     createAccount: "Register one",
-    sideTitle:
-      "VoceSpace is for Remote Teams",
-    sideSubtitle:
-      "AI Worklog, Team spaces, Private Rooms",
+    sideTitle: "VoceSpace is for Remote Teams",
+    sideSubtitle: "AI Worklog, Team spaces, Private Rooms",
     placeholder: {
       email: "Please enter your email address",
       pwd: "Please enter your password",
@@ -148,6 +146,17 @@ export default {
         "Usernames can only contain letters, numbers, Chinese characters, underscores, and hyphens, and cannot be repeated",
     },
     setting: {
+      to_profile: "Go to profile page",
+      account: {
+        delete: "Delete account",
+        delete_confirm:
+          "Are you sure you want to delete your account? This operation is irreversible. We will delete all your personal data and space information.",
+        delete_success:
+          "Account deletion successful, thank you for using our service!",
+        delete_error:
+          "Account deletion failed, please try again or contact support.",
+        delete_btn: "Delete your account",
+      },
       title: "User Settings",
       username: "Username",
       nickname: "Nickname",

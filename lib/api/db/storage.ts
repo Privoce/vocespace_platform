@@ -39,7 +39,7 @@ const url = async (client: SupabaseClient, path: string) => {
   return publicUrl;
 };
 
-const remove = async (
+const removeAvatar = async (
   client: SupabaseClient,
   path: string
 ): Promise<boolean> => {
@@ -50,6 +50,52 @@ const remove = async (
   return true;
 };
 
+/**
+ * 删除用户在storage中的所有文件，这些文件有个特点就是都是以用户的id开头的
+ */
+const removeAll = async (
+  client: SupabaseClient,
+  uid: string
+): Promise<boolean> => {
+  // 目前只需要删掉头像文件和AI总结的图片文件
+  const { data: avatarFiles, error: avatarError } = await client.storage
+    .from(AVATAR_BUCKET)
+    .list(FOLDER, {
+      search: `${uid}_`,
+    });
+  if (avatarError) {
+    throw avatarError;
+  }
+  if (avatarFiles && avatarFiles.length > 0) {
+    const avatarPaths = avatarFiles.map((file) => `${FOLDER}/${file.name}`);
+    const { error: removeAvatarError } = await client.storage
+      .from(AVATAR_BUCKET)
+      .remove(avatarPaths);
+    if (removeAvatarError) {
+      throw removeAvatarError;
+    }
+  }
+
+  const { data: aiFiles, error: aiError } = await client.storage
+    .from(AI_ANALYSIS_BUCKET)
+    .list(FOLDER, {
+      search: `${uid}_`,
+    });
+  if (aiError) {
+    throw aiError;
+  }
+  if (aiFiles && aiFiles.length > 0) {
+    const aiPaths = aiFiles.map((file) => `${FOLDER}/${file.name}`);
+    const { error: removeAiError } = await client.storage
+      .from(AI_ANALYSIS_BUCKET)
+      .remove(aiPaths);
+    if (removeAiError) {
+      throw removeAiError;
+    }
+  }
+
+  return true;
+};
 /**
  * 将blob图片上传到supabase存储中
  * @param blobImg
@@ -75,6 +121,7 @@ const uploadBlob = async (
 export const storage = {
   update,
   url,
-  remove,
+  removeAvatar,
   uploadBlob,
+  removeAll
 };
