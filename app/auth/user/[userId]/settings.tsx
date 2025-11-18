@@ -177,13 +177,13 @@ export default function UserSettings({
                 cursor: "pointer",
               }}
             >
-              {userInfo?.nickname.charAt(0).toUpperCase() || <UserOutlined />}
+              {userInfo?.username.charAt(0).toUpperCase() || <UserOutlined />}
             </Avatar>
           </EditAvatarBtn>
         </div>
         <div className={styles.settings_userInfo}>
           <div className={styles.settings_userInfo_username}>
-            {userInfo.nickname}
+            {userInfo.username}
           </div>
           <div
             className={styles.settings_userInfo_desc}

@@ -83,9 +83,9 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
   // 判断是否需要onboarding（只有查看自己时才需要判断）
   const needsOnboarding = useMemo(() => {
     if (!isSelf || !isAuthenticated || loading) return false;
-    // 如果没有nickname或没有userInfo，认为需要onboarding
-    return !userInfo || !userInfo?.nickname || userInfo.nickname.trim() === "";
-  }, [isSelf, isAuthenticated, loading, userInfo?.nickname]);
+    // 如果没有username或没有userInfo，认为需要onboarding
+    return !userInfo || !userInfo?.username || userInfo.username.trim() === "";
+  }, [isSelf, isAuthenticated, loading, userInfo?.username]);
 
   // 获取用户的spaces
   const fetchSpaces = async (userId: string) => {
@@ -184,7 +184,7 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
     }
 
     const displayName =
-      userInfo.nickname || currentAuthUser.email || "Unknown User";
+      userInfo.username || currentAuthUser.email || "Unknown User";
 
     try {
       const response = await vocespace.createSpace(
@@ -256,6 +256,10 @@ export function useAuth() {
   const client = createClient();
 
   const signOut = async () => {
+    const uid = (await client.auth.getUser()).data.user?.id;
+    if (uid) {
+      const _ = await dbApi.userInfo.offline(client, uid);
+    }
     const { error } = await client.auth.signOut();
     if (error) throw error;
   };
@@ -286,8 +290,8 @@ export const getUsername = (
   userInfo: Nullable<UserInfo>
 ): string => {
   if (!user) return "unknown";
-  if (userInfo?.nickname) {
-    return userInfo.nickname;
+  if (userInfo?.username) {
+    return userInfo.username;
   } else {
     if (
       user?.app_metadata &&

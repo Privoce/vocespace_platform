@@ -56,11 +56,11 @@ export const useShareBtn = ({ userInfo }: UseShareBtnProps) => {
               border: "none",
             }}
           >
-            {userInfo.nickname.charAt(0).toUpperCase() || <UserOutlined />}
+            {userInfo.username.charAt(0).toUpperCase() || <UserOutlined />}
           </Avatar>
-          <div className={styles.share_username}>{userInfo.nickname}</div>
+          <div className={styles.share_username}>{userInfo.username}</div>
           <div className={styles.share_url}>
-            {vocespaceUrlVisit(userInfo.nickname)}
+            {vocespaceUrlVisit(userInfo.username)}
           </div>
         </div>
         <Button
@@ -68,7 +68,7 @@ export const useShareBtn = ({ userInfo }: UseShareBtnProps) => {
           type="primary"
           block
           onClick={() => {
-            navigator.clipboard.writeText(vocespaceUrlVisit(userInfo.nickname));
+            navigator.clipboard.writeText(vocespaceUrlVisit(userInfo.username));
           }}
         >
           {t("share.copy")}

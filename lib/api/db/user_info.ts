@@ -45,11 +45,11 @@ export const getOrNull = async (
 export const create = async (
   client: SupabaseClient,
   uid: string,
-  nickname: string
+  username: string
 ): Promise<UserInfo> => {
   const { data, error } = await client
     .from("user_info")
-    .insert(DEFAULT_USER_INFO(uid, nickname))
+    .insert(DEFAULT_USER_INFO(uid, username))
     .select()
     .single();
 
@@ -87,6 +87,42 @@ export const update = async (
   return true;
 };
 
+/**
+ * 用户退出登录之后需要把用户状态设置为离线
+ */
+export const offline = async (
+  client: SupabaseClient,
+  uid: string
+): Promise<boolean> => {
+  const { error } = await client
+    .from("user_info")
+    .update({ online: false })
+    .eq("id", uid);
+    
+  if (error) {
+    throw error;
+  }
+  return true;
+};
+
+/**
+ * 用户成功登陆之后需要把用户状态设置为在线
+ */
+export const online = async (
+  client: SupabaseClient,
+  uid: string
+): Promise<boolean> => {
+  const { error } = await client
+    .from("user_info")
+    .update({ online: true })
+    .eq("id", uid);
+
+  if (error) {
+    throw error;
+  }
+  return true;
+};
+
 export const remove = async (
   client: SupabaseClient,
   uid: string
@@ -106,4 +142,6 @@ export const userInfo = {
   insert,
   update,
   remove,
+  online,
+  offline
 };

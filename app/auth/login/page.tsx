@@ -142,14 +142,13 @@ function LoginForm({ searchParams }: LoginPageProps) {
 
     const params = getParams();
     let redirectTo = `/auth/user/${data.user.id}`;
-
+    // get userInfo, if userInfo has username, do jump to vocespace meeting page or to drive page
+    const userInfo = await dbApi.userInfo.getOrNull(client, data.user.id);
     if (params && (params.from === "vocespace" || params.from === "init")) {
-      // get userInfo, if userInfo has nickname, do jump to vocespace meeting page or to drive page
-      const userInfo = await dbApi.userInfo.getOrNull(client, data.user.id);
-      if (userInfo && userInfo.nickname) {
+      if (userInfo && userInfo.username) {
         redirectTo = vocespaceUrl(
           data.user.id,
-          userInfo.nickname,
+          userInfo.username,
           "vocespace",
           params.spaceName
         );
@@ -158,6 +157,14 @@ function LoginForm({ searchParams }: LoginPageProps) {
         redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}`;
       }
     }
+
+    // 这里说明当前用户已经登录成功，进行跳转，但是在跳转之前我们需要尝试到数据库中获取更完整的用户信息
+    // 如果有的话说明用户是已经完成用户身份登记的，需要把online状态更新为true，如果没有则会让profile页面
+    // 去完成用户信息登记（这里直接跳转，不需要干预）
+    if (userInfo) {
+      const _ = await dbApi.userInfo.online(client, data.user.id);
+    }
+
     router.push(redirectTo);
   };
 
@@ -167,12 +174,16 @@ function LoginForm({ searchParams }: LoginPageProps) {
   const signInWithGoogle = async (directly = false) => {
     try {
       setLoading(true);
-      
+
       // 构建回调 URL
-      const isLocalEnv = process.env.NODE_ENV === "development" || window.location.hostname === "localhost";
-      const baseUrl = isLocalEnv ? window.location.origin : "https://home.vocespace.com";
+      const isLocalEnv =
+        process.env.NODE_ENV === "development" ||
+        window.location.hostname === "localhost";
+      const baseUrl = isLocalEnv
+        ? window.location.origin
+        : "https://home.vocespace.com";
       let redirectTo = `${baseUrl}/auth/callback`;
-      
+
       // 如果是直接登录（从 vocespace 跳转过来），添加 spaceName 参数
       if (directly) {
         const params = getParams();

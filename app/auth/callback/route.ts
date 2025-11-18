@@ -33,11 +33,11 @@ export async function GET(request: NextRequest) {
         // 获取用户信息（新用户可能不存在）
         const userInfo = await dbApi.userInfo.getOrNull(supabase, userId);
         
-        if (userInfo && userInfo.nickname) {
+        if (userInfo && userInfo.username) {
           // 用户已有昵称，直接跳转到 vocespace.com
           redirectUrl = vocespaceUrl(
             userId,
-            userInfo.nickname,
+            userInfo.username,
             "google",
             spaceName
           );

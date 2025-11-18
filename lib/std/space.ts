@@ -124,7 +124,7 @@ export const initSpace = (partial: Partial<Space>): Space | null => {
 /**
  * create vocespace url for direct access
  * @param userId user id
- * @param username username from `UserInfo.nickname` || `User.email!`
+ * @param username username from `UserInfo.username` || `User.email!`
  * @param spaceName spaceName if is undefined, will use username as spaceName
  * @returns
  */

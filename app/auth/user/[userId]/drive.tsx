@@ -24,7 +24,7 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 interface DriveFormValues {
-  nickname: string;
+  username: string;
   desc?: string;
 }
 
@@ -74,8 +74,8 @@ export default function OnboardingDrive({
     }
   }, [user, router]);
 
-  const validateNickname = async (nickname: string) => {
-    if (!nickname || nickname.length < 2) {
+  const validateNickname = async (username: string) => {
+    if (!username || username.length < 2) {
       return false;
     }
 
@@ -84,13 +84,13 @@ export default function OnboardingDrive({
       const { data, error } = await client
         .from("user_info")
         .select("id")
-        .eq("nickname", nickname)
+        .eq("username", username)
         .neq("id", user?.id); // 排除自己
 
       if (error) throw error;
       return data.length === 0;
     } catch (error) {
-      console.error("Error validating nickname:", error);
+      console.error("Error validating username:", error);
       return false;
     }
   };
@@ -105,13 +105,13 @@ export default function OnboardingDrive({
       setLoading(true);
 
       // 验证昵称唯一性
-      const isNicknameValid = await validateNickname(values.nickname);
+      const isNicknameValid = await validateNickname(values.username);
       if (!isNicknameValid) {
-        messageApi.error(t("user.onboarding.nicknameExists"));
+        messageApi.error(t("user.onboarding.usernameExists"));
         form.setFields([
           {
-            name: "nickname",
-            errors: [t("user.onboarding.nicknameExists")],
+            name: "username",
+            errors: [t("user.onboarding.usernameExists")],
           },
         ]);
         return;
@@ -119,18 +119,19 @@ export default function OnboardingDrive({
 
       // 更新用户信息
       const updateData = {
-        nickname: values.nickname,
+        username: values.username,
         desc: values.desc || null,
         avatar: avatar || null,
+        online: true,
       };
 
       const success = await dbApi.userInfo.insert(client, updateData as UserInfo);
 
       if (success) {
         const space = initSpace({
-          name: updateData.nickname,
+          name: updateData.username,
           desc: "",
-          url: vocespaceUrlVisit(updateData.nickname),
+          url: vocespaceUrlVisit(updateData.username),
           public: true,
           owner_id: user.id,
         });
@@ -161,7 +162,7 @@ export default function OnboardingDrive({
         if (spaceName) {
           const redirectUrl = vocespaceUrl(
             user.id,
-            updateData.nickname,
+            updateData.username,
             "vocespace",
             spaceName
           );
@@ -237,7 +238,7 @@ export default function OnboardingDrive({
         className={styles.form}
         requiredMark={false}
         initialValues={{
-          nickname: user.email ? user.email.split("@")[0] : "",
+          username: user.email ? user.email.split("@")[0] : "",
         }}
       >
         {/* 头像上传 */}
@@ -267,21 +268,21 @@ export default function OnboardingDrive({
         </div>
         {/* 昵称 */}
         <Form.Item
-          name="nickname"
-          label={t("user.onboarding.profile.nickname")}
+          name="username"
+          label={t("user.onboarding.profile.username")}
           rules={[
-            { required: true, message: t("user.onboarding.nicknameRequired") },
-            { min: 2, message: t("user.onboarding.nicknameLength") },
-            { max: 30, message: t("user.onboarding.nicknameLength") },
+            { required: true, message: t("user.onboarding.usernameRequired") },
+            { min: 2, message: t("user.onboarding.usernameLength") },
+            { max: 30, message: t("user.onboarding.usernameLength") },
             {
               pattern: /^[a-zA-Z0-9\u4e00-\u9fa5_-]+$/,
-              message: t("user.onboarding.nicknamePattern"),
+              message: t("user.onboarding.usernamePattern"),
             },
           ]}
         >
           <Input
             size="large"
-            placeholder={t("user.onboarding.profile.nicknamePlaceholder")}
+            placeholder={t("user.onboarding.profile.usernamePlaceholder")}
             maxLength={30}
           />
         </Form.Item>

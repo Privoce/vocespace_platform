@@ -9,7 +9,7 @@ export interface CreateSpaceParams {
 /**
  * create a vocespace for user
  * @param uid user id
- * @param username user nickname from `UserInfo` or use `User`.email (now only support email/google login, so email is always exist)
+ * @param username user username from `UserInfo` or use `User`.email (now only support email/google login, so email is always exist)
  */
 export const createSpace = (
   uid: string,

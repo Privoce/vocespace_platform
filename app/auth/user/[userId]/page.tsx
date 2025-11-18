@@ -13,6 +13,7 @@ import styles from "@/styles/user_settings.module.scss";
 import { Space } from "@/lib/std/space";
 import { Nullable } from "@/lib/std";
 import { useRouter, useSearchParams } from "next/navigation";
+import { dbApi } from "@/lib/api/db";
 
 export interface UserPageUniProps {
   userId: string;
@@ -71,16 +72,16 @@ export default function UserPage({ params }: { params: { userId: string } }) {
 
   // 如果searchParam中包含logout=true，直接退出登陆
   useEffect(() => {
-    if (urlSearchParams.get("logout") === "true") {
-      console.warn(client.auth);
-      client.auth.signOut().then(() => {
+    if (urlSearchParams.get("logout") === "true" && user) {
+      client.auth.signOut().then(async () => {
+        const _ = await dbApi.userInfo.offline(client, user!.id);
         flushUser();
         setTimeout(() => {
           router.replace("/auth/login");
         }, 500);
       });
     }
-  }, [urlSearchParams, client]);
+  }, [urlSearchParams, client, user]);
 
   // 如果查看的不是自己的页面，且用户存在但昵称未设置，显示该用户无法访问
   // 如果是onboarding页面，显示onboarding组件
@@ -153,7 +154,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
           )}
         </>
       )}
-      {userInfo && !needsOnboarding && userInfo.nickname && (
+      {userInfo && !needsOnboarding && userInfo.username && (
         <div className={styles.user_view}>
           <UserProfile
             flushUser={flushUser}

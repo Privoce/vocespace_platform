@@ -145,8 +145,8 @@ export function UserProfile({
   const [shareUrl, setShareUrl] = useState("");
   const router = useRouter();
   const selfVocespaceUrl = useMemo(() => {
-    if (user && userInfo?.nickname) {
-      return vocespaceUrl(user.id, userInfo.nickname, whereUserFrom(user));
+    if (user && userInfo?.username) {
+      return vocespaceUrl(user.id, userInfo.username, whereUserFrom(user));
     } else {
       return "";
     }
@@ -172,7 +172,7 @@ export function UserProfile({
   //     color: ["#1890ff", "#52c41a", "#faad14", "#f5222d"],
   //   };
   const { JoinUsBtn, JoinUsModal, JoinUserBtn } = useJoinUsBtn({
-    username: userInfo?.nickname,
+    username: userInfo?.username,
   });
   const { ShareBtn, ShareModal } = useShareBtn({ userInfo });
   const [createSpaceOpen, setCreateSpaceOpen] = useState<boolean>(false);
@@ -195,14 +195,14 @@ export function UserProfile({
         url:
           isSelf && userInfo
             ? selfVocespaceUrl
-            : vocespaceUrlVisit(userInfo?.nickname || ""),
+            : vocespaceUrlVisit(userInfo?.username || ""),
         icon: <VocespaceLogo height={24} width={24} />,
         key: "vocespace",
         placeholder: t("user.setting.placeholder.vocespace"),
         value:
           isSelf && userInfo
             ? selfVocespaceUrl
-            : vocespaceUrlVisit(userInfo?.nickname || ""),
+            : vocespaceUrlVisit(userInfo?.username || ""),
         onChange: (e: ChangeEvent<HTMLInputElement>) => {},
       },
       {
@@ -467,14 +467,14 @@ export function UserProfile({
                       cursor: isSelf ? "pointer" : "default",
                     }}
                   >
-                    {userInfo.nickname.charAt(0).toUpperCase() || (
+                    {userInfo.username.charAt(0).toUpperCase() || (
                       <UserOutlined />
                     )}
                   </Avatar>
                 </EditAvatarBtn>
               </div>
               <div className={styles.profileInfo}>
-                <div className={styles.username}>{userInfo.nickname}</div>
+                <div className={styles.username}>{userInfo.username}</div>
                 <div
                   className={styles.bio}
                   onClick={handleDesc}
@@ -713,9 +713,9 @@ export function UserProfile({
                 border: "none",
               }}
             >
-              {userInfo.nickname.charAt(0).toUpperCase() || <UserOutlined />}
+              {userInfo.username.charAt(0).toUpperCase() || <UserOutlined />}
             </Avatar>
-            <div className={styles.share_username}>{userInfo.nickname}</div>
+            <div className={styles.share_username}>{userInfo.username}</div>
             <div className={styles.share_url}>{shareUrl}</div>
           </div>
           <Button

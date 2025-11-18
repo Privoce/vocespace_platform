@@ -119,12 +119,12 @@ export default {
         title: "Set up your profile",
         subtitle: "Tell everyone a little about yourself",
         avatar: "Avatar",
-        nickname: "Nickname (required)",
+        username: "Nickname (required)",
         desc: "About me (optional)",
         avatarHint: "Click to upload an avatar (optional)",
-        nicknameHint: "2-20 characters, this will be your display name",
+        usernameHint: "2-20 characters, this will be your display name",
         descHint: "Briefly introduce yourself (optional)",
-        nicknamePlaceholder: "Please enter your nickname",
+        usernamePlaceholder: "Please enter your username",
         descPlaceholder: "Tell everyone a little about yourself...",
         back: "Previous step",
         complete: "Set up",
@@ -140,17 +140,17 @@ export default {
       step3: "Complete",
       successMessage: "Profile setup successful!",
       error: "Setting failed, please try again",
-      nicknameExists:
-        "This nickname is already in use, please choose another one",
-      nicknameRequired: "Please enter a nickname",
-      nicknameLength: "Nickname length should be 2-20 characters",
-      nicknamePattern:
+      usernameExists:
+        "This username is already in use, please choose another one",
+      usernameRequired: "Please enter a username",
+      usernameLength: "Nickname length should be 2-20 characters",
+      usernamePattern:
         "Usernames can only contain letters, numbers, Chinese characters, underscores, and hyphens, and cannot be repeated",
     },
     setting: {
       title: "User Settings",
       username: "Username",
-      nickname: "Nickname",
+      username: "Nickname",
       desc: "Personal Profile",
       location: "Location",
       linkedin: "LinkedIn",
@@ -176,7 +176,7 @@ export default {
       email: "Email address",
       placeholder: {
         username: "Please enter your username",
-        nickname: "Please enter your nickname",
+        username: "Please enter your username",
         desc: "Please enter your profile",
         location: "Please enter your location",
         linkedin: "Please enter your LinkedIn profile link",

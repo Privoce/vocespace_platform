@@ -13,7 +13,8 @@ function getCorsHeaders(request: NextRequest) {
 
   const corsHeaders = {
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, X-Requested-With",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Credentials": "false",
   };
@@ -58,8 +59,8 @@ export async function GET(request: NextRequest) {
 
     return new Response(
       JSON.stringify({
-        username: user.nickname,
-        avatar: user.avatar,
+        data: { username: user.username, avatar: user.avatar },
+        online: user.online,
       }),
       {
         status: 200,

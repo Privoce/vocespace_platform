@@ -3,7 +3,8 @@ import { Space, SpaceType } from "./space";
 
 export interface UserInfo {
   id: string;
-  nickname: string;
+  username: string;
+  nickname: Nullable<string>;
   desc: Nullable<string>;
   location: Nullable<string>;
   /**
@@ -20,11 +21,13 @@ export interface UserInfo {
   website: Nullable<string>;
   wx: Nullable<string>;
   avatar: Nullable<string>;
+  online: boolean;
 }
 
-export const DEFAULT_USER_INFO = (id: string, nickname: string): UserInfo => ({
+export const DEFAULT_USER_INFO = (id: string, username: string): UserInfo => ({
   id,
-  nickname,
+  username,
+  nickname: null,
   desc: null,
   location: null,
   subscribes: null,
@@ -35,6 +38,7 @@ export const DEFAULT_USER_INFO = (id: string, nickname: string): UserInfo => ({
   avatar: null,
   website: null,
   wx: null,
+  online: false,
 });
 
 export interface User {
