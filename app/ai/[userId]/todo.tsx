@@ -52,6 +52,7 @@ export function Todo({
   const [todoListChecked, setTodoListChecked] = useState<TodoNode[]>([]);
   const fetchTodos = async () => {
     setLoading(true);
+    setTodos([]);
     const response = await api.todos.getTodos(userId);
     if (response.ok) {
       const { todos }: { todos: Todos[] } = await response.json();
@@ -105,6 +106,13 @@ export function Todo({
               <Skeleton paragraph={{ rows: 10 }} active />
             ) : (
               <List
+                pagination={{
+                  position: "bottom",
+                  align: "end",
+                  pageSize: 15,
+                  size: "small",
+                  simple: { readOnly: true },
+                }}
                 dataSource={todoList}
                 bordered={false}
                 split={false}
@@ -136,21 +144,28 @@ export function Todo({
               {t("widgets.todo.today_done")}
             </Divider>
             <List
+              pagination={{
+                position: "bottom",
+                align: "end",
+                pageSize: 5,
+                size: "small",
+                simple: { readOnly: true },
+              }}
               dataSource={todoListChecked}
               bordered={false}
               split={false}
               locale={{
-                  emptyText: (
-                    <p
-                      style={{
-                        color: "#8c8c8c",
-                        fontSize: 14,
-                      }}
-                    >
-                      {t("widgets.todo.empty")}
-                    </p>
-                  ),
-                }}
+                emptyText: (
+                  <p
+                    style={{
+                      color: "#8c8c8c",
+                      fontSize: 14,
+                    }}
+                  >
+                    {t("widgets.todo.empty")}
+                  </p>
+                ),
+              }}
               renderItem={(item) => (
                 <List.Item>
                   <Checkbox checked={true} disabled>
