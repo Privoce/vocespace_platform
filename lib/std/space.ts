@@ -123,6 +123,8 @@ export const initSpace = (partial: Partial<Space>): Space | null => {
 
 /**
  * create vocespace url for direct access
+ * - authFrom:
+ *  - vocespace | google =>
  * @param userId user id
  * @param username username from `UserInfo.username` || `User.email!`
  * @param spaceName spaceName if is undefined, will use username as spaceName
@@ -131,10 +133,11 @@ export const initSpace = (partial: Partial<Space>): Space | null => {
 export const vocespaceUrl = (
   userId: string,
   username: string,
-  authFrom: "vocespace" | "google" = "vocespace",
+  authFrom: "vocespace" | "space" = "vocespace",
   spaceName?: string
 ): string => {
-  return `https://vocespace.com/${
+  let redirectTo = authFrom === "space" ? "space.voce.chat" : "vocespace.com";
+  return `https://${redirectTo}/${
     spaceName || username
   }?auth=${authFrom}&userId=${userId}&username=${username}`;
 };

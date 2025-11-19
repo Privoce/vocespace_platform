@@ -28,7 +28,7 @@ export interface LoginPageProps {
      * - unknown: unknown source (for future other platform need vocespace platform user login)
      * - init: from vocespace.com initial page, act as "vocespace", after register/login, redirect to vocespace meeting page (self)
      */
-    from?: "vocespace" | "unknown" | "init";
+    from?: "vocespace" | "unknown" | "space";
     /**
      * redirect to which page after login success, if from is `vocespace` (this is not needed), it should container params see [`vocespaceUrl()`](../../../lib/std/space.ts)
      */
@@ -91,7 +91,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
         : null);
 
     return {
-      from: from as "vocespace" | "unknown" | "init" | undefined,
+      from: from as "vocespace" | "unknown" | "space" | undefined,
       spaceName: spaceName || "",
       auth: auth as "google" | "email" | undefined,
       redirectTo: redirectTo || undefined,
@@ -144,17 +144,17 @@ function LoginForm({ searchParams }: LoginPageProps) {
     let redirectTo = `/auth/user/${data.user.id}`;
     // get userInfo, if userInfo has username, do jump to vocespace meeting page or to drive page
     const userInfo = await dbApi.userInfo.getOrNull(client, data.user.id);
-    if (params && (params.from === "vocespace" || params.from === "init")) {
+    if (params && (params.from === "vocespace" || params.from === "space")) {
       if (userInfo && userInfo.username) {
         redirectTo = vocespaceUrl(
           data.user.id,
           userInfo.username,
-          "vocespace",
+          params.from,
           params.spaceName
         );
       } else {
         // add params to redirectTo
-        redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}`;
+        redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}&from=${params.from}`;
       }
     }
 
@@ -171,7 +171,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
   /**
    * login with google oauth when clicked continue with google button
    */
-  const signInWithGoogle = async (directly = false) => {
+  const signInWithGoogle = async (directly = false, from: "vocespace" | "space" = "vocespace") => {
     try {
       setLoading(true);
 
@@ -188,7 +188,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
       if (directly) {
         const params = getParams();
         if (params.spaceName) {
-          redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}`;
+          redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}&from=${from}`;
         }
       }
 
@@ -217,10 +217,10 @@ function LoginForm({ searchParams }: LoginPageProps) {
 
     const params = getParams();
 
-    if (params && params.from === "vocespace" && params.auth === "google") {
+    if (params && (params.from === "vocespace" || params.from === "space") && params.auth === "google") {
       // directly use google oauth
       setHasTriggeredOAuth(true);
-      signInWithGoogle(true);
+      signInWithGoogle(true, params.from);
     }
   }, [urlSearchParams, searchParams]);
 

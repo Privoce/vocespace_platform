@@ -10,7 +10,7 @@ import { HomeHeader, HomeHeaderExports } from "@/app/home/header";
 import { useI18n } from "@/lib/i18n/i18n";
 import { MessageInstance } from "antd/es/message/interface";
 import styles from "@/styles/user_settings.module.scss";
-import { Space } from "@/lib/std/space";
+import { Space, vocespaceUrl } from "@/lib/std/space";
 import { Nullable } from "@/lib/std";
 import { useRouter, useSearchParams } from "next/navigation";
 import { dbApi } from "@/lib/api/db";
@@ -33,6 +33,14 @@ export interface UserPageUniProps {
 
 type pageType = "settings" | "profile";
 
+/**
+ *  User Page Component
+ *  ## url
+ *  - logout: `/auth/user/[userId]?logout=true`
+ *  - from google oauth | register unfinished : `/auth/user/[userId]?spaceName=xxx&from=space|vocespace`
+ *  - settings page: `/auth/user/[userId]?pg=settings`
+ *  - profile page: `/auth/user/[userId]?pg=profile` or no `pg` param
+ */
 export default function UserPage({ params }: { params: { userId: string } }) {
   const [messageApi, contextHolder] = message.useMessage();
   const HomeHeaderRef = useRef<HomeHeaderExports>(null);
@@ -74,8 +82,9 @@ export default function UserPage({ params }: { params: { userId: string } }) {
     }
   };
 
-  // 如果searchParam中包含logout=true，直接退出登陆
+  // ------- 处理URL参数逻辑 -------------------------------------------------------------------------------------
   useEffect(() => {
+    // 如果searchParam中包含logout=true，直接退出登陆
     if (urlSearchParams.get("logout") === "true") {
       if (user) {
         client.auth.signOut().then(async () => {
@@ -89,13 +98,25 @@ export default function UserPage({ params }: { params: { userId: string } }) {
         router.replace("/auth/login");
       }
     }
-
+    // 处理pg参数，决定显示设置页面还是资料页面
     if (urlSearchParams.get("pg") === "settings") {
       setUserPageType("settings");
     } else {
       setUserPageType("profile");
     }
-  }, [urlSearchParams, client, user]);
+    // 处理from和spaceName参数，如果存在说明需要跳转到会议空间
+    const spaceName = urlSearchParams.get("spaceName");
+    const from = urlSearchParams.get("from");
+    if (spaceName && from && !needsOnboarding && user && userInfo) {
+      const redirectUrl = vocespaceUrl(
+        user.id,
+        userInfo.username,
+        from === "space" ? "space" : "vocespace",
+        spaceName
+      );
+      router.replace(redirectUrl);
+    }
+  }, [urlSearchParams, client, user, needsOnboarding, userInfo]);
 
   const deleteAccount = async () => {
     if (!user || !userInfo) return;
