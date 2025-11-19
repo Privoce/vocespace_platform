@@ -1,5 +1,6 @@
 import { AICutAnalysis } from "@/lib/std/ai";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { AI_ANALYSIS_BUCKET } from "./storage";
 
 export const AI_API_URL = "/api/ai";
 
@@ -16,7 +17,7 @@ export const get = async (
   date: string
 ): Promise<AICutAnalysis | null> => {
   const { data, error } = await client
-    .from("ai_analysis")
+    .from(AI_ANALYSIS_BUCKET)
     .select("*")
     .eq("id", uid)
     .eq("date", date)
@@ -32,7 +33,7 @@ export const getAll = async (
   uid: string
 ): Promise<AICutAnalysis[]> => {
   const { data, error } = await client
-    .from("ai_analysis")
+    .from(AI_ANALYSIS_BUCKET)
     .select("*")
     .eq("id", uid);
 
@@ -43,7 +44,7 @@ export const getAll = async (
 
 export const update = async (client: SupabaseClient, data: AICutAnalysis) => {
   const { error } = await client
-    .from("ai_analysis")
+    .from(AI_ANALYSIS_BUCKET)
     .update(data)
     .eq("id", data.id)
     .eq("date", data.date);
@@ -69,7 +70,7 @@ export const insertOrUpdate = async (
     return await update(client, data);
   } else {
     // 无记录，进行插入
-    const { error } = await client.from("ai_analysis").insert(data);
+    const { error } = await client.from(AI_ANALYSIS_BUCKET).insert(data);
 
     if (error) {
       throw error;
@@ -82,7 +83,10 @@ const removeAll = async (
   client: SupabaseClient,
   uid: string
 ): Promise<boolean> => {
-  const { error } = await client.from("ai_analysis").delete().eq("id", uid);
+  const { error } = await client
+    .from(AI_ANALYSIS_BUCKET)
+    .delete()
+    .eq("id", uid);
 
   if (error) {
     throw error;

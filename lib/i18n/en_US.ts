@@ -6,6 +6,20 @@ export default {
     copyright: "© 2025 VoceSpace, Inc. All rights reserved.",
     getUserInfoFail: "Failed to get user information",
   },
+  widgets: {
+    ai: {
+      cut: {
+        time: {
+          start: "Start Time",
+          duration: "Duration",
+        },
+      },
+    },
+    todo: {
+      empty: "No to-do items",
+      today_done: "Completed today",
+    },
+  },
   login: {
     title: "Login",
     welcome: "Welcome to VoceSpace",
@@ -95,6 +109,7 @@ export default {
       mySpace: "My Space",
       publishs: "My Space",
       subscribes: "History",
+      ai: "AI Analysis & TODO",
       placeholder: {
         desc: "This user is lazy and leaves nothing.",
       },

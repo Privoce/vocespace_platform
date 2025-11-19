@@ -11,6 +11,7 @@ import { AICutAnalysis, AICutAnalysisRes } from "@/lib/std/ai";
 import { useI18n } from "@/lib/i18n/i18n";
 import { todayTimestamp } from "@/lib/std";
 import ReactMarkdown from "react-markdown";
+import { AI_ANALYSIS_BUCKET } from "@/lib/api/db/storage";
 
 interface AIAnalysisProps {
   userId: string;
@@ -26,7 +27,6 @@ export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
     setDate(date as Dayjs);
   };
   const [content, setContent] = useState<AICutAnalysis>();
-
   // 根据日期获取分析内容 -------------------------------------------------------
   const fetchAIAnalysis = async (userId: string, date: number) => {
     setLoading(true);
@@ -78,11 +78,11 @@ export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
                 }}
               >
                 <span>
-                  {`${t("ai.cut.time.start")}: ${new Date(
+                  {`${t("widgets.ai.cut.time.start")}: ${new Date(
                     section.timestamp
                   ).toLocaleString()}`}
                 </span>
-                <span>{`${t("ai.cut.time.duration")}: ${
+                <span>{`${t("widgets.ai.cut.time.duration")}: ${
                   section.duration
                 }`}</span>
               </p>
@@ -91,26 +91,28 @@ export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
                 <ReactMarkdown>{section.content}</ReactMarkdown>
               </div>
 
-              {/* {section.screenshot && (
-                <img
-                  src={section.screenshot}
-                  alt="screenshot"
-                  style={{
-                    maxWidth: "320px",
-                    height: "auto",
-                    borderRadius: "8px",
-                    marginTop: "4px",
-                    border: "1px solid #444",
-                  }}
-                />
-              )} */}
+              <img
+                src={
+                  dbApi.storage.getUrl(
+                    client,
+                    AI_ANALYSIS_BUCKET,
+                    `/public/${userId}_${section.timestamp}.jpg`
+                  ).data.publicUrl
+                }
+                alt={`no img: ${userId}_${section.timestamp}.jpg`}
+                style={{
+                  maxWidth: "320px",
+                  height: "auto",
+                  borderRadius: "8px",
+                }}
+              />
 
               {index < content.result.length - 1 && (
                 <hr
                   style={{
                     border: "none",
                     borderTop: "1px solid #333",
-                    margin: "24px 0",
+                    margin: "12px 0",
                   }}
                 />
               )}

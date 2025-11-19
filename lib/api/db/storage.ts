@@ -118,10 +118,15 @@ const uploadBlob = async (
   return data.path;
 };
 
+const getUrl = (client: SupabaseClient, bucket: string, path: string) => {
+  return client.storage.from(bucket).getPublicUrl(path);
+};
+
 export const storage = {
   update,
   url,
   removeAvatar,
   uploadBlob,
-  removeAll
+  removeAll,
+  getUrl,
 };
