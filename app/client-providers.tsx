@@ -163,6 +163,9 @@ export default function ClientProviders({ children }: { children: React.ReactNod
             colorBorderBg: '#1E1E1E',
             nodeSelectedBg: '#1E1E1E',
           },
+          Divider: {
+            colorSplit: '#333',
+          }
         },
       }}
     >

@@ -14,13 +14,13 @@ export const get = async (
   client: SupabaseClient,
   uid: string,
   date: string
-): Promise<AICutAnalysis> => {
+): Promise<AICutAnalysis | null> => {
   const { data, error } = await client
     .from("ai_analysis")
     .select("*")
     .eq("id", uid)
     .eq("date", date)
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
 

@@ -46,5 +46,5 @@ export interface AICutAnalysis {
   /**
    * jsonb 存储AICutAnalysisRes结果
    */
-  result: string; // JSON.stringify(AICutAnalysisRes)
+  result: AICutAnalysisResLine[]; // JSON.stringify(AICutAnalysisResLine[])
 }

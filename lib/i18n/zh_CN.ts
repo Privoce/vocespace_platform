@@ -7,9 +7,17 @@ export default {
     getUserInfoFail: "获取用户信息失败",
   },
   widgets: {
-    ai: {},
+    ai: {
+      cut: {
+        time: {
+          start: "开始时间",
+          duration: "持续时间",
+        }
+      }
+    },
     todo: {
       empty: "暂无待办事项",
+      today_done: "今日已完成",
     }
   },
   login: {

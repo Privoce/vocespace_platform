@@ -1,13 +1,123 @@
-import { DatePicker, DatePickerProps } from "antd";
+"use client";
 
-export function AIAnalysis() {
+import { DatePicker, DatePickerProps, Skeleton } from "antd";
+import styles from "@/styles/ai.module.scss";
+import { useEffect, useMemo, useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { MessageInstance } from "antd/es/message/interface";
+import { dbApi } from "@/lib/api/db";
+import { AICutAnalysis, AICutAnalysisRes } from "@/lib/std/ai";
+import { useI18n } from "@/lib/i18n/i18n";
+import { todayTimestamp } from "@/lib/std";
+import ReactMarkdown from "react-markdown";
+
+interface AIAnalysisProps {
+  userId: string;
+  client: SupabaseClient;
+  messageApi: MessageInstance;
+}
+
+export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
+  const { t } = useI18n();
+  const [date, setDate] = useState(dayjs(todayTimestamp()));
+  const [loading, setLoading] = useState(false);
   const onChange: DatePickerProps["onChange"] = (date, dateString) => {
-    console.log(date, dateString);
+    setDate(date as Dayjs);
+  };
+  const [content, setContent] = useState<AICutAnalysis>();
+
+  // 根据日期获取分析内容 -------------------------------------------------------
+  const fetchAIAnalysis = async (userId: string, date: number) => {
+    setLoading(true);
+    try {
+      const res = await dbApi.ai.get(client, userId, date.toString());
+      if (res) {
+        setContent(res);
+      }
+    } catch (error) {
+      messageApi.error("Failed to fetch AI analysis data.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchAIAnalysis(userId, date.valueOf());
+  }, [userId, date]);
+
   return (
-    <div>
-      <DatePicker onChange={onChange} />
+    <div className={styles.analysis}>
+      <DatePicker onChange={onChange} value={date} />
+      {loading ? (
+        <div className={styles.analysis_content}>
+          <Skeleton paragraph={{ rows: 10 }} active />
+        </div>
+      ) : (
+        <div className={styles.analysis_content}>
+          {content?.result.map((section, index) => (
+            <div key={index} style={{ marginBottom: "32px" }}>
+              {section.name && (
+                <h2
+                  style={{
+                    color: "#fff",
+                    fontSize: "18px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {section.name}
+                </h2>
+              )}
+              <p
+                style={{
+                  color: "#888",
+                  fontSize: "12px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  gap: "12px",
+                }}
+              >
+                <span>
+                  {`${t("ai.cut.time.start")}: ${new Date(
+                    section.timestamp
+                  ).toLocaleString()}`}
+                </span>
+                <span>{`${t("ai.cut.time.duration")}: ${
+                  section.duration
+                }`}</span>
+              </p>
+
+              <div style={{ marginBottom: "16px" }}>
+                <ReactMarkdown>{section.content}</ReactMarkdown>
+              </div>
+
+              {/* {section.screenshot && (
+                <img
+                  src={section.screenshot}
+                  alt="screenshot"
+                  style={{
+                    maxWidth: "320px",
+                    height: "auto",
+                    borderRadius: "8px",
+                    marginTop: "4px",
+                    border: "1px solid #444",
+                  }}
+                />
+              )} */}
+
+              {index < content.result.length - 1 && (
+                <hr
+                  style={{
+                    border: "none",
+                    borderTop: "1px solid #333",
+                    margin: "24px 0",
+                  }}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

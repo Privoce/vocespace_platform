@@ -11,4 +11,25 @@
 }
 .tree_wrapper {
     height: 100%;
+    &_list {
+        height: calc(100% - 300px);
+    }
+    &_today {
+        height: 300px;
+    }
+}
+
+.analysis {
+    height: 100%;
+    width: 100%;
+    padding: 24px;
+    &_content {
+        border-top: 1px solid #333;
+        margin-top: 12px;
+        padding-top: 12px;
+        height: calc(100% - 48px);
+        overflow-y: scroll;
+        scrollbar-width: thin;
+        width: 100%;
+    }
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbApi } from "@/lib/api/db";
 import { createClient } from "@/lib/supabase/server";
 import { AICutAnalysisRes } from "@/lib/std/ai";
-import { convertBase64ToImg } from "@/lib/std";
+import { convertBase64ToImg, todayTimestamp } from "@/lib/std";
 
 interface ReqPost {
   id: string;
@@ -26,13 +26,12 @@ export async function POST(request: NextRequest) {
         );
       }
       const client = await createClient();
-      const date = new Date(timestamp);
-      date.setHours(0, 0, 0, 0); // 设置为当天的00:00:00
+      const date = todayTimestamp();
 
       const success = await dbApi.ai.insertOrUpdate(client, {
         id,
-        date: date.getTime().toString(),
-        result: JSON.stringify(data.result.lines),
+        date: date.toString(),
+        result: data.result.lines,
       });
       if (!success) {
         return NextResponse.json(

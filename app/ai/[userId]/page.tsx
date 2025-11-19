@@ -39,12 +39,12 @@ export default function Page({ params }: { params: { userId: string } }) {
   return (
     <div className={styles.view}>
       {contextHolder}
-      <Row gutter={16} style={{height: "100%"}}>
+      <Row style={{height: "100%"}}>
         <Col span={8}>
           <Todo messageApi={messageApi} userId={userId} client={client}></Todo>
         </Col>
         <Col span={16}>
-          <AIAnalysis></AIAnalysis>
+          <AIAnalysis userId={userId} client={client} messageApi={messageApi}></AIAnalysis>
         </Col>
       </Row>
     </div>

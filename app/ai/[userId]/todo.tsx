@@ -6,10 +6,12 @@ import {
   Checkbox,
   Descriptions,
   DescriptionsProps,
+  Divider,
   Input,
   List,
   Modal,
   Progress,
+  Skeleton,
   Tree,
   TreeDataNode,
   TreeProps,
@@ -23,12 +25,19 @@ import { CardSize } from "antd/es/card/Card";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { TodoItem, Todos } from "@/lib/std/todo";
 import { api } from "@/lib/api";
+import { inToday } from "@/lib/std";
 
 export interface AppTodoProps {
   messageApi: MessageInstance;
   userId: string;
   disabled?: boolean;
   client: SupabaseClient;
+}
+
+interface TodoNode {
+  title: string;
+  key: string;
+  checked: boolean;
 }
 
 export function Todo({
@@ -39,8 +48,10 @@ export function Todo({
 }: AppTodoProps) {
   const { t } = useI18n();
   const [todos, setTodos] = useState<Todos[]>([]);
-
+  const [loading, setLoading] = useState<boolean>(false);
+  const [todoListChecked, setTodoListChecked] = useState<TodoNode[]>([]);
   const fetchTodos = async () => {
+    setLoading(true);
     const response = await api.todos.getTodos(userId);
     if (response.ok) {
       const { todos }: { todos: Todos[] } = await response.json();
@@ -48,6 +59,7 @@ export function Todo({
     } else {
       messageApi.error(t("more.app.todo.fetch_error"));
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -56,24 +68,27 @@ export function Todo({
 
   const todoList = useMemo(() => {
     console.warn("Rendering todoTree with todos:", todos);
-    let expandList: {
-      title: string;
-      key: string;
-      checked: boolean;
-    }[] = [];
+    let expandList: TodoNode[] = [];
+    let checkedList: TodoNode[] = [];
 
     todos.forEach((item) => {
       expandList.push(
         ...item.items.map((todo) => {
-          return {
+          let item = {
             title: todo.title,
             key: todo.id,
             checked: !!todo.done,
           };
+
+          if (todo.done && inToday(todo.done)) {
+            checkedList.push(item);
+          }
+
+          return item;
         })
       );
     });
-
+    setTodoListChecked(checkedList);
     return expandList;
   }, [todos]);
 
@@ -81,33 +96,70 @@ export function Todo({
     <>
       <Card
         style={{ width: "100%", padding: 0, height: "100%" }}
+        styles={{ body: { height: "100%" } }}
         size="default"
       >
         <div className={styles.tree_wrapper}>
-          <List
-            dataSource={todoList}
-            bordered={false}
-            split={false}
-            locale={{
-              emptyText: (
-                <p
-                  style={{
-                    color: "#8c8c8c",
-                    fontSize: 14,
-                  }}
-                >
-                  {t("widgets.todo.empty")}
-                </p>
-              ),
-            }}
-            renderItem={(item) => (
-              <List.Item>
-                <Checkbox checked={item.checked} disabled>
-                  {item.title}
-                </Checkbox>
-              </List.Item>
+          <div className={styles.tree_wrapper_list}>
+            {loading ? (
+              <Skeleton paragraph={{ rows: 10 }} active />
+            ) : (
+              <List
+                dataSource={todoList}
+                bordered={false}
+                split={false}
+                locale={{
+                  emptyText: (
+                    <p
+                      style={{
+                        color: "#8c8c8c",
+                        fontSize: 14,
+                      }}
+                    >
+                      {t("widgets.todo.empty")}
+                    </p>
+                  ),
+                }}
+                renderItem={(item) => (
+                  <List.Item>
+                    <Checkbox checked={item.checked} disabled>
+                      {item.title}
+                    </Checkbox>
+                  </List.Item>
+                )}
+              ></List>
             )}
-          ></List>
+          </div>
+
+          <div className={styles.tree_wrapper_today}>
+            <Divider style={{ fontSize: 12 }}>
+              {t("widgets.todo.today_done")}
+            </Divider>
+            <List
+              dataSource={todoListChecked}
+              bordered={false}
+              split={false}
+              locale={{
+                  emptyText: (
+                    <p
+                      style={{
+                        color: "#8c8c8c",
+                        fontSize: 14,
+                      }}
+                    >
+                      {t("widgets.todo.empty")}
+                    </p>
+                  ),
+                }}
+              renderItem={(item) => (
+                <List.Item>
+                  <Checkbox checked={true} disabled>
+                    {item.title}
+                  </Checkbox>
+                </List.Item>
+              )}
+            ></List>
+          </div>
         </div>
       </Card>
     </>

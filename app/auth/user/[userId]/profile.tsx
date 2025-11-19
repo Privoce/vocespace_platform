@@ -146,7 +146,7 @@ export function UserProfile({
   const router = useRouter();
   const selfVocespaceUrl = useMemo(() => {
     if (user && userInfo?.username) {
-      return vocespaceUrl(user.id, userInfo.username, whereUserFrom(user));
+      return vocespaceUrl(user.id, userInfo.username, "vocespace");
     } else {
       return "";
     }
