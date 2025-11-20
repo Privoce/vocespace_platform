@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { todo }: { todo: Todos } = await request.json();
-    console.warn("Received todo in POST /api/todos:", todo);
+    // console.warn("Received todo in POST /api/todos:", todo);
     // 更新数据库
     const client = await createClient();
     let success = await dbApi.todos.insert(client, todo);
