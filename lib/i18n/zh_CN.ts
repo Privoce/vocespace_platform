@@ -18,6 +18,7 @@ export default {
     todo: {
       empty: "暂无待办事项",
       today_done: "今日已完成",
+      history: "历史待办"
     }
   },
   login: {

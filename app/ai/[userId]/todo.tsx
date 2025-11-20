@@ -26,6 +26,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { TodoItem, Todos } from "@/lib/std/todo";
 import { api } from "@/lib/api";
 import { inToday } from "@/lib/std";
+import { v4 as uuidv4 } from "uuid";
 
 export interface AppTodoProps {
   messageApi: MessageInstance;
@@ -38,6 +39,7 @@ interface TodoNode {
   title: string;
   key: string;
   checked: boolean;
+  date: string; // 使用字符串存储的时间戳
 }
 
 export function Todo({
@@ -49,10 +51,8 @@ export function Todo({
   const { t } = useI18n();
   const [todos, setTodos] = useState<Todos[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [todoListChecked, setTodoListChecked] = useState<TodoNode[]>([]);
   const fetchTodos = async () => {
     setLoading(true);
-    setTodos([]);
     const response = await api.todos.getTodos(userId);
     if (response.ok) {
       const { todos }: { todos: Todos[] } = await response.json();
@@ -67,113 +67,105 @@ export function Todo({
     fetchTodos();
   }, [userId]);
 
-  const todoList = useMemo(() => {
+  const { todoList, todoListChecked } = useMemo(() => {
     console.warn("Rendering todoTree with todos:", todos);
-    let expandList: TodoNode[] = [];
-    let checkedList: TodoNode[] = [];
+    const expandList: TodoNode[] = [];
+    const checkedList: TodoNode[] = [];
+    todos.forEach((todoGroup) => {
+      todoGroup.items.forEach((todo) => {
+        const todoNode: TodoNode = {
+          title: todo.title,
+          key: uuidv4(),
+          checked: !!todo.done,
+          date: todo.id,
+        };
 
-    todos.forEach((item) => {
-      expandList.push(
-        ...item.items.map((todo) => {
-          let item = {
-            title: todo.title,
-            key: todo.id,
-            checked: !!todo.done,
-          };
+        expandList.push(todoNode);
 
-          if (todo.done && inToday(todo.done)) {
-            checkedList.push(item);
-          }
-
-          return item;
-        })
-      );
+        if (todo.done && inToday(todo.done)) {
+          checkedList.push(todoNode);
+        }
+      });
     });
-    setTodoListChecked(checkedList);
-    return expandList;
+    // 需要按照日期进行排序
+    return {
+      todoList: expandList.sort((a, b) => {
+        const dateA = new Date(Number(a.date)).getTime();
+        const dateB = new Date(Number(b.date)).getTime();
+        return dateB - dateA; // 降序排列
+      }),
+      // 只返回今天完成的任务
+      todoListChecked: checkedList,
+    };
   }, [todos]);
 
   return (
     <>
       <Card
         style={{ width: "100%", padding: 0, height: "100%" }}
-        styles={{ body: { height: "100%" } }}
+        styles={{ body: { height: "100%", padding: 0, overflow: "hidden" } }}
         size="default"
       >
         <div className={styles.tree_wrapper}>
-          <div className={styles.tree_wrapper_list}>
+          <Divider style={{ fontSize: 12, margin: "12px 0" }}>
+            {t("widgets.todo.today_done")}
+          </Divider>
+          <div className={styles.tree_wrapper_today}>
             {loading ? (
-              <Skeleton paragraph={{ rows: 10 }} active />
-            ) : (
-              <List
-                pagination={{
-                  position: "bottom",
-                  align: "end",
-                  pageSize: 15,
-                  size: "small",
-                  simple: { readOnly: true },
-                }}
-                dataSource={todoList}
-                bordered={false}
-                split={false}
-                locale={{
-                  emptyText: (
-                    <p
-                      style={{
-                        color: "#8c8c8c",
-                        fontSize: 14,
-                      }}
-                    >
-                      {t("widgets.todo.empty")}
-                    </p>
-                  ),
-                }}
-                renderItem={(item) => (
-                  <List.Item>
+              <div style={{ padding: "16px" }}>
+                <Skeleton paragraph={{ rows: 5 }} active />
+              </div>
+            ) : todoListChecked.length > 0 ? (
+              <div className={styles.tree_wrapper_today_content}>
+                {todoListChecked.map((item) => (
+                  <div key={item.key} className={styles.todo_item}>
                     <Checkbox checked={item.checked} disabled>
                       {item.title}
                     </Checkbox>
-                  </List.Item>
-                )}
-              ></List>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#8c8c8c",
+                }}
+              >
+                {t("widgets.todo.empty")}
+              </div>
             )}
           </div>
-
-          <div className={styles.tree_wrapper_today}>
-            <Divider style={{ fontSize: 12 }}>
-              {t("widgets.todo.today_done")}
-            </Divider>
-            <List
-              pagination={{
-                position: "bottom",
-                align: "end",
-                pageSize: 5,
-                size: "small",
-                simple: { readOnly: true },
-              }}
-              dataSource={todoListChecked}
-              bordered={false}
-              split={false}
-              locale={{
-                emptyText: (
-                  <p
-                    style={{
-                      color: "#8c8c8c",
-                      fontSize: 14,
-                    }}
-                  >
-                    {t("widgets.todo.empty")}
-                  </p>
-                ),
-              }}
-              renderItem={(item) => (
-                <List.Item>
-                  <Checkbox checked={true} disabled>
-                    {item.title}
-                  </Checkbox>
-                </List.Item>
-              )}
-            ></List>
+          <Divider style={{ fontSize: 12, margin: "12px 0" }}>
+            {t("widgets.todo.history")}
+          </Divider>
+          <div className={styles.tree_wrapper_list}>
+            {loading ? (
+              <div style={{ padding: "16px" }}>
+                <Skeleton paragraph={{ rows: 10 }} active />
+              </div>
+            ) : todoList.length > 0 ? (
+              <div>
+                {todoList.map((item) => (
+                  <div key={item.key} className={styles.todo_item}>
+                    <Checkbox checked={item.checked} disabled>
+                      {item.title}
+                    </Checkbox>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#8c8c8c",
+                }}
+              >
+                {t("widgets.todo.empty")}
+              </div>
+            )}
           </div>
         </div>
       </Card>
