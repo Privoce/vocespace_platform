@@ -168,6 +168,20 @@ const deleteAccount = async (
   return false;
 };
 
+const exist = async (client: SupabaseClient, uid: string): Promise<boolean> => {
+  const { data, error } = await client
+    .from("user_info")
+    .select("id")
+    .eq("id", uid)
+    .maybeSingle();
+
+  if (error) {
+    return false;
+  }
+
+  return data !== null;
+};
+
 export const userInfo = {
   get,
   getOrNull,
@@ -178,4 +192,5 @@ export const userInfo = {
   online,
   offline,
   deleteAccount,
+  exist
 };

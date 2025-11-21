@@ -14,6 +14,41 @@ interface ReqPost {
   };
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    const uid = request.nextUrl.searchParams.get("uid");
+    const date = request.nextUrl.searchParams.get("date");
+
+    if (!uid) {
+      return NextResponse.json(
+        { error: "Missing uid parameter" },
+        { status: 400 }
+      );
+    }
+
+    const client = await createClient();
+    if (date) {
+      // 有date代表查询具体某日的
+      const aiData = await dbApi.ai.get(client, uid, date);
+      return NextResponse.json({ data: aiData });
+    }else {
+      // 没有表示查询所有的，目前不提供查询所有的接口，数据量太大
+      return NextResponse.json(
+        { error: "date parameter - `date: string` is required" },
+        { status: 400 }
+      );  
+    }
+
+
+  }catch (e) {
+    console.error("Error in GET /api/ai:", e);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { data, id, timestamp }: ReqPost = await request.json();
