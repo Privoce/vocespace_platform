@@ -1,5 +1,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+// Enable UTC plugin for dayjs
+dayjs.extend(utc);
 
 export interface SBClientNeeded {
   client: SupabaseClient;
@@ -7,14 +11,21 @@ export interface SBClientNeeded {
 
 export type Nullable<T> = T | null;
 
+/**
+ * Get UTC timestamp for the start of today (00:00:00 UTC)
+ * This ensures consistent timestamps across different timezones
+ */
 export const todayTimestamp = (): number => {
-  const startOfDay = dayjs().startOf("day");
+  const startOfDay = dayjs.utc().startOf("day");
   return startOfDay.valueOf();
 };
 
+/**
+ * Check if a timestamp is within today (UTC)
+ */
 export const inToday = (timestamp: number): boolean => {
-  let todayStart = todayTimestamp();
-  let tomorrowStart = todayStart + 24 * 60 * 60 * 1000;
+  const todayStart = todayTimestamp();
+  const tomorrowStart = todayStart + 24 * 60 * 60 * 1000;
   return timestamp >= todayStart && timestamp < tomorrowStart;
 };
 

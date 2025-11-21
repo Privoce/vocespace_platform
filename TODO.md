@@ -67,7 +67,10 @@
 - [x] 退出重定向登陆页
 - [x] collapse 开启图标旋转
 - [x] google登陆资料页
-- [ ] vocespace.com google登陆失败（待复现）
+- [x] vocespace.com google登陆失败（待复现）
+- [x] 时区时间戳出现问题
 
 
 http://localhost:3001/auth/user/7792d9c6-bc73-4145-bfee-baa112567006?logout=true
+
+

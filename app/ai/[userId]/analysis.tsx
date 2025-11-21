@@ -32,6 +32,7 @@ export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
     setLoading(true);
     try {
       const res = await dbApi.ai.get(client, userId, date.toString());
+      console.warn(res);
       if (res) {
         setContent(res);
       }

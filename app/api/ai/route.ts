@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbApi } from "@/lib/api/db";
 import { createClient } from "@/lib/supabase/server";
 import { AICutAnalysisRes } from "@/lib/std/ai";
-import { convertBase64ToImg, todayTimestamp } from "@/lib/std";
+import { todayTimestamp } from "@/lib/std";
+import { convertBase64ToImgServer } from "@/lib/std/server";
 
 interface ReqPost {
   id: string;
@@ -16,7 +17,7 @@ interface ReqPost {
 export async function POST(request: NextRequest) {
   try {
     const { data, id, timestamp }: ReqPost = await request.json();
-    console.warn(data.result.lines);
+    // console.warn(data.result.lines);
     // 更新数据库
     if (data.result.lines.length > 0) {
       if (!data || !id) {
@@ -40,12 +41,12 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // 如果有图片，需要将base64转换为Blob并上传到存储中
+      // 如果有图片，需要将base64转换为Buffer并上传到存储中
       if (data.screenShot) {
-        const blobImg = await convertBase64ToImg(data.screenShot);
+        const imgBuffer = await convertBase64ToImgServer(data.screenShot, 512);
         const imgName = `${id}_${timestamp}.jpg`;
         // 上传图片到supabase存储
-        await dbApi.storage.uploadBlob(client, blobImg, imgName);
+        await dbApi.storage.uploadBuffer(client, imgBuffer, imgName);
       }
     }
     return NextResponse.json(

@@ -56,7 +56,7 @@ export const update = async (client: SupabaseClient, data: AICutAnalysis) => {
 };
 
 /**
- * 插入当天的AI分析结果，如果已存在则覆盖更新
+ * 插入当天的AI分析结果，如果已存在则合并更新
  */
 export const insertOrUpdate = async (
   client: SupabaseClient,
@@ -65,9 +65,25 @@ export const insertOrUpdate = async (
   // 首先检查当天是否已有记录
   const { id, date } = data;
   const today = await get(client, id, date).catch(() => null);
+  
   if (today) {
-    // 已有记录，进行更新
-    return await update(client, data);
+    // 已有记录，进行合并更新
+    data.result.forEach((newLine) => {
+      const existingIndex = today.result.findIndex(
+        (line) => line.timestamp === newLine.timestamp
+      );
+      
+      if (existingIndex !== -1) {
+        // 相同时间戳，覆盖
+        today.result[existingIndex] = newLine;
+      } else {
+        // 不同时间戳，追加
+        today.result.push(newLine);
+      }
+    });
+    
+    // 使用合并后的 today 数据进行更新
+    return await update(client, today);
   } else {
     // 无记录，进行插入
     const { error } = await client.from(AI_ANALYSIS_BUCKET).insert(data);

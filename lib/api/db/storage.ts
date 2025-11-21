@@ -118,6 +118,30 @@ const uploadBlob = async (
   return data.path;
 };
 
+/**
+ * 将Buffer图片上传到supabase存储中（服务端使用）
+ * @param imgBuffer
+ * @param name
+ */
+const uploadBuffer = async (
+  client: SupabaseClient,
+  imgBuffer: Buffer,
+  name: string
+) => {
+  const { data, error } = await client.storage
+    .from(AI_ANALYSIS_BUCKET)
+    .upload(`${FOLDER}/${name}`, imgBuffer, {
+      cacheControl: "3600",
+      upsert: true,
+      contentType: "image/jpeg",
+    });
+  if (error) {
+    throw error;
+  }
+
+  return data.path;
+};
+
 const getUrl = (client: SupabaseClient, bucket: string, path: string) => {
   return client.storage.from(bucket).getPublicUrl(path);
 };
@@ -127,6 +151,7 @@ export const storage = {
   url,
   removeAvatar,
   uploadBlob,
+  uploadBuffer,
   removeAll,
   getUrl,
 };
