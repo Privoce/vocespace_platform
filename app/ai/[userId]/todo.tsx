@@ -25,14 +25,15 @@ import { CardSize } from "antd/es/card/Card";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { TodoItem, Todos } from "@/lib/std/todo";
 import { api } from "@/lib/api";
-import { inToday } from "@/lib/std";
+import { inToday, todayTimestamp } from "@/lib/std";
 import { v4 as uuidv4 } from "uuid";
+import { PlusCircleOutlined } from "@ant-design/icons";
 
 export interface AppTodoProps {
   messageApi: MessageInstance;
   userId: string;
-  disabled?: boolean;
   client: SupabaseClient;
+  isSelf?: boolean;
 }
 
 interface TodoNode {
@@ -40,17 +41,20 @@ interface TodoNode {
   key: string;
   checked: boolean;
   date: string; // 使用字符串存储的时间戳
+  origin: TodoItem; // 原始的 TodoItem 对象，以便后续操作
+  from: string; // 来自哪个 Todos 的 date 字段
 }
 
 export function Todo({
   messageApi,
   userId,
-  disabled = false,
   client,
+  isSelf = false,
 }: AppTodoProps) {
   const { t } = useI18n();
   const [todos, setTodos] = useState<Todos[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [newTodo, setNewTodo] = useState<string>("");
   const fetchTodos = async () => {
     setLoading(true);
     const response = await api.todos.getTodos(userId);
@@ -58,7 +62,7 @@ export function Todo({
       const { todos }: { todos: Todos[] } = await response.json();
       setTodos(todos);
     } else {
-      messageApi.error(t("more.app.todo.fetch_error"));
+      messageApi.error(t("widgets.todo.error.fetch"));
     }
     setLoading(false);
   };
@@ -66,6 +70,72 @@ export function Todo({
   useEffect(() => {
     fetchTodos();
   }, [userId]);
+
+  const addTodo = async () => {
+    if (!newTodo.trim()) {
+      messageApi.warning(t("widgets.todo.warning.empty"));
+      return;
+    }
+
+    const wrapperTodo = {
+      id: userId,
+      date: todayTimestamp().toString(),
+      items: [
+        {
+          id: new Date().getTime().toString(),
+          title: newTodo,
+          visible: true,
+        },
+      ],
+    } as Todos;
+
+    await fetchAddTodo(wrapperTodo, () => {
+      setNewTodo("");
+      fetchTodos();
+    });
+  };
+
+  const fetchAddTodo = async (todo: Todos, onSuccess: () => void) => {
+    setLoading(true);
+    const response = await api.todos.add(todo);
+    if (response.ok) {
+      onSuccess();
+      messageApi.success(t("widgets.todo.success.add"));
+    } else {
+      messageApi.error(t("widgets.todo.error.add"));
+    }
+    setLoading(false);
+  };
+
+  const toggleTodo = (v: boolean, item: TodoNode) => {
+    if (v) {
+      // 如果是完成，那么需要构建成一个为origin增加done字段
+      item.origin.done = new Date().getTime();
+    } else {
+      // 去除done字段
+      delete item.origin.done;
+    }
+    // 从todos中找到对应的Todos对象并更新
+    const updatedTodo = todos.find((todo) => {
+      return todo.date === item.from;
+    });
+    // 能找到就更新，找不到说明有问题
+    if (updatedTodo) {
+      updatedTodo.items = updatedTodo.items.map((todo) => {
+        if (todo.id === item.origin.id) {
+          return item.origin;
+        }
+        return todo;
+      });
+      // 提交更新
+      fetchAddTodo(updatedTodo, () => {
+        fetchTodos();
+      });
+    } else {
+      messageApi.error(t("widgets.todo.error.fetch"));
+      return;
+    }
+  };
 
   const { todoList, todoListChecked } = useMemo(() => {
     console.warn("Rendering todoTree with todos:", todos);
@@ -78,6 +148,8 @@ export function Todo({
           key: uuidv4(),
           checked: !!todo.done,
           date: todo.id,
+          origin: todo,
+          from: todoGroup.date,
         };
 
         expandList.push(todoNode);
@@ -149,7 +221,11 @@ export function Todo({
               <div>
                 {todoList.map((item) => (
                   <div key={item.key} className={styles.todo_item}>
-                    <Checkbox checked={item.checked} disabled>
+                    <Checkbox
+                      checked={item.checked}
+                      disabled={!isSelf}
+                      onChange={(v) => toggleTodo(v.target.checked, item)}
+                    >
                       {item.title}
                     </Checkbox>
                   </div>
@@ -167,6 +243,35 @@ export function Todo({
               </div>
             )}
           </div>
+          {isSelf && (
+            <div className={styles.tree_wrapper_add}>
+              <Input
+                className={styles.todo_add_input}
+                placeholder={t("widgets.todo.add")}
+                width={"100%"}
+                value={newTodo}
+                onChange={(e) => {
+                  setNewTodo(e.target.value);
+                }}
+                size="large"
+                onPressEnter={addTodo}
+                suffix={
+                  <Button
+                    className={styles.todo_add_btn}
+                    style={{ padding: 0, height: "fit-content" }}
+                    type="text"
+                    onClick={addTodo}
+                  >
+                    <PlusCircleOutlined
+                      style={{
+                        color: isSelf ? "#fff" : "#8c8c8c",
+                      }}
+                    ></PlusCircleOutlined>
+                  </Button>
+                }
+              ></Input>
+            </div>
+          )}
         </div>
       </Card>
     </>

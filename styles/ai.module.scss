@@ -19,10 +19,17 @@
     padding-bottom: 16px;
   }
   &_list {
-    height: calc(100vh - 416px);
+    height: calc(100vh - 478px);
     scrollbar-width: thin;
     overflow-y: scroll;
     padding-bottom: 16px;
+  }
+  &_add {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
   }
 }
 

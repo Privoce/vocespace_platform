@@ -35,26 +35,16 @@ export interface Todos {
 
 // 合并只需要合并items字段，并且我们需要遍历确保不要重复添加相同id的todo item
 export const mergeTodos = (existing: Todos, incoming: Todos): Todos => {
-  const existingItemsMap: { [key: string]: TodoItem } = {};
-  existing.items.forEach((item) => {
-    existingItemsMap[item.id] = item;
-  });
+  const existingItemsMap = new Map(
+    existing.items.map((item) => [item.id, item])
+  );
 
   incoming.items.forEach((item) => {
-    if (!existingItemsMap[item.id]) {
-      existingItemsMap[item.id] = item;
-    } else {
-      // 如果已经存在，则更新字段
-      existingItemsMap[item.id] = {
-        ...existingItemsMap[item.id],
-        ...item,
-      };
-    }
+    existingItemsMap.set(item.id, item);
   });
 
   return {
-    id: existing.id,
-    date: existing.date,
-    items: Object.values(existingItemsMap),
+    ...existing,
+    items: Array.from(existingItemsMap.values()),
   };
 };

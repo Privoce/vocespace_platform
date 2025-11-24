@@ -1,6 +1,6 @@
 "use client";
 
-import { DatePicker, DatePickerProps, Skeleton } from "antd";
+import { DatePicker, DatePickerProps, Image, Skeleton } from "antd";
 import styles from "@/styles/ai.module.scss";
 import { useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
@@ -92,7 +92,7 @@ export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
                 <ReactMarkdown>{section.content}</ReactMarkdown>
               </div>
 
-              <img
+              <Image
                 src={
                   dbApi.storage.getUrl(
                     client,
@@ -106,7 +106,7 @@ export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
                   height: "auto",
                   borderRadius: "8px",
                 }}
-              />
+              ></Image>
 
               {index < content.result.length - 1 && (
                 <hr

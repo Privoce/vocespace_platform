@@ -74,3 +74,6 @@
 http://localhost:3001/auth/user/7792d9c6-bc73-4145-bfee-baa112567006?logout=true
 
 
+增加widget右侧跳转到个人待办与分析页面按钮
+
+https://www.figma.com/design/NKlzkfflv1oUlq5IOgtWnt/Timer?node-id=52-138&t=nBJXwOaQtRpUcOyb-0

@@ -41,7 +41,7 @@ export default function Page({ params }: { params: { userId: string } }) {
       {contextHolder}
       <Row style={{height: "100%"}}>
         <Col span={8}>
-          <Todo messageApi={messageApi} userId={userId} client={client}></Todo>
+          <Todo messageApi={messageApi} userId={userId} client={client} isSelf={isSelf}></Todo>
         </Col>
         <Col span={16}>
           <AIAnalysis userId={userId} client={client} messageApi={messageApi}></AIAnalysis>

@@ -61,9 +61,9 @@ export const insert = async (
   const existing = await get(client, id, date).catch(() => null);
   if (existing) {
     // 合并
-    // const merged = mergeTodos(existing, todos);
+    const merged = mergeTodos(existing, todos);
     // 更新
-    return await update(client, todos);
+    return await update(client, merged);
   }
   // 如果不存在，则直接插入
   const { error } = await client.from("todos").insert(todos);

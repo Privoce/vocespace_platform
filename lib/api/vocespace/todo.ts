@@ -1,3 +1,5 @@
+import { Todos } from "@/lib/std/todo";
+
 const API = "/api/todos";
 
 /**
@@ -10,6 +12,18 @@ export const getTodos = async (uid: string) => {
   return await fetch(url.toString());
 };
 
+export const add = async (todo: Todos) => {
+  const url = new URL(API, location.origin);
+  return await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ todo }),
+  });
+};
+
 export const todos = {
   getTodos,
+  add,
 };

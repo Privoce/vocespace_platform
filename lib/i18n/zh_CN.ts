@@ -12,14 +12,25 @@ export default {
         time: {
           start: "开始时间",
           duration: "持续时间",
-        }
-      }
+        },
+      },
     },
     todo: {
+      add: "添加待办",
       empty: "暂无待办事项",
       today_done: "今日已完成",
-      history: "历史待办"
-    }
+      history: "历史待办",
+      warning: {
+        empty: "待办事项不能为空",
+      },
+      success: {
+        add: "待办事项添加成功",
+      },
+      error: {
+        fetch: "获取待办事项失败，请重试",
+        add: "添加待办事项失败，请重试",
+      },
+    },
   },
   login: {
     title: "登陆",
@@ -32,8 +43,7 @@ export default {
     noAccount: "还没有账号？",
     createAccount: "注册一个",
     sideTitle: "Ai辅助的远程工作平台",
-    sideSubtitle:
-      "一起工作，团队对齐，AI工作总结",
+    sideSubtitle: "一起工作，团队对齐，AI工作总结",
     placeholder: {
       email: "请输入您的电子邮箱",
       pwd: "请输入您的密码",
@@ -160,7 +170,8 @@ export default {
       to_profile: "前往个人主页",
       account: {
         delete: "删除账号",
-        delete_confirm: "您确定要删除您的账号吗？此操作不可撤销。我们将删除您的所有个人数据和空间信息。",
+        delete_confirm:
+          "您确定要删除您的账号吗？此操作不可撤销。我们将删除您的所有个人数据和空间信息。",
         delete_success: "账号删除成功，感谢您的使用！",
         delete_error: "账号删除失败，请重试或联系支持团队。",
         delete_btn: "删除账号",

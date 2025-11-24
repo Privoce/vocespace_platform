@@ -16,8 +16,20 @@ export default {
       },
     },
     todo: {
-      empty: "No to-do items",
+      add: "Add todo",
+      empty: "No todo items",
       today_done: "Completed today",
+      history: "Todo history",
+      warning: {
+        empty: "Todo cannot be empty",
+      },
+      success: {
+        add: "Todo added successfully",
+      },
+      error: {
+        fetch: "Failed to fetch todo, please try again",
+        add: "Failed to add todo, please try again",
+      },
     },
   },
   login: {
