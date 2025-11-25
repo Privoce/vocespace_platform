@@ -21,7 +21,7 @@ interface AIAnalysisProps {
 
 export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
   const { t } = useI18n();
-  const [date, setDate] = useState(dayjs(todayTimestamp()));
+  const [date, setDate] = useState(dayjs.utc(todayTimestamp()));
   const [loading, setLoading] = useState(false);
   const onChange: DatePickerProps["onChange"] = (date, dateString) => {
     setDate(date as Dayjs);
