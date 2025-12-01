@@ -34,14 +34,15 @@ export interface Todos {
 }
 
 // 合并只需要合并items字段，并且我们需要遍历确保不要重复添加相同id的todo item
-export const mergeTodos = (existing: Todos, incoming: Todos): Todos => {
+export const coverTodos = (existing: Todos, incoming: Todos): Todos => {
   const existingItemsMap = new Map(
     existing.items.map((item) => [item.id, item])
   );
 
-  incoming.items.forEach((item) => {
+  // 遍历incoming的items，覆盖或添加到existingItemsMap中,适合更新，添加
+  for (const item of incoming.items) {
     existingItemsMap.set(item.id, item);
-  });
+  }
 
   return {
     ...existing,

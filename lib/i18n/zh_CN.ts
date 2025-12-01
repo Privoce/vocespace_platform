@@ -25,8 +25,10 @@ export default {
       },
       success: {
         add: "待办事项添加成功",
+        delete: "待办事项删除成功",
       },
       error: {
+        delete: "删除待办事项失败，请重试",
         fetch: "获取待办事项失败，请重试",
         add: "添加待办事项失败，请重试",
       },

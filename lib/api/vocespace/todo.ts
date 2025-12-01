@@ -23,7 +23,18 @@ export const add = async (todo: Todos) => {
   });
 };
 
+export const deleteTodo = async (uid: string, date: string, todoId: string) => {
+  const url = new URL(API, location.origin);
+  url.searchParams.append("uid", uid);
+  url.searchParams.append("date", date);
+  url.searchParams.append("todoId", todoId);
+  return await fetch(url.toString(), {
+    method: "DELETE",
+  });
+};
+
 export const todos = {
   getTodos,
   add,
+  deleteTodo,
 };

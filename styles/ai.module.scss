@@ -35,7 +35,10 @@
 
 .todo_item {
   width: 100%;
-  padding: 4px 0;
+  padding: 4px 8px 4px 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .analysis {

@@ -58,3 +58,39 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const uid = request.nextUrl.searchParams.get("uid");
+    const date = request.nextUrl.searchParams.get("date");
+    const todoId = request.nextUrl.searchParams.get("todoId");
+
+    if (!uid || !date || !todoId) {
+      return NextResponse.json(
+        { error: "Missing uid, date, or todoId parameter" },
+        { status: 400 }
+      );
+    }
+
+    const client = await createClient();
+    const success = await dbApi.todos.deleteTodo(client, uid, date, todoId);
+
+    if (success) {
+      return NextResponse.json(
+        { message: "Todo deleted successfully" },
+        { status: 200 }
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Failed to delete todo" },
+        { status: 500 }
+      );
+    }
+  } catch (e) {
+    console.error("Error in DELETE /api/todos:", e);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}

@@ -27,7 +27,11 @@ import { TodoItem, Todos } from "@/lib/std/todo";
 import { api } from "@/lib/api";
 import { inToday, todayTimestamp } from "@/lib/std";
 import { v4 as uuidv4 } from "uuid";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import {
+  CloseCircleOutlined,
+  CloseOutlined,
+  PlusCircleOutlined,
+} from "@ant-design/icons";
 
 export interface AppTodoProps {
   messageApi: MessageInstance;
@@ -54,6 +58,7 @@ export function Todo({
   const { t } = useI18n();
   const [todos, setTodos] = useState<Todos[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [editingTarget, setEditingTarget] = useState<TodoNode | null>(null);
   const [newTodo, setNewTodo] = useState<string>("");
   const fetchTodos = async () => {
     setLoading(true);
@@ -138,7 +143,7 @@ export function Todo({
   };
 
   const { todoList, todoListChecked } = useMemo(() => {
-    console.warn("Rendering todoTree with todos:", todos);
+    // console.warn("Rendering todoTree with todos:", todos);
     const expandList: TodoNode[] = [];
     const checkedList: TodoNode[] = [];
     todos.forEach((todoGroup) => {
@@ -170,6 +175,59 @@ export function Todo({
       todoListChecked: checkedList,
     };
   }, [todos]);
+
+  const startEditing = (item: TodoNode) => {
+    if (isSelf) {
+      setEditingTarget(item);
+    }
+  };
+
+  const saveEdit = (item: TodoNode) => {
+    // 如果压根没有修改，就不提交
+    if (item.origin.title === editingTarget?.title) {
+      setEditingTarget(null);
+      return;
+    }
+    // 从todos中找到对应的Todos对象并更新
+    const updatedTodo = todos.find((todo) => {
+      return todo.date === item.from;
+    });
+
+    // 能找到就更新，找不到说明有问题
+    if (updatedTodo) {
+      updatedTodo.items = updatedTodo.items.map((todo) => {
+        if (todo.id === item.origin.id) {
+          item.origin.title = editingTarget?.title || item.origin.title;
+          return item.origin;
+        }
+        return todo;
+      });
+
+      // 提交更新
+      fetchAddTodo(updatedTodo, () => {
+        fetchTodos();
+      });
+    } else {
+      messageApi.error(t("widgets.todo.error.fetch"));
+      return;
+    }
+    setEditingTarget(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingTarget(null);
+  };
+
+  const deleteTodo = async (item: TodoNode) => {
+    const response = await api.todos.deleteTodo(userId, item.from, item.origin.id);
+    if (response.ok) {
+      fetchTodos();
+      messageApi.success(t("widgets.todo.success.delete"));
+    } else {
+      messageApi.error(t("widgets.todo.error.delete"));
+    }
+    setLoading(false);
+  };
 
   return (
     <>
@@ -225,9 +283,45 @@ export function Todo({
                       checked={item.checked}
                       disabled={!isSelf}
                       onChange={(v) => toggleTodo(v.target.checked, item)}
-                    >
-                      {item.title}
-                    </Checkbox>
+                    ></Checkbox>
+                    <div style={{ marginLeft: "8px", flex: 1 }}>
+                      {editingTarget?.key === item.key ? (
+                        <Input
+                          value={editingTarget?.title || ""}
+                          styles={{ input: { fontSize: 14 } }}
+                          size="small"
+                          autoFocus
+                          onChange={(e) =>
+                            setEditingTarget({
+                              ...editingTarget,
+                              title: e.target.value,
+                            })
+                          }
+                          onBlur={() => saveEdit(item)}
+                          onPressEnter={() => saveEdit(item)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") {
+                              cancelEdit();
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div
+                          onClick={() => startEditing(item)}
+                          style={{
+                            // textDecoration: item.checked ? 'line-through' : 'none',
+                            cursor: !isSelf ? "default" : "pointer",
+                            color: "#fff",
+                          }}
+                        >
+                          {item.title}
+                        </div>
+                      )}
+                    </div>
+                    <CloseOutlined
+                      style={{ fontSize: 12 }}
+                      onClick={() => deleteTodo(item)}
+                    ></CloseOutlined>
                   </div>
                 ))}
               </div>

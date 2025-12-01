@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { mergeTodos, TodoItem, Todos } from "@/lib/std/todo";
+import { coverTodos, TodoItem, Todos } from "@/lib/std/todo";
 
 export const getAll = async (
   client: SupabaseClient,
@@ -61,9 +61,9 @@ export const insert = async (
   const existing = await get(client, id, date).catch(() => null);
   if (existing) {
     // 合并
-    const merged = mergeTodos(existing, todos);
+    const covered = coverTodos(existing, todos);
     // 更新
-    return await update(client, merged);
+    return await update(client, covered);
   }
   // 如果不存在，则直接插入
   const { error } = await client.from("todos").insert(todos);
@@ -87,6 +87,35 @@ export const insertSingle = async (
   };
 
   return await insert(client, todos);
+};
+
+const deleteTodo = async (
+  client: SupabaseClient,
+  uid: string,
+  date: string,
+  todoId: string
+): Promise<boolean> => {
+  // 先获取当天的todos
+  const todos = await get(client, uid, date);
+  // 过滤掉要删除的todo item
+  const filteredItems = todos.items.filter((item) => item.id !== todoId);
+
+  if (filteredItems.length === todos.items.length) {
+    // 如果长度没有变化，说明没有找到要删除的todoId，直接返回true
+    return true;
+  }
+
+  if (filteredItems.length === 0) {
+    // 如果过滤后没有剩余item，则删除整条记录
+    return await remove(client, uid, date);
+  } else {
+    // 否则更新items字段
+    const updatedTodos: Todos = {
+      ...todos,
+      items: filteredItems,
+    };
+    return await update(client, updatedTodos);
+  }
 };
 
 const remove = async (
@@ -125,5 +154,6 @@ export const todos = {
   insertSingle,
   update,
   remove,
-  removeAll
+  removeAll,
+  deleteTodo
 };
