@@ -154,7 +154,9 @@ function LoginForm({ searchParams }: LoginPageProps) {
         );
       } else {
         // add params to redirectTo
-        redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}&from=${params.from}`;
+        redirectTo += `?spaceName=${encodeURIComponent(
+          params.spaceName
+        )}&from=${params.from}`;
       }
     }
 
@@ -171,7 +173,10 @@ function LoginForm({ searchParams }: LoginPageProps) {
   /**
    * login with google oauth when clicked continue with google button
    */
-  const signInWithGoogle = async (directly = false, from: "vocespace" | "space" = "vocespace") => {
+  const signInWithGoogle = async (
+    directly = false,
+    from: "vocespace" | "space" = "vocespace"
+  ) => {
     try {
       setLoading(true);
 
@@ -188,17 +193,22 @@ function LoginForm({ searchParams }: LoginPageProps) {
       if (directly) {
         const params = getParams();
         if (params.spaceName) {
-          redirectTo += `?spaceName=${encodeURIComponent(params.spaceName)}&from=${from}`;
+          redirectTo += `?spaceName=${encodeURIComponent(
+            params.spaceName
+          )}&from=${from}`;
         }
       }
 
-      console.log("Google OAuth redirectTo:", redirectTo);
-
+      // console.log("Google OAuth redirectTo:", redirectTo);
+      // 增加queryParams: { prompt: "select_account" }，确保每次都弹出账号选择
       const { data, error } = await client.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectTo,
           skipBrowserRedirect: false,
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
 
@@ -217,7 +227,11 @@ function LoginForm({ searchParams }: LoginPageProps) {
 
     const params = getParams();
 
-    if (params && (params.from === "vocespace" || params.from === "space") && params.auth === "google") {
+    if (
+      params &&
+      (params.from === "vocespace" || params.from === "space") &&
+      params.auth === "google"
+    ) {
       // directly use google oauth
       setHasTriggeredOAuth(true);
       signInWithGoogle(true, params.from);
