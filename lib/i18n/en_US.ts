@@ -174,6 +174,33 @@ export default {
         "Usernames can only contain letters, numbers, Chinese characters, underscores, and hyphens, and cannot be repeated",
     },
     setting: {
+      general: {
+        title: "Basic Settings",
+        volume: "Volume",
+        blur: "Video Blur",
+        screenBlur: "Screen Blur",
+        openShareAudio: "Enable Screen Sharing Audio",
+        openPromptSound: "Enable New User Joining Notification Sound",
+        open: "ON",
+        close: "OFF",
+        ai: {
+          title: "AI Settings",
+          source: "AI Work Log Source Data",
+          max: "Max",
+          mid: "Medium",
+          easy: "Easy",
+          spent: "Time Spent",
+          todo: "Combined with ToDo",
+          extraction: "Extract Content Fineness",
+        },
+        save: "Save Settings",
+        success: {
+          save: "Settings saved successfully",
+        },
+        error: {
+          save: "Settings saved failed, please try again",
+        },
+      },
       to_profile: "Go to profile page",
       account: {
         delete: "Delete account",
