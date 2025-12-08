@@ -16,10 +16,10 @@ export default {
       },
     },
     todo: {
-      add: "Add todo",
-      empty: "No todo items",
+      add: "Add task",
+      empty: "No task",
       today_done: "Completed today",
-      history: "Todo history",
+      history: "Current list",
       warning: {
         empty: "Todo cannot be empty",
       },

@@ -6,9 +6,7 @@
   justify-content: center;
   padding: 0 16px;
   gap: 8px;
-  
 }
-
 
 .container {
   height: 100%;
@@ -34,6 +32,17 @@
 
 .items {
   margin-top: 16px;
+  &_general {
+    &_title {
+      font-size: 20px;
+      font-weight: 700;
+      border-bottom: 1px solid #666;
+      padding: 8px 0;
+    }
+    &_item {
+      margin-top: 16px;
+    }
+  }
   &_delete {
     display: flex;
     width: 100%;

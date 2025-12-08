@@ -83,6 +83,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
           },
           Slider: {
             railHoverBg: '#888',
+            railBg: '#666',
           },
           Select: {
             selectorBg: '#1E1E1E',

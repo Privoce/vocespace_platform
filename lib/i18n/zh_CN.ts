@@ -19,7 +19,7 @@ export default {
       add: "添加待办",
       empty: "暂无待办事项",
       today_done: "今日已完成",
-      history: "历史待办",
+      history: "待办事项",
       warning: {
         empty: "待办事项不能为空",
       },
@@ -169,6 +169,33 @@ export default {
         "用户名只能包含字母、数字、中文、下划线和连字符且不可重复",
     },
     setting: {
+      general: {
+        title: "基础设置",
+        volume: "音量",
+        blur: "视频模糊",
+        screenBlur: "屏幕模糊",
+        openShareAudio: "开启屏幕分享音频",
+        openPromptSound: "开启新用户加入提示音",
+        open: "开启",
+        close: "关闭",
+        ai: {
+          title: "AI设置",
+          source: "AI 工作日志源数据",
+          max: "精细",
+          mid: "适中",
+          easy: "简单",
+          spent: "时间统计",
+          todo: "结合待办事项",
+          extraction: "提取内容精细度",
+        },
+        save:"保存设置",
+        success: {
+          save: "设置保存成功",
+        },
+        error: {
+          save: "设置保存失败，请重试",
+        },
+      },
       to_profile: "前往个人主页",
       account: {
         delete: "删除账号",

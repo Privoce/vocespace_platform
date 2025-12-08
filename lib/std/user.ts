@@ -1,5 +1,5 @@
 import { Nullable } from ".";
-import { Space, SpaceType } from "./space";
+import { ParticipantSettings, Space, SpaceType } from "./space";
 
 export interface UserInfo {
   id: string;
@@ -22,6 +22,7 @@ export interface UserInfo {
   wx: Nullable<string>;
   avatar: Nullable<string>;
   online: boolean;
+  settings: Nullable<ParticipantSettings>;
 }
 
 export const DEFAULT_USER_INFO = (id: string, username: string): UserInfo => ({
@@ -39,6 +40,7 @@ export const DEFAULT_USER_INFO = (id: string, username: string): UserInfo => ({
   website: null,
   wx: null,
   online: false,
+  settings: null,
 });
 
 export interface User {

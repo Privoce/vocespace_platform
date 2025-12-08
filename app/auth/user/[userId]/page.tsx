@@ -148,6 +148,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
           messageApi={messageApi}
           setPageType={setUserPageType}
           deleteAccount={deleteAccount}
+          updateUserInfo={updateUserInfo}
         ></UserSettings>
       ) : (
         <>

@@ -1,3 +1,118 @@
+export type Extraction = 'easy' | 'medium' | 'max';
+
+export interface AICutParticipantConf {
+  /**
+   * 是否需要在任务栏显示分析时间以及需要进行时间统计
+   */
+  spent: boolean;
+  /**
+   * 是否要结合待办事项进行分析
+   */
+  todo: boolean;
+  /**
+   * 提取内容配置的精细度
+   */
+  extraction: Extraction;
+}
+
+
+/**
+ * 用户的基础设置，去除了不必要的信息
+ */
+export interface ParticipantSettings {
+  // /**
+  //  * 客户端版本
+  //  */
+  // version: string;
+  // /**
+  //  * 参与者名称
+  //  */
+  // name: string;
+  /**
+   * 音量
+   */
+  volume: number;
+  /**
+   * 视频模糊度
+   */
+  blur: number;
+  /**
+   * 屏幕分享模糊度
+   */
+  screenBlur: number;
+  // /**
+  //  * 用户状态：系统状态/用户自定义状态
+  //  */
+  // status: UserStatus | string;
+  // socketId: string;
+  // /**
+  //  * 参与者开始时间
+  //  */
+  // startAt: number;
+  // /**
+  //  * 虚拟形象
+  //  */
+  // virtual: {
+  //   role: ModelRole;
+  //   bg: ModelBg;
+  //   enabled: boolean;
+  // };
+  /**
+   * 是否开启屏幕分享音频
+   */
+  openShareAudio: boolean;
+  /**
+   * 是否开启新用户加入时的提示音
+   */
+  openPromptSound: boolean;
+  // /**
+  //  * 用户应用同步
+  //  */
+  // sync: AppKey[];
+  // /**
+  //  * 用户应用权限
+  //  */
+  // auth: AppAuth;
+  // /**
+  //  * 用户应用数据
+  //  */
+  // appDatas: {
+  //   /**
+  //    * 待办事项应用数据
+  //    */
+  //   todo?: SpaceTodo[];
+  //   /**
+  //    * 计时器应用数据
+  //    */
+  //   timer?: SpaceTimer;
+  //   /**
+  //    * 倒计时应用数据
+  //    */
+  //   countdown?: SpaceCountdown;
+  // };
+  // /**
+  //  * 当前是否请求举手
+  //  */
+  // raiseHand: boolean;
+  /**
+   * ai相关的功能设置
+   */
+  ai: {
+    /**
+     * AI截图分析功能
+     */
+    cut: AICutParticipantConf;
+  };
+  // /**
+  //  * 是否在线，如果用户在线则新用户如果重名无法加入，如果不在线则允许重名加入
+  //  */
+  // online: boolean;
+  // /**
+  //  * 是否认证通过
+  //  */
+  // isAuth: boolean;
+}
+
 export enum FrequencyInterval {
   Daily = "daily",
   Weekly = "weekly",

@@ -350,7 +350,7 @@ export function Todo({
                 size="large"
                 onPressEnter={addTodo}
                 suffix={
-                  <Button
+                  isSelf && (<Button
                     className={styles.todo_add_btn}
                     style={{ padding: 0, height: "fit-content" }}
                     type="text"
@@ -361,7 +361,7 @@ export function Todo({
                         color: isSelf ? "#fff" : "#8c8c8c",
                       }}
                     ></PlusCircleOutlined>
-                  </Button>
+                  </Button>)
                 }
               ></Input>
             </div>
