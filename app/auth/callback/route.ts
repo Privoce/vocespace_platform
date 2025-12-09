@@ -28,12 +28,12 @@ export async function GET(request: NextRequest) {
       const isLocalEnv = process.env.NODE_ENV === "development";
       const baseUrl = isLocalEnv ? origin : "https://home.vocespace.com";
 
-      // if contains spaceName, redirect to vocespace.com use vocespaceUrl()
-      if (spaceName) {
-        // 获取用户信息（新用户可能不存在）
-        const userInfo = await dbApi.userInfo.getOrNull(supabase, userId);
-
-        if (userInfo && userInfo.username) {
+      // 获取用户信息（新用户可能不存在）
+      const userInfo = await dbApi.userInfo.getOrNull(supabase, userId);
+      if (userInfo && userInfo.username) {
+        // 用户存在就改变online状态
+        await dbApi.userInfo.online(supabase, userId);
+        if (spaceName) {
           // 用户已有昵称,说明用户已经注册完毕，直接跳转到 重定向位置
           redirectUrl = vocespaceUrl(
             userId,
@@ -41,17 +41,17 @@ export async function GET(request: NextRequest) {
             from === "space" ? "space" : "vocespace",
             spaceName
           );
-          // 这里需要发送一个请求修改online状态
-          await dbApi.userInfo.online(supabase, userId);
         } else {
-          // 用户需要完成 onboarding，跳转到用户页面
-          redirectUrl = `${baseUrl}/auth/user/${userId}?spaceName=${encodeURIComponent(
-            spaceName
-          )}&from=${from === "space" ? "space" : "vocespace"}`;
+          redirectUrl = `${baseUrl}/auth/user/${userId}`;
         }
       } else {
-        // 没有 spaceName，跳转到用户页面
-        redirectUrl = `${baseUrl}/auth/user/${userId}`;
+        redirectUrl = `${baseUrl}/auth/user/${userId}${
+          spaceName
+            ? `?spaceName=${encodeURIComponent(spaceName)}&from=${
+                from === "space" ? "space" : "vocespace"
+              }`
+            : ""
+        }`;
       }
 
       console.log("Redirecting to:", redirectUrl);
