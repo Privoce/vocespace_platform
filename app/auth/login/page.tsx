@@ -11,8 +11,9 @@ import {
   EyeInvisibleOutlined,
   EyeOutlined,
   GoogleOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
-import { Button, Divider, Input, message } from "antd";
+import { Button, Divider, Input, message, Spin } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useCallback, Suspense } from "react";
 
@@ -53,6 +54,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [screenLoading, setScreenLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [hasTriggeredOAuth, setHasTriggeredOAuth] = useState(false);
@@ -217,11 +219,14 @@ function LoginForm({ searchParams }: LoginPageProps) {
       messageApi.error(
         e instanceof Error ? e.message : t("login.googleSignInFail")
       );
+    } finally {
+      // setScreenLoading(false);
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    setScreenLoading(true);
     // 防止重复触发 OAuth 流程
     if (hasTriggeredOAuth) return;
 
@@ -232,11 +237,30 @@ function LoginForm({ searchParams }: LoginPageProps) {
       (params.from === "vocespace" || params.from === "space") &&
       params.auth === "google"
     ) {
+      console.warn("Auto trigger Google OAuth login flow");
+
       // directly use google oauth
       setHasTriggeredOAuth(true);
       signInWithGoogle(true, params.from);
+    } else {
+      setScreenLoading(false);
     }
+
+    return () => {
+      setScreenLoading(false);
+    };
   }, [urlSearchParams, searchParams]);
+
+  if (screenLoading) {
+    return (
+      <Spin
+        indicator={<LoadingOutlined spin />}
+        size="large"
+        tip="Loading..."
+        fullscreen
+      />
+    );
+  }
 
   return (
     <div className={styles.login}>
@@ -391,9 +415,5 @@ function LoginForm({ searchParams }: LoginPageProps) {
 
 // 主页面组件，包装 LoginForm 在 Suspense 中
 export default function Page({ searchParams }: LoginPageProps) {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginForm searchParams={searchParams} />
-    </Suspense>
-  );
+  return <LoginForm searchParams={searchParams} />;
 }
