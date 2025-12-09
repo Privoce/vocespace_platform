@@ -151,7 +151,7 @@ export function UserSettings({
         </Button>
       </div>
       <div className={styles.items}>
-        <div className={styles.items_general}>
+        {/* <div className={styles.items_general}>
           <div className={styles.items_general_title}>
             {t("user.setting.general.title")}
           </div>
@@ -283,7 +283,7 @@ export function UserSettings({
                 }}
               ></Checkbox.Group>
             </div>
-          </div>
+          </div> 
 
           <div className={styles.items_general_item}>
             <div>{t("user.setting.general.ai.extraction")}</div>
@@ -319,7 +319,7 @@ export function UserSettings({
               </Button>
             )}
           </div>
-        </div>
+        </div>*/}
 
         <div className={styles.items_delete}>
           <div className={styles.items_delete_title}>

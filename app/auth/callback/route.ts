@@ -3,7 +3,6 @@ import { vocespaceUrl } from "@/lib/std/space";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const spaceName = request.nextUrl.searchParams.get("spaceName");
@@ -42,6 +41,8 @@ export async function GET(request: NextRequest) {
             from === "space" ? "space" : "vocespace",
             spaceName
           );
+          // 这里需要发送一个请求修改online状态
+          await dbApi.userInfo.online(supabase, userId);
         } else {
           // 用户需要完成 onboarding，跳转到用户页面
           redirectUrl = `${baseUrl}/auth/user/${userId}?spaceName=${encodeURIComponent(
