@@ -415,5 +415,9 @@ function LoginForm({ searchParams }: LoginPageProps) {
 
 // 主页面组件，包装 LoginForm 在 Suspense 中
 export default function Page({ searchParams }: LoginPageProps) {
-  return <LoginForm searchParams={searchParams} />;
+  return (
+    <Suspense>
+      <LoginForm searchParams={searchParams} />
+    </Suspense>
+  );
 }
