@@ -1,3 +1,5 @@
+import { todayTimestamp } from ".";
+
 export interface AICutAnalysisResLine {
   /**
    * 当前用户进行任务的时间戳，由外部传入
@@ -15,6 +17,11 @@ export interface AICutAnalysisResLine {
    * 花费的时间统计，单位分钟，当结果解析出含有same字段时需要处理
    */
   duration: number;
+  /**
+   * 与历史任务相似的时间戳，当AICutAnalysisBack.same字段不为0时会将本次的timestamp作为相似任务的时间戳
+   * 这样就可以获取了第二张图片的时间戳信息了
+   */
+  same?: number;
 }
 /**
  * 最终的AI裁剪分析结果，包含多行结果，形成完整的分析报告(任务总结)
@@ -47,4 +54,10 @@ export interface AICutAnalysis {
    * jsonb 存储AICutAnalysisRes结果
    */
   result: AICutAnalysisResLine[]; // JSON.stringify(AICutAnalysisResLine[])
+}
+
+export const DEFAULT_AI_CUT_ANALYSIS: AICutAnalysis = {
+  id: "",
+  date: todayTimestamp().toString(),
+  result: [],
 }
