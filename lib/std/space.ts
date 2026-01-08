@@ -1,4 +1,7 @@
-export type Extraction = 'easy' | 'medium' | 'max';
+import { v4 as uuidv4 } from "uuid";
+import { space } from "../api/db/space";
+
+export type Extraction = "easy" | "medium" | "max";
 
 export interface AICutParticipantConf {
   /**
@@ -14,7 +17,6 @@ export interface AICutParticipantConf {
    */
   extraction: Extraction;
 }
-
 
 /**
  * 用户的基础设置，去除了不必要的信息
@@ -150,10 +152,19 @@ export interface Space {
    */
   start_at?: string;
   end_at?: string;
+  /**
+   * Frequency of the space (e.g., daily, weekly, monthly)
+   */
   freq: Frequency;
+  /**
+   * 费用，订阅费用
+   */
   fee: number;
   owner_id: string;
   state?: SpaceState;
+  /**
+   * 订阅人数
+   */
   sub_count: number;
   online_count?: number;
   /**
@@ -264,3 +275,233 @@ export const vocespaceUrlVisit = (spaceName: string) => {
 export const vocespaceName = (username: string, spaceName?: string) => {
   return spaceName || username;
 };
+
+export interface RecordSettings {
+  /**
+   * egress 服务ID for LiveKit
+   */
+  egressId?: string;
+  /**
+   * 录制文件存储路径
+   */
+  filePath?: string;
+  /**
+   * 录制是否开启
+   */
+  active: boolean;
+}
+
+export interface ChildRoom {
+  /**
+   * room name
+   */
+  name: string;
+  /**
+   * 参与者ID
+   * participantId
+   */
+  participants: string[];
+  /**
+   * room owner ID
+   */
+  ownerId: string;
+  /**
+   * is private room or not
+   */
+  isPrivate: boolean;
+}
+
+export type AppKey = "timer" | "countdown" | "todo";
+
+export interface SpaceAIConf {
+  cut: {
+    enabled: boolean;
+    freq: number; // 截图频率，单位分钟
+  };
+}
+
+export interface ParticipantWorkConf {
+  /**
+   * 是否开启工作模式, 在space中表示空间是否开启工作模式（目前没有作用）
+   */
+  enabled: boolean;
+  /**
+   * 视频模糊度, 在这里是存储用户原先的模糊度设置
+   */
+  videoBlur: number;
+  /**
+   * 屏幕分享模糊度，在这里是存储用户原先的模糊度设置
+   */
+  screenBlur: number;
+}
+
+export interface SpaceWorkConf extends ParticipantWorkConf {
+  /**
+   * 是否开启AI分析，开启后每个开始工作模式的用户都会自动启动AI分析
+   * 当然，用户可以选择开启后手动关闭AI分析
+   */
+  useAI: boolean;
+  /**
+   * 同步的配置项
+   * - 视频模糊度
+   * - 屏幕分享模糊度
+   */
+  sync: boolean;
+}
+
+/**
+ * vocespace.com 等在客户端真实的空间结构，在后端中我们需要清洗成Space结构以便存储和处理
+ */
+export interface VoceSpaceInfo {
+  participants: {
+    [participantId: string]: ParticipantSettings;
+  };
+  // /**
+  //  * 用户自定义状态列表，这会保存任意在空间的参与者设置过的自定义状态
+  //  * 主要用于在空间内的用户自定义状态选择
+  //  */ @deprecated 由用户内部维护
+  // status?: UserDefineStatus[];
+  /**
+   * 空间主持人ID
+   */
+  ownerId: string;
+  /**
+   * 空间管理员ID列表，空间管理员可获得owner同等权限但无法对owner进行管理
+   * owner可以将其他用户设置为管理员，每个空间最多5个管理员，管理员可以转让自己的身份
+   * 管理员只能管理空间用户，无法删除空间，但可以更改部分空间设置
+   *
+   * 管理员可以管理用户的权限和应用：
+   *  - 帮助修改用户的名称
+   *  - 关闭/开启用户的麦克风和摄像头
+   *  - 开放空间应用给其他用户使用
+   *  - 录制空间
+   *  - 删除用户子房间
+   *  - 设置用户声音/虚化
+   *  - 强制用户离开空间
+   *
+   *  ---
+   *
+   * 管理员无法进行以下操作：
+   *  - 删除空间
+   *  - 转让空间所有权
+   *  - 修改空间的持久化设置
+   *  - 修改空间的访客加入设置
+   *  - 修改空间的AI相关设置
+   *  - 更改空间证书
+   */
+  managers: string[];
+  /**
+   * 是否允许访客加入
+   * 若为false，则只有认证用户才能加入空间
+   */
+  allowGuest: boolean;
+  /**
+   * 录制设置
+   */
+  record: RecordSettings;
+  /**
+   * 空间创建的时间戳
+   */
+  startAt: number;
+  /**
+   * 空间中子房间列表
+   */
+  children: ChildRoom[];
+  // 应用列表，由主持人设置参与者可以使用的应用
+  apps: AppKey[];
+  /**
+   * 空间是否为持久化空间
+   * - false: 临时空间，所有数据不会持久化，空间内的应用数据也不会保存
+   * - true: 持久化空间，空间内的数据会持久化，应用数据也会保存
+   */
+  persistence: boolean;
+  /**
+   * 空间的AI相关配置
+   */
+  ai: SpaceAIConf;
+  /**
+   * 工作模式相关配置
+   *
+   */
+  work: SpaceWorkConf;
+}
+
+export interface VoceSpaceInfoMapObj {
+  [spaceName: string]: VoceSpaceInfo;
+}
+
+export type VoceSpaceInfoMap = Map<string, VoceSpaceInfo>;
+
+/**
+ * 转换并清理MapObj为Space结构
+ * 将对象转换为 Map 结构， 由于 TS 不支持直接将对象转换为 Map，所以需要手动转换
+ * **平台端传过来的都是Obj结构的，转为Map更容易后续处理**
+ * @param obj
+ */
+export const convertObjToSpace = (obj: VoceSpaceInfoMapObj): Space[] => {
+  const spaces: Space[] = [];
+  for (const [spaceName, info] of Object.entries(obj)) {
+    const space: Space = {
+      id: uuidv4(),
+      name: spaceName,
+      desc: "",
+      //2025-11-17T22:31:43+00:00
+      created_at: new Date(info.startAt).toISOString(),
+      expired_at: new Date(info.startAt + 365 * 24 * 3600 * 1000).toISOString(), // default 1 year later
+      freq: { interval: FrequencyInterval.Flexible },
+      fee: 0,
+      owner_id: info.ownerId,
+      sub_count: Object.keys(info.participants).length,
+      url: vocespaceUrlVisit(spaceName),
+      images: [],
+      ty: SpaceType.Meeting,
+      public: !info.allowGuest,
+    };
+    spaces.push(space);
+  }
+  return spaces;
+};
+
+/**
+ * ## 合并或覆盖空间信息
+ * 合并或覆盖空间信息，这个方法用于清理空间信息，由于我们会从vocespace.com获取空间信息还会从数据库中获取空间信息
+ * - remote: 来自 vocespace.com 的空间信息
+ * - local: 来自我们数据库的空间信息
+ * 这两个空间信息可能是会有重复的，我们需要合并或覆盖这些信息以便后续使用
+ * ### 覆盖规则
+ * 只要发现remote和local的url是一致的，直接用local覆盖remote，否则不覆盖，不用name判断的原因是name可能会重复，但url是唯一的
+ * @param remote
+ * @param local
+ */
+export const mergeOrCoverSpaces = (
+  remote: Space[],
+  local: Space[]
+): Space[] => {
+  const allSpaces: Space[] = [];
+  const localMap: Map<string, Space> = new Map();
+  // 先将local空间信息存入Map，key为url，value为Space对象
+  for (const space of local) {
+    localMap.set(space.url, space);
+  }
+  // 遍历remote空间信息，判断是否有对应的local空间信息
+  for (const rSpace of remote) {
+    if (localMap.has(rSpace.url)) {
+      // 如果有对应的local空间信息，则用local覆盖remote
+      allSpaces.push(localMap.get(rSpace.url)!);
+      // 删除已经处理过的local空间信息
+      localMap.delete(rSpace.url);
+    } else {
+      // 如果没有对应的local空间信息，则直接使用remote空间信息
+      allSpaces.push(rSpace);
+    }
+  }
+  // 最后将剩余的local空间信息添加到allSpaces中
+  for (const lSpace of localMap.values()) {
+    allSpaces.push(lSpace);
+  }
+  return allSpaces;
+};
+
+export const sortSpacesByUserNum = (spaces: Space[]): Space[] => {
+  return spaces.sort((a, b) => (b.sub_count || 0) - (a.sub_count || 0));
+}

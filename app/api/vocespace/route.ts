@@ -1,9 +1,16 @@
 import { dbApi } from "@/lib/api/db";
 import { CreateSpaceParams } from "@/lib/api/vocespace/space";
+import {
+  convertObjToSpace,
+  mergeOrCoverSpaces,
+  sortSpacesByUserNum,
+  Space,
+  VoceSpaceInfoMapObj,
+} from "@/lib/std/space";
 import { UserInfo } from "@/lib/std/user";
 import { createClient } from "@/lib/supabase/server";
 import { PostgrestSingleResponse, User } from "@supabase/supabase-js";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE = "https://vocespace.com/api/space";
 
@@ -33,6 +40,26 @@ export async function OPTIONS(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const userId = request.nextUrl.searchParams.get("userId");
+    const space = request.nextUrl.searchParams.get("space");
+
+    const client = await createClient();
+    if (space === "all") {
+      // 向 vocespace.com 转发请求
+      const url = new URL(API_BASE);
+
+      url.searchParams.append("all", "true");
+      url.searchParams.append("detail", "true");
+      const response = await fetch(url.toString(), {
+        method: "GET",
+      });
+
+      const remoteSpacesObj: VoceSpaceInfoMapObj = await response.json();
+      const remoteSpaces = convertObjToSpace(remoteSpacesObj);
+      const localSpaces: Space[] = await dbApi.space.get(client);
+      const spaces = sortSpacesByUserNum(mergeOrCoverSpaces(remoteSpaces, localSpaces));
+
+      return NextResponse.json({ spaces }, { status: 200 });
+    }
 
     if (!userId) {
       return new Response(JSON.stringify({ error: "userId is required" }), {
@@ -44,7 +71,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const client = await createClient();
     const user = await dbApi.userInfo.getOrNull(client, userId);
 
     if (!user) {

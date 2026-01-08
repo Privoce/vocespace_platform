@@ -157,8 +157,12 @@
       }
 
       .name {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
+        text-align: justify;
+        height: 3.5em;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .flex_line {
         display: inline-flex;

@@ -13,8 +13,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(80vh - 128px);
+  height: fit-content;
   &_tabs {
     width: 1080px;
+    height: 100%;
   }
 }

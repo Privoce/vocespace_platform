@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Button, Card, Tag } from "antd";
+import { Button, Card, Image, Tag } from "antd";
 import {
   UserOutlined,
   EyeOutlined,
@@ -72,7 +72,9 @@ export function SpaceCard({
     // Handle join space logic
     // window.open(url, "_blank");
     // jump to space detail page
-    router.push("/space/" + space.id);
+    // router.push("/space/" + space.id);
+    // 暂时使用直接跳转平台房间的方式
+    window.open(space.url, "_blank");
   };
 
   const handleCardClick = () => {
@@ -80,14 +82,6 @@ export function SpaceCard({
     console.log("Navigate to space:", space.id);
     router.push("/space/" + space.id);
   };
-
-  const spaceImage = useMemo(() => {
-    if (space.images.length > 0) {
-      return space.images[0];
-    } else {
-      return undefined;
-    }
-  }, [space]);
 
   if (cardType === "edit") {
     return (
@@ -101,8 +95,8 @@ export function SpaceCard({
       >
         <div className={styles.spaceCard_edit}>
           <div className={styles.spaceCard_edit_imageSection}>
-            {spaceImage ? (
-              <img src={spaceImage} alt={createSpaceName(space.name)} />
+            {space.images.length > 0 ? (
+              <Image src={space.images[0]} alt={createSpaceName(space.name)} />
             ) : (
               <div
                 style={{
@@ -110,13 +104,12 @@ export function SpaceCard({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: !spaceImage ? "#22ccee" : "transparent",
+                  backgroundColor: "#22CCEE",
                   color: "#fff",
                   whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
                   overflow: "hidden",
-                  padding: !spaceImage ? 16 : 0,
-                  height: "100%"
+                  height: "100%",
                 }}
               >
                 {createSpaceName(space.name)}
@@ -170,7 +163,26 @@ export function SpaceCard({
         style={style}
       >
         <div className={styles.imageSection}>
-          <img src={spaceImage} alt={createSpaceName(space.name)} />
+          {space.images.length > 0 ? (
+            <Image src={space.images[0]} alt={createSpaceName(space.name)} />
+          ) : (
+            <div
+              style={{
+                fontSize: 32,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#22CCEE",
+                color: "#fff",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                height: "100%",
+              }}
+            >
+              {createSpaceName(space.name)}
+            </div>
+          )}
 
           <div
             className={`${styles.feeTag} ${space.fee === 0 ? styles.free : ""}`}
@@ -184,7 +196,7 @@ export function SpaceCard({
             <div className={styles.name}>{space.name}</div>
           </div>
 
-          <div className={styles.content_line_desc}>{space.desc}</div>
+          <div className={styles.content_line_desc}>{space.desc || "no description"}</div>
 
           <div className={styles.content_line}>
             <div className={styles.flex_line}>

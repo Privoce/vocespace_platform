@@ -12,6 +12,10 @@ import {
   SpaceType,
 } from "@/lib/std/space";
 import styles from "@/styles/home_main.module.scss";
+import { api } from "@/lib/api";
+import { dbApi } from "@/lib/api/db";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 
 const mockSpaces: Space[] = [];
 // Mock data for demonstration
@@ -158,18 +162,24 @@ export function DisplaySpaces() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const client = createClient();
+
+  const getSpaces = async () => {
+    setLoading(true);
+    const response = await api.vocespace.allSpaces();
+    if (response.ok) {
+      const { spaces }: { spaces: Space[] } = await response.json();
+      setSpaces(spaces);
+    } else {
+      console.error("Failed to fetch spaces");
+    }
+
+    setLoading(false);
+  };
 
   useEffect(() => {
     // Simulate API call
-    const loadSpaces = async () => {
-      setLoading(true);
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setSpaces(mockSpaces);
-      setLoading(false);
-    };
-
-    loadSpaces();
+    getSpaces();
   }, []);
 
   const onChange = (key: string) => {
@@ -180,20 +190,23 @@ export function DisplaySpaces() {
     {
       key: "all",
       label: "全部",
-      children: <></>,
-      // spaces.length == 0 ? (
-      //   <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-      // ) : (
-      //   <List
-      //     grid={{ gutter: 20, column: 3 }}
-      //     dataSource={spaces}
-      //     renderItem={(space) => (
-      //       <List.Item>
-      //         {/* <SpaceCard key={space.id} {...space} /> */}
-      //       </List.Item>
-      //     )}
-      //   ></List>
-      // ),
+      children: (
+        <div className={styles.spaceGrid}>
+          {spaces.length == 0 ? (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          ) : (
+            <List
+              grid={{ gutter: 20, column: 3 }}
+              dataSource={spaces}
+              renderItem={(space) => (
+                <List.Item>
+                  <SpaceCard key={space.id} space={space} />
+                </List.Item>
+              )}
+            ></List>
+          )}
+        </div>
+      ),
     },
     // {
     //   key: SpaceType.Meeting,
@@ -217,16 +230,16 @@ export function DisplaySpaces() {
     //     </div>
     //   ),
     // },
-    {
-      key: SpaceType.Hobbies,
-      label: "兴趣",
-      children: <div className={styles.spaceGrid}></div>,
-    },
-    {
-      key: SpaceType.Tech,
-      label: "技术",
-      children: <div className={styles.spaceGrid}></div>,
-    },
+    // {
+    //   key: SpaceType.Hobbies,
+    //   label: "兴趣",
+    //   children: <div className={styles.spaceGrid}></div>,
+    // },
+    // {
+    //   key: SpaceType.Tech,
+    //   label: "技术",
+    //   children: <div className={styles.spaceGrid}></div>,
+    // },
   ];
 
   if (loading) {

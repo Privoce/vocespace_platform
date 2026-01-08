@@ -1,5 +1,6 @@
 const VOCESPACE_API = "/api/vocespace";
 
+
 export interface CreateSpaceParams {
   spaceName: string;
   ownerId: string;
@@ -30,6 +31,15 @@ export const createSpace = (
   });
 };
 
+export const allSpaces = (): Promise<Response> => {
+  const url = new URL(VOCESPACE_API, location.origin);
+  url.searchParams.append("space", "all");
+  return fetch(url.toString(), {
+    method: "GET",
+  });
+};
+
 export const vocespace = {
   createSpace,
+  allSpaces,
 };

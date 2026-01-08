@@ -47,6 +47,9 @@ export const isMobile = (): boolean => {
 // console.warn(createSpaceName("中文 交流")); // 中交
 // ```
 export const createSpaceName = (spaceName: string): string => {
+  // 如果字符少于8个就不处理
+  if (spaceName.trim().length <= 8) return spaceName.trim();
+
   const trimmed = spaceName.trim();
   const separators = /[-_\s]+/;
   const parts = trimmed.split(separators).filter((part) => part.length > 0);
