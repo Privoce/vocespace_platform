@@ -107,6 +107,7 @@ export function AIAnalysis({ userId, client, messageApi }: AIAnalysisProps) {
                   maxWidth: "320px",
                   height: "auto",
                   borderRadius: "8px",
+                  marginRight: "12px",
                 }}
               ></Image>
 

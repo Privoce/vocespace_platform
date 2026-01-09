@@ -46,9 +46,9 @@ export const isMobile = (): boolean => {
 // console.warn(createSpaceName("  mixed_语言-test  ")); // M语T
 // console.warn(createSpaceName("中文 交流")); // 中交
 // ```
-export const createSpaceName = (spaceName: string): string => {
+export const createSpaceName = (spaceName: string, limit = 3): string => {
   // 如果字符少于8个就不处理
-  if (spaceName.trim().length <= 8) return spaceName.trim();
+  if (spaceName.trim().length <= limit) return spaceName.trim();
 
   const trimmed = spaceName.trim();
   const separators = /[-_\s]+/;

@@ -164,7 +164,7 @@ export function SpaceCard({
       >
         <div className={styles.imageSection}>
           {space.images.length > 0 ? (
-            <Image src={space.images[0]} alt={createSpaceName(space.name)} />
+            <Image src={space.images[0]} alt={createSpaceName(space.name, 9)} />
           ) : (
             <div
               style={{
@@ -180,7 +180,7 @@ export function SpaceCard({
                 height: "100%",
               }}
             >
-              {createSpaceName(space.name)}
+              {createSpaceName(space.name, 9)}
             </div>
           )}
 
