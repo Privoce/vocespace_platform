@@ -36,8 +36,12 @@ export async function GET(request: NextRequest) {
         if (spaceName) {
           // 用户已有昵称,说明用户已经注册完毕，直接跳转到 重定向位置
           redirectUrl = vocespaceUrl(
-            userId,
-            userInfo.username,
+            // userId,
+            // userInfo.username,
+            {
+              ...userInfo,
+              id: userId,
+            },
             from === "space" ? "space" : "vocespace",
             spaceName
           );
