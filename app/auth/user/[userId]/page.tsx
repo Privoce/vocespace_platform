@@ -108,15 +108,16 @@ export default function UserPage({ params }: { params: { userId: string } }) {
     const spaceName = urlSearchParams.get("spaceName");
     const from = urlSearchParams.get("from");
     if (spaceName && from && !needsOnboarding && user && userInfo) {
-      const redirectUrl = vocespaceUrl(
+      vocespaceUrl(
         {
           ...userInfo,
           id: user.id,
         },
         from === "space" ? "space" : "vocespace",
         spaceName
-      );
-      router.replace(redirectUrl);
+      ).then((redirectUrl) => {
+        router.replace(redirectUrl);
+      });
     }
   }, [urlSearchParams, client, user, needsOnboarding, userInfo]);
 

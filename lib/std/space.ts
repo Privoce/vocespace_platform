@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import jwt from "jsonwebtoken";
 import { UserInfo } from "./user";
 import { currentTimestamp, todayTimestamp } from ".";
 export type Extraction = "easy" | "medium" | "max";
@@ -324,24 +323,26 @@ export interface TokenResult {
 
 const SECRET_KEY = "vocespace_secret_privoce";
 
-const generateToken = (payload: TokenResult): string => {
-  const now = Math.floor(currentTimestamp() / 1000);
-  const iat = payload.iat && payload.iat > 0 ? payload.iat : now;
-  const exp =
-    payload.exp && payload.exp > 0 ? payload.exp : now + 3600 * 24 * 15; // default 15 days
+const generateToken = async (payload: TokenResult): Promise<string> => {
+  try {
+    const response = await fetch("/api/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-  const claims: Record<string, any> = {
-    ...payload,
-    iat,
-    exp,
-  };
+    if (!response.ok) {
+      throw new Error("Failed to generate token");
+    }
 
-  if (!claims.id && claims.userId) claims.id = claims.userId;
-
-  return jwt.sign(claims, SECRET_KEY, {
-    algorithm: "HS256",
-    noTimestamp: true,
-  });
+    const data = await response.json();
+    return data.token;
+  } catch (error) {
+    console.error("Token generation error:", error);
+    throw error;
+  }
 };
 
 export default {
@@ -367,14 +368,14 @@ const castUserToTokenResult = (user: UserInfo, space?: string): TokenResult => {
  * @param spaceName spaceName if is undefined, will use username as spaceName
  * @returns
  */
-export const vocespaceUrl = (
+export const vocespaceUrl = async (
   info: UserInfo,
   authFrom: "vocespace" | "space" = "vocespace",
   spaceName?: string
-): string => {
+): Promise<string> => {
   let redirectTo = authFrom === "space" ? "space.voce.chat" : "vocespace.com";
   let res = castUserToTokenResult(info, spaceName);
-  let token = generateToken(res);
+  let token = await generateToken(res);
   return `https://${redirectTo}/api/connection-details?auth=${authFrom}&token=${token}`;
 };
 

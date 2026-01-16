@@ -148,7 +148,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
     const userInfo = await dbApi.userInfo.getOrNull(client, data.user.id);
     if (params && (params.from === "vocespace" || params.from === "space")) {
       if (userInfo && userInfo.username) {
-        redirectTo = vocespaceUrl(userInfo, params.from, params.spaceName);
+        redirectTo = await vocespaceUrl(userInfo, params.from, params.spaceName);
       } else {
         // add params to redirectTo
         redirectTo += `?spaceName=${encodeURIComponent(

@@ -163,7 +163,7 @@ export default function OnboardingDrive({
         // if has spaceName param, redirect to vocespace url
         const spaceName = searchParams.get("spaceName");
         if (spaceName) {
-          const redirectUrl = vocespaceUrl(
+          const redirectUrl = await vocespaceUrl(
             // user.id,
             // updateData.username,
             DEFAULT_USER_INFO(user.id, updateData.username),
