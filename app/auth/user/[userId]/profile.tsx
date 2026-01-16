@@ -146,7 +146,13 @@ export function UserProfile({
   const router = useRouter();
   const selfVocespaceUrl = useMemo(() => {
     if (user && userInfo?.username) {
-      return vocespaceUrl(user.id, userInfo.username, "vocespace");
+      return vocespaceUrl(
+        {
+          ...userInfo,
+          id: user.id,
+        },
+        "vocespace"
+      );
     } else {
       return "";
     }
@@ -357,15 +363,15 @@ export function UserProfile({
           userInfo?.subscribes?.length || 0
         }`,
         open: openPubSpace.includes("subscribes"),
-        onclick: ()=> {}
+        onclick: () => {},
       },
       {
         icon: <AppstoreOutlined className={styles.icon} />,
         label: `${t("user.profile.ai")} `,
         open: openPubSpace.includes("ai"),
-        onclick: ()=> {
+        onclick: () => {
           router.push(`/ai/${userId}`);
-        }
+        },
       },
     ];
   }, [userInfo, user, t, openPubSpace, spaces]);

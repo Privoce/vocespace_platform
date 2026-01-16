@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/i18n";
-import { initSpace, Space, vocespaceUrl, vocespaceUrlVisit } from "@/lib/std/space";
+import { initSpace, Space, vocespaceUrlVisit } from "@/lib/std/space";
 import styles from "@/styles/space_pub.module.scss";
 import { Input, Modal, Radio } from "antd";
 import { MessageInstance } from "antd/es/message/interface";

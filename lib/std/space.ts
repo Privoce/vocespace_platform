@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
-import { space } from "../api/db/space";
-
+import jwt from "jsonwebtoken";
+import { UserInfo } from "./user";
+import { currentTimestamp, todayTimestamp } from ".";
 export type Extraction = "easy" | "medium" | "max";
 
 export interface AICutParticipantConf {
@@ -248,6 +249,116 @@ export const initSpace = (partial: Partial<Space>): Space | null => {
 };
 
 /**
+ * 可以是具体的房间名
+ * 1. $empty: 任意空房间
+ * 2. string: 其他自定义房间名, 具体房间，用户将直接进入该房间，如果没有则创建该房间
+ * 3. $space: 空间主房间，无需后续进行任何处理，用户将直接进入空间主房间
+ */
+export type RoomType = "$empty" | string | "$space";
+
+/**
+ * IdentityType 用户身份类型
+ * - assistant: 客服人员
+ * - customer: 顾客
+ * - other: 其他身份
+ * - owner: 空间所有者
+ * - manager: 空间管理员
+ * - participant: 空间参与者
+ * - guest: 访客
+ */
+export type IdentityType =
+  | "assistant"
+  | "customer"
+  | "other"
+  | "owner"
+  | "manager"
+  | "participant"
+  | "guest";
+
+export interface TokenResult {
+  /**
+   * 用户ID
+   */
+  id: string;
+  /**
+   * 用户名
+   */
+  username: string;
+  /**
+   * 头像
+   */
+  avatar?: string;
+  /**
+   * 空间名
+   */
+  space: string;
+  /**
+   * 房间名
+   */
+  room?: RoomType;
+  /**
+   * 身份类型，目前只有两种
+   * IdentityType 用户身份类型
+   * - assistant: 客服人员
+   * - customer: 顾客
+   * - other: 其他身份
+   * - owner: 空间所有者
+   * - manager: 空间管理员
+   * - participant: 空间参与者
+   * - guest: 访客
+   */
+  identity: IdentityType;
+  /**
+   * 是否经过预加入页面进入，如果为true则需要经过预加入页面，false则直接进入
+   */
+  preJoin?: boolean;
+  /**
+   * 签发时间
+   */
+  iat?: number;
+  /**
+   * 过期时间
+   */
+  exp?: number;
+}
+
+const SECRET_KEY = "vocespace_secret_privoce";
+
+const generateToken = (payload: TokenResult): string => {
+  const now = Math.floor(currentTimestamp() / 1000);
+  const iat = payload.iat && payload.iat > 0 ? payload.iat : now;
+  const exp =
+    payload.exp && payload.exp > 0 ? payload.exp : now + 3600 * 24 * 15; // default 15 days
+
+  const claims: Record<string, any> = {
+    ...payload,
+    iat,
+    exp,
+  };
+
+  if (!claims.id && claims.userId) claims.id = claims.userId;
+
+  return jwt.sign(claims, SECRET_KEY, {
+    algorithm: "HS256",
+    noTimestamp: true,
+  });
+};
+
+export default {
+  generateToken,
+};
+
+const castUserToTokenResult = (user: UserInfo, space?: string): TokenResult => {
+  return {
+    id: user.id,
+    username: user.username,
+    avatar: user.avatar || undefined,
+    space: space || user.username,
+    identity: "participant",
+  };
+};
+
+/**
  * create vocespace url for direct access
  * - authFrom:
  *  - vocespace | google =>
@@ -257,15 +368,14 @@ export const initSpace = (partial: Partial<Space>): Space | null => {
  * @returns
  */
 export const vocespaceUrl = (
-  userId: string,
-  username: string,
+  info: UserInfo,
   authFrom: "vocespace" | "space" = "vocespace",
   spaceName?: string
 ): string => {
   let redirectTo = authFrom === "space" ? "space.voce.chat" : "vocespace.com";
-  return `https://${redirectTo}/${
-    spaceName || username
-  }?auth=${authFrom}&userId=${userId}&username=${username}`;
+  let res = castUserToTokenResult(info, spaceName);
+  let token = generateToken(res);
+  return `https://${redirectTo}/api/connection-details?auth=${authFrom}&token=${token}`;
 };
 
 export const vocespaceUrlVisit = (spaceName: string) => {
@@ -504,4 +614,4 @@ export const mergeOrCoverSpaces = (
 
 export const sortSpacesByUserNum = (spaces: Space[]): Space[] => {
   return spaces.sort((a, b) => (b.sub_count || 0) - (a.sub_count || 0));
-}
+};

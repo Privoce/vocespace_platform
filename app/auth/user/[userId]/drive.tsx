@@ -13,7 +13,7 @@ import { dbApi } from "@/lib/api/db";
 import type { UploadFile } from "antd";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { MessageInstance } from "antd/es/message/interface";
-import { UserInfo } from "@/lib/std/user";
+import { DEFAULT_USER_INFO, UserInfo } from "@/lib/std/user";
 import { type User } from "@supabase/supabase-js";
 import { Nullable } from "@/lib/std";
 import styles from "./drive.module.scss";
@@ -125,7 +125,10 @@ export default function OnboardingDrive({
         online: true,
       };
 
-      const success = await dbApi.userInfo.insert(client, updateData as UserInfo);
+      const success = await dbApi.userInfo.insert(
+        client,
+        updateData as UserInfo
+      );
 
       if (success) {
         const space = initSpace({
@@ -161,8 +164,9 @@ export default function OnboardingDrive({
         const spaceName = searchParams.get("spaceName");
         if (spaceName) {
           const redirectUrl = vocespaceUrl(
-            user.id,
-            updateData.username,
+            // user.id,
+            // updateData.username,
+            DEFAULT_USER_INFO(user.id, updateData.username),
             "vocespace",
             spaceName
           );

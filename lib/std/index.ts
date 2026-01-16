@@ -20,6 +20,10 @@ export const todayTimestamp = (): number => {
   return startOfDay.valueOf();
 };
 
+export const currentTimestamp = (): number => {
+  return dayjs.utc().valueOf();
+};
+
 /**
  * Check if a timestamp is within today (UTC)
  */

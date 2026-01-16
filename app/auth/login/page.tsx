@@ -148,12 +148,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
     const userInfo = await dbApi.userInfo.getOrNull(client, data.user.id);
     if (params && (params.from === "vocespace" || params.from === "space")) {
       if (userInfo && userInfo.username) {
-        redirectTo = vocespaceUrl(
-          data.user.id,
-          userInfo.username,
-          params.from,
-          params.spaceName
-        );
+        redirectTo = vocespaceUrl(userInfo, params.from, params.spaceName);
       } else {
         // add params to redirectTo
         redirectTo += `?spaceName=${encodeURIComponent(
@@ -161,7 +156,6 @@ function LoginForm({ searchParams }: LoginPageProps) {
         )}&from=${params.from}`;
       }
     }
-
     // 这里说明当前用户已经登录成功，进行跳转，但是在跳转之前我们需要尝试到数据库中获取更完整的用户信息
     // 如果有的话说明用户是已经完成用户身份登记的，需要把online状态更新为true，如果没有则会让profile页面
     // 去完成用户信息登记（这里直接跳转，不需要干预）
