@@ -1,5 +1,5 @@
 import { dbApi } from "@/lib/api/db";
-import { vocespaceUrlServer } from "@/lib/std/space";
+import { vocespaceUrlServer } from "@/lib/std/server";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
