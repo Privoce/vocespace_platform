@@ -4,6 +4,36 @@
  */
 
 import sharp from 'sharp';
+import jwt from 'jsonwebtoken';
+import { TokenResult } from './space';
+import { currentTimestamp } from '.';
+
+const SECRET_KEY = "vocespace_secret_privoce";
+
+/**
+ * Generate JWT token on the server side
+ * This is the server-side version that doesn't use fetch
+ */
+export const generateTokenServer = (payload: TokenResult): string => {
+  const now = Math.floor(currentTimestamp() / 1000);
+  const iat = payload.iat && payload.iat > 0 ? payload.iat : now;
+  const exp =
+    payload.exp && payload.exp > 0 ? payload.exp : now + 3600 * 24 * 15; // default 15 days
+
+  const claims: Record<string, any> = {
+    ...payload,
+    iat,
+    exp,
+  };
+
+  if (!claims.id && claims.userId) claims.id = claims.userId;
+
+  const token = jwt.sign(claims, SECRET_KEY, {
+    algorithm: "HS256",
+  });
+
+  return token;
+};
 
 /**
  * Server-side image compression using sharp

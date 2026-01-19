@@ -379,6 +379,24 @@ export const vocespaceUrl = async (
   return `https://${redirectTo}/api/connection-details?auth=${authFrom}&token=${token}`;
 };
 
+/**
+ * Server-side version of vocespaceUrl that doesn't use fetch
+ * Use this in API routes and server components
+ */
+export const vocespaceUrlServer = (
+  info: UserInfo,
+  authFrom: "vocespace" | "space" = "vocespace",
+  spaceName?: string
+): string => {
+  // We'll import this dynamically to avoid bundling server code in client
+  const { generateTokenServer } = require('./server');
+  
+  let redirectTo = authFrom === "space" ? "space.voce.chat" : "vocespace.com";
+  let res = castUserToTokenResult(info, spaceName);
+  let token = generateTokenServer(res);
+  return `https://${redirectTo}/api/connection-details?auth=${authFrom}&token=${token}`;
+};
+
 export const vocespaceUrlVisit = (spaceName: string) => {
   return `https://vocespace.com/${spaceName}`;
 };
