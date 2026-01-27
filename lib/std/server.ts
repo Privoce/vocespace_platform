@@ -56,12 +56,13 @@ const castUserToTokenResult = (user: UserInfo, space?: string): TokenResult => {
 export const vocespaceUrlServer = (
   info: UserInfo,
   authFrom: "vocespace" | "space" = "vocespace",
-  spaceName?: string
+  spaceName?: string,
+  redirectTo?: string,
 ): string => {
-  let redirectTo = authFrom === "space" ? "space.voce.chat" : "vocespace.com";
+  let redirectToUrl = redirectTo || (authFrom === "space" ? "space.voce.chat" : "vocespace.com");
   let res = castUserToTokenResult(info, spaceName);
   let token = generateTokenServer(res);
-  return `https://${redirectTo}/api/connection-details?auth=${authFrom}&token=${token}`;
+  return `https://${redirectToUrl}/api/connection-details?auth=${authFrom}&token=${token}`;
 };
 
 /**

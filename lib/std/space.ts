@@ -225,7 +225,7 @@ export const initSpace = (partial: Partial<Space>): Space | null => {
   const now = Date.now();
   const nowString = new Date(now).toLocaleString();
   const default_expired_at = new Date(
-    now + 365 * 24 * 3600 * 1000
+    now + 365 * 24 * 3600 * 1000,
   ).toLocaleString();
   if (!partial.name || !partial.url || !partial.owner_id) {
     return null;
@@ -371,12 +371,14 @@ const castUserToTokenResult = (user: UserInfo, space?: string): TokenResult => {
 export const vocespaceUrl = async (
   info: UserInfo,
   authFrom: "vocespace" | "space" = "vocespace",
-  spaceName?: string
+  spaceName?: string,
+  redirectTo?: string,
 ): Promise<string> => {
-  let redirectTo = authFrom === "space" ? "space.voce.chat" : "vocespace.com";
+  let redirectToUrl =
+    redirectTo || (authFrom === "space" ? "space.voce.chat" : "vocespace.com");
   let res = castUserToTokenResult(info, spaceName);
   let token = await generateToken(res);
-  return `https://${redirectTo}/api/connection-details?auth=${authFrom}&token=${token}`;
+  return `https://${redirectToUrl}/api/connection-details?auth=${authFrom}&token=${token}`;
 };
 
 export const vocespaceUrlVisit = (spaceName: string) => {
@@ -586,7 +588,7 @@ export const convertObjToSpace = (obj: VoceSpaceInfoMapObj): Space[] => {
  */
 export const mergeOrCoverSpaces = (
   remote: Space[],
-  local: Space[]
+  local: Space[],
 ): Space[] => {
   const allSpaces: Space[] = [];
   const localMap: Map<string, Space> = new Map();

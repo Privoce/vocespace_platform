@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const spaceName = request.nextUrl.searchParams.get("spaceName");
   const from = request.nextUrl.searchParams.get("from");
+  const redirectTo = request.nextUrl.searchParams.get("redirectTo");
   const origin = request.nextUrl.origin;
 
   console.log("Callback received:", { code, spaceName, from, origin });
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("OAuth error:", error);
       return NextResponse.redirect(
-        `${origin}/auth/auth-code-error?error=${error.message}`
+        `${origin}/auth/auth-code-error?error=${error.message}`,
       );
     }
 
@@ -46,7 +47,8 @@ export async function GET(request: NextRequest) {
                 id: userId,
               },
               from === "space" ? "space" : "vocespace",
-              spaceName
+              spaceName,
+              redirectTo || undefined,
             );
           } else {
             redirectUrl = `${baseUrl}/auth/user/${userId}`;
@@ -58,7 +60,7 @@ export async function GET(request: NextRequest) {
                   from === "space" ? "space" : "vocespace"
                 }`
               : ""
-          }`;
+          }${redirectTo ? `&redirectTo=${encodeURIComponent(redirectTo)}` : ""}`;
         }
 
         console.log("Redirecting to:", redirectUrl);
@@ -67,8 +69,8 @@ export async function GET(request: NextRequest) {
         console.error("Error during callback processing:", err);
         return NextResponse.redirect(
           `${origin}/auth/auth-code-error?error=${encodeURIComponent(
-            err instanceof Error ? err.message : "Unknown error"
-          )}`
+            err instanceof Error ? err.message : "Unknown error",
+          )}`,
         );
       }
     }

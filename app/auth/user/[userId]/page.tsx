@@ -107,6 +107,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
     // 处理from和spaceName参数，如果存在说明需要跳转到会议空间
     const spaceName = urlSearchParams.get("spaceName");
     const from = urlSearchParams.get("from");
+    const redirectTo = urlSearchParams.get("redirectTo");
     if (spaceName && from && !needsOnboarding && user && userInfo) {
       vocespaceUrl(
         {
@@ -114,7 +115,8 @@ export default function UserPage({ params }: { params: { userId: string } }) {
           id: user.id,
         },
         from === "space" ? "space" : "vocespace",
-        spaceName
+        spaceName,
+        redirectTo || undefined,
       ).then((redirectUrl) => {
         router.replace(redirectUrl);
       });
