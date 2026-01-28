@@ -126,7 +126,7 @@ export default {
       subscribes: "History",
       ai: "AI Analysis & TODO",
       placeholder: {
-        desc: "This user is lazy and leaves nothing.",
+        desc: "An awesome netizen.",
       },
       joinUs: {
         title: "Join Vocespace",
