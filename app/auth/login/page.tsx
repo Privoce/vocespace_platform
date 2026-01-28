@@ -56,6 +56,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
   const [password, setPassword] = useState("");
   const [screenLoading, setScreenLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
   const [hasTriggeredOAuth, setHasTriggeredOAuth] = useState(false);
   const router = useRouter();
@@ -105,18 +106,50 @@ function LoginForm({ searchParams }: LoginPageProps) {
       setLoading(true);
 
       if (isSignUp) {
+        if (password !== confirmPassword) {
+          setLoading(false);
+          messageApi.error(
+            t("login.passwordNotMatch") || "Passwords do not match",
+          );
+          return;
+        }
+        // 将携带的参数传递给注册请求，用户就可以通过注册确认的email链接继续完成注册流程进行相应的跳转
+        const searchParamsStr = searchParams
+          ? new URLSearchParams(
+              searchParams as Record<string, string>,
+            ).toString()
+          : urlSearchParams
+            ? urlSearchParams.toString()
+            : "";
+        let emailRedirectTo = `${window.location.origin}/auth/verify_email`;
+        if (searchParamsStr) {
+          emailRedirectTo += `?${searchParamsStr}`;
+        }
+
         const { error } = await client.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/verify_email`,
+            emailRedirectTo,
           },
         });
         if (error) throw error;
-        messageApi.success(t("login.signupSuccess"));
-        setEmail("");
-        setPassword("");
-        setIsSignUp(false);
+
+        // 注册后尝试直接使用相同凭证登录；若因邮箱确认等原因失败，则提示注册成功并清理表单
+        const { error: signinError } = await client.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signinError) {
+          messageApi.success(t("login.signupSuccess"));
+          setEmail("");
+          setPassword("");
+          setConfirmPassword("");
+          setIsSignUp(false);
+        } else {
+          await getUserAndRedirect();
+        }
       } else {
         const { error } = await client.auth.signInWithPassword({
           email,
@@ -148,11 +181,16 @@ function LoginForm({ searchParams }: LoginPageProps) {
     const userInfo = await dbApi.userInfo.getOrNull(client, data.user.id);
     if (params && (params.from === "vocespace" || params.from === "space")) {
       if (userInfo && userInfo.username) {
-        redirectTo = await vocespaceUrl(userInfo, params.from, params.spaceName, params.redirectTo);
+        redirectTo = await vocespaceUrl(
+          userInfo,
+          params.from,
+          params.spaceName,
+          params.redirectTo,
+        );
       } else {
         // add params to redirectTo
         redirectTo += `?spaceName=${encodeURIComponent(
-          params.spaceName
+          params.spaceName,
         )}&from=${params.from}`;
       }
     }
@@ -172,7 +210,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
    */
   const signInWithGoogle = async (
     directly = false,
-    from: "vocespace" | "space" = "vocespace"
+    from: "vocespace" | "space" = "vocespace",
   ) => {
     try {
       setLoading(true);
@@ -191,13 +229,11 @@ function LoginForm({ searchParams }: LoginPageProps) {
         const params = getParams();
         if (params.spaceName) {
           redirectTo += `?spaceName=${encodeURIComponent(
-            params.spaceName
+            params.spaceName,
           )}&from=${from}`;
         }
         if (params.redirectTo) {
-          redirectTo += `&redirectTo=${encodeURIComponent(
-            params.redirectTo
-          )}`;
+          redirectTo += `&redirectTo=${encodeURIComponent(params.redirectTo)}`;
         }
       }
 
@@ -217,7 +253,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
       if (error) throw error;
     } catch (e) {
       messageApi.error(
-        e instanceof Error ? e.message : t("login.googleSignInFail")
+        e instanceof Error ? e.message : t("login.googleSignInFail"),
       );
     } finally {
       // setScreenLoading(false);
@@ -317,7 +353,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
           <Divider style={{ borderColor: "#4c4c4c", margin: 0 }}>or</Divider>
           <div className={styles.login_left_main_form}>
             <div className={styles.login_form_input}>
-              <div className={styles.login_form_input_title}>邮箱</div>
+              <div className={styles.login_form_input_title}>Email</div>
               <Input
                 value={email}
                 size="large"
@@ -329,9 +365,11 @@ function LoginForm({ searchParams }: LoginPageProps) {
             <div className={styles.login_form_input}>
               <div className={styles.login_form_input_title}>
                 <span>{t("login.password")}</span>
-                <a href="/auth/forget-password" style={{ color: "#22ccee" }}>
-                  {t("login.forgetPwd")}
-                </a>
+                {!isSignUp && (
+                  <a href="/auth/forget-password" style={{ color: "#22ccee" }}>
+                    {t("login.forgetPwd")}
+                  </a>
+                )}
               </div>
 
               <Input.Password
@@ -355,6 +393,40 @@ function LoginForm({ searchParams }: LoginPageProps) {
                   )
                 }
               />
+              {isSignUp && (
+                <div
+                  className={styles.login_form_input}
+                  style={{ marginTop: 20 }}
+                >
+                  <div className={styles.login_form_input_title}>
+                    <span>Confirm Password</span>
+                  </div>
+
+                  <Input.Password
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    size="large"
+                    placeholder={
+                      t("login.placeholder.confirmPwd") || "Confirm password"
+                    }
+                    iconRender={(visible) =>
+                      visible ? (
+                        <EyeOutlined
+                          style={{
+                            color: "#22ccee",
+                          }}
+                        />
+                      ) : (
+                        <EyeInvisibleOutlined
+                          style={{
+                            color: "#22ccee",
+                          }}
+                        />
+                      )
+                    }
+                  />
+                </div>
+              )}
             </div>
 
             <Button
@@ -381,7 +453,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
             </div>
           ) : (
             <div className={styles.login_left_main_signup}>
-              {t("login.noAccount")}
+              {t("login.noAccount")}{" "}
               <a
                 onClick={() => setIsSignUp(true)}
                 style={{

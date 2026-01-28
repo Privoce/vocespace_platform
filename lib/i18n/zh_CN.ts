@@ -3,7 +3,7 @@ export default {
     save: "保存",
     cancel: "取消",
     uploading: "上传中...",
-    copyright: "© 2025 VoceSpace, Inc. 保留所有权利。",
+    copyright: "© 2026 VoceSpace, Inc. 保留所有权利。",
     getUserInfoFail: "获取用户信息失败",
   },
   widgets: {
@@ -46,9 +46,11 @@ export default {
     createAccount: "注册一个",
     sideTitle: "Ai辅助的远程工作平台",
     sideSubtitle: "一起工作，团队对齐，AI工作总结",
+    passwordNotMatch: "两次输入的密码不一致",
     placeholder: {
       email: "请输入您的电子邮箱",
       pwd: "请输入您的密码",
+      confirmPwd: "请再次输入您的密码",
     },
     signin: "登录",
     signinFail: "登录失败",

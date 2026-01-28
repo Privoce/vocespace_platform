@@ -3,7 +3,7 @@ export default {
     save: "Save",
     cancel: "Cancel",
     uploading: "Uploading...",
-    copyright: "© 2025 VoceSpace, Inc. All rights reserved.",
+    copyright: "© 2026 VoceSpace, Inc. All rights reserved.",
     getUserInfoFail: "Failed to get user information",
   },
   widgets: {
@@ -44,9 +44,11 @@ export default {
     createAccount: "Register one",
     sideTitle: "VoceSpace is for Remote Teams",
     sideSubtitle: "AI Worklog, Team spaces, Private Rooms",
+    passwordNotMatch: "Passwords do not match",
     placeholder: {
       email: "Please enter your email address",
       pwd: "Please enter your password",
+      confirmPwd: "Please re-enter your password",
     },
     signin: "Login",
     signinFail: "Login failed",
