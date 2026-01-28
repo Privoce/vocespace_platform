@@ -35,6 +35,7 @@ export default {
     },
   },
   login: {
+    confirmPassword: "确认密码",
     title: "登陆",
     welcome: "欢迎使用VoceSpace",
     continue: "请登录以继续",

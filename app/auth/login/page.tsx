@@ -121,9 +121,10 @@ function LoginForm({ searchParams }: LoginPageProps) {
           : urlSearchParams
             ? urlSearchParams.toString()
             : "";
+        // 使用 hash (#) 承载查询参数，避免 Supabase 在生成验证链接时丢弃 query string
         let emailRedirectTo = `${window.location.origin}/auth/verify_email`;
         if (searchParamsStr) {
-          emailRedirectTo += `?${searchParamsStr}`;
+          emailRedirectTo += `#${searchParamsStr}`;
         }
 
         const { error } = await client.auth.signUp({
@@ -133,6 +134,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
             emailRedirectTo,
           },
         });
+
         if (error && error.code !== "email_not_confirmed") {
           messageApi.error(error.message);
           throw error;
@@ -402,7 +404,7 @@ function LoginForm({ searchParams }: LoginPageProps) {
                   style={{ marginTop: 20 }}
                 >
                   <div className={styles.login_form_input_title}>
-                    <span>Confirm Password</span>
+                    <span>{t("login.confirmPassword")}</span>
                   </div>
 
                   <Input.Password

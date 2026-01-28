@@ -33,6 +33,7 @@ export default {
     },
   },
   login: {
+    confirmPassword: "Confirm Password",
     title: "Login",
     welcome: "Welcome to VoceSpace",
     continue: "Please log in to continue",
