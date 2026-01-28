@@ -133,7 +133,10 @@ function LoginForm({ searchParams }: LoginPageProps) {
             emailRedirectTo,
           },
         });
-        if (error) throw error;
+        if (error && error.code !== "email_not_confirmed") {
+          messageApi.error(error.message);
+          throw error;
+        }
 
         // 注册后尝试直接使用相同凭证登录；若因邮箱确认等原因失败，则提示注册成功并清理表单
         const { error: signinError } = await client.auth.signInWithPassword({
