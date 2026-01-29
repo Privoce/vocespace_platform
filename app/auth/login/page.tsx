@@ -113,25 +113,29 @@ function LoginForm({ searchParams }: LoginPageProps) {
           );
           return;
         }
-        // 将携带的参数传递给注册请求，用户就可以通过注册确认的email链接继续完成注册流程进行相应的跳转
-        const searchParamsStr = searchParams
-          ? new URLSearchParams(
-              searchParams as Record<string, string>,
-            ).toString()
-          : urlSearchParams
-            ? urlSearchParams.toString()
-            : "";
-        // 使用 hash (#) 承载查询参数，避免 Supabase 在生成验证链接时丢弃 query string
-        let emailRedirectTo = `${window.location.origin}/auth/verify_email`;
-        if (searchParamsStr) {
-          emailRedirectTo += `#${searchParamsStr}`;
+
+        const searchParamsObj: Record<string, string> = {};
+        if (searchParams) {
+          Object.entries(searchParams as Record<string, string>).forEach(
+            ([k, v]) => (searchParamsObj[k] = v),
+          );
+        } else if (urlSearchParams) {
+          urlSearchParams.forEach((v, k) => (searchParamsObj[k] = v));
         }
+
+        // 使用 hash (#) 承载查询参数作为兼容方案，避免 Supabase 在生成验证链接时丢弃 query string
+        let emailRedirectTo = `${window.location.origin}/auth/verify_email`;
 
         const { error } = await client.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo,
+            // 将自定义参数放到 data（会存入 user_metadata）以便在验证页面通过 getUser 获取
+            data:
+              Object.keys(searchParamsObj).length > 0
+                ? searchParamsObj
+                : undefined,
           },
         });
 

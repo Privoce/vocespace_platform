@@ -13,6 +13,7 @@ import {
   Checkbox,
   CheckboxOptionType,
   Col,
+  Input,
   InputNumber,
   InputNumberProps,
   Radio,
@@ -21,6 +22,7 @@ import {
 } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
 import { useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export interface UserSettingsProps {
   messageApi: MessageInstance;
@@ -42,80 +44,34 @@ export function UserSettings({
   updateUserInfo,
 }: UserSettingsProps) {
   const { t } = useI18n();
-  const [volume, setVolume] = useState(userInfo.settings?.volume || 100);
-  const [blur, setBlur] = useState<number>(userInfo.settings?.blur || 0.0);
-  const [openShareAudio, setOpenShareAudio] = useState<boolean>(
-    userInfo.settings?.openShareAudio || true
-  );
-  const [openPromptSound, setOpenPromptSound] = useState<boolean>(
-    userInfo.settings?.openPromptSound || true
-  );
-  const [screenBlur, setScreenBlur] = useState<number>(
-    userInfo.settings?.screenBlur || 0.0
-  );
-  const [aiChoose, setAiChoose] = useState<string[]>(() => {
-    let { spent, todo } = userInfo.settings?.ai.cut || {
-      spent: false,
-      todo: true,
-    };
-    const choices: string[] = [];
-    if (spent) choices.push("spent");
-    if (todo) choices.push("todo");
-    return choices;
-  });
-  const [aiExtraction, setAiExtraction] = useState<Extraction>("medium");
-  const aiChooseOptions: CheckboxOptionType<string>[] = [
-    { label: t("user.setting.general.ai.spent"), value: "spent" },
-    { label: t("user.setting.general.ai.todo"), value: "todo" },
-  ];
+  const [newPassword, setNewPassword] = useState("");
+  const [changing, setChanging] = useState(false);
+  const client = createClient();
 
-  const isChanged = useMemo(() => {
-    if (!userInfo.settings) return true;
-    if (userInfo.settings.volume !== volume) return true;
-    if (userInfo.settings.blur !== blur) return true;
-    if (userInfo.settings.screenBlur !== screenBlur) return true;
-    const aiConf = userInfo.settings.ai.cut;
-    const spent = aiChoose.includes("spent");
-    const todo = aiChoose.includes("todo");
-    if (aiConf.spent !== spent) return true;
-    if (aiConf.todo !== todo) return true;
-    if (aiExtraction !== aiConf.extraction) return true;
-    if (userInfo.settings.openShareAudio !== openShareAudio) return true;
-    if (userInfo.settings.openPromptSound !== openPromptSound) return true;
-    return false;
-  }, [
-    userInfo.settings,
-    volume,
-    blur,
-    screenBlur,
-    aiChoose,
-    aiExtraction,
-    openShareAudio,
-    openPromptSound,
-  ]);
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      messageApi.error(
+        t("user.setting.password.min_length") || "Password too short",
+      );
+      return;
+    }
 
-  const saveSettings = async () => {
-    const success= await updateUserInfo({
-      settings: {
-        volume,
-        blur,
-        screenBlur,
-        openShareAudio,
-        openPromptSound,
-        ai: {
-          cut: {
-            spent: aiChoose.includes("spent"),
-            todo: aiChoose.includes("todo"),
-            extraction: aiExtraction,
-          },
-        },
-      },
-    });
-
-    if (success) {
-      messageApi.success(t("user.setting.general.success.save"));
-    }else{
-      messageApi.error(t("user.setting.general.error.save"));
+    try {
+      setChanging(true);
+      const { data, error } = await client.auth.updateUser({
+        password: newPassword,
+      });
+      if (error) throw error;
+      messageApi.success(
+        t("user.setting.password.success") || "Password updated",
+      );
+      setNewPassword("");
+    } catch (e) {
+      messageApi.error(
+        e instanceof Error ? e.message : t("user.setting.password.fail"),
+      );
+    } finally {
+      setChanging(false);
     }
   };
 
@@ -151,175 +107,45 @@ export function UserSettings({
         </Button>
       </div>
       <div className={styles.items}>
-        {/* <div className={styles.items_general}>
-          <div className={styles.items_general_title}>
-            {t("user.setting.general.title")}
+        <div className={styles.items_section}>
+          <div className={styles.items_section_title}>
+            {t("user.setting.password.change") || "修改密码"}
           </div>
-          <div className={styles.items_general_item}>
-            <div>{t("user.setting.general.volume")}</div>
-            <div>
-              <Row>
-                <Col span={12}>
-                  <Slider
-                    min={0}
-                    max={100}
-                    onChange={(newValue) => setVolume(newValue as number)}
-                    value={typeof volume === "number" ? volume : 0}
-                  />
-                </Col>
-                <Col span={4}>
-                  <InputNumber
-                    min={0}
-                    max={100}
-                    style={{ margin: "0 16px" }}
-                    value={volume}
-                    onChange={(newValue) => setVolume(newValue as number)}
-                  />
-                </Col>
-              </Row>
-            </div>
+          <div className={styles.items_section_desc}>
+            {t("user.setting.password.change_desc") ||
+              "输入新密码以更新账户密码。"}
           </div>
-          <div className={styles.items_general_item}>
-            <div>{t("user.setting.general.blur")}</div>
-            <div>
-              <Row>
-                <Col span={12}>
-                  <Slider
-                    min={0.0}
-                    step={0.05}
-                    max={1.0}
-                    onChange={(newValue) => setBlur(newValue as number)}
-                    value={typeof blur === "number" ? blur : 0}
-                  />
-                </Col>
-                <Col span={4}>
-                  <InputNumber
-                    min={0.0}
-                    step={0.05}
-                    max={1.0}
-                    style={{ margin: "0 16px" }}
-                    value={blur}
-                    onChange={(newValue) => setBlur(newValue as number)}
-                  />
-                </Col>
-              </Row>
-            </div>
-          </div>
-          <div className={styles.items_general_item}>
-            <div>{t("user.setting.general.screenBlur")}</div>
-            <div>
-              <Row>
-                <Col span={12}>
-                  <Slider
-                    min={0.0}
-                    max={1.0}
-                    step={0.05}
-                    onChange={(newValue) => setScreenBlur(newValue as number)}
-                    value={typeof screenBlur === "number" ? screenBlur : 0}
-                  />
-                </Col>
-                <Col span={4}>
-                  <InputNumber
-                    min={0.0}
-                    step={0.05}
-                    max={1.0}
-                    style={{ margin: "0 16px" }}
-                    value={screenBlur}
-                    onChange={(newValue) => setScreenBlur(newValue as number)}
-                  />
-                </Col>
-              </Row>
-            </div>
-          </div>
-          <div className={styles.items_general_item}>
-            <div>{t("user.setting.general.openShareAudio")}</div>
-            <div style={{ width: 500, marginTop: 8 }}>
-              <Radio.Group
-                size="large"
-                block
-                value={openShareAudio}
-                onChange={(e) => setOpenShareAudio(e.target.value)}
-              >
-                <Radio.Button value={true}>
-                  {t("user.setting.general.open")}
-                </Radio.Button>
-                <Radio.Button value={false}>
-                  {t("user.setting.general.close")}
-                </Radio.Button>
-              </Radio.Group>
-            </div>
-          </div>
-          <div className={styles.items_general_item}>
-            <div>{t("user.setting.general.openPromptSound")}</div>
-            <div style={{ width: 500, marginTop: 8 }}>
-              <Radio.Group
-                size="large"
-                block
-                value={openPromptSound}
-                onChange={(e) => setOpenPromptSound(e.target.value)}
-              >
-                <Radio.Button value={true}>
-                  {t("user.setting.general.open")}
-                </Radio.Button>
-                <Radio.Button value={false}>
-                  {t("user.setting.general.close")}
-                </Radio.Button>
-              </Radio.Group>
-            </div>
-          </div>
-        </div>
-        <div className={styles.items_general}>
-          <div className={styles.items_general_title}>
-            {t("user.setting.general.ai.title")}
-          </div>
-          <div className={styles.items_general_item}>
-            <div>{t("user.setting.general.ai.source")}</div>
-            <div style={{ width: 500, marginTop: 8 }}>
-              <Checkbox.Group
-                options={aiChooseOptions}
-                value={aiChoose}
-                onChange={(e) => {
-                  setAiChoose(e as string[]);
-                }}
-              ></Checkbox.Group>
-            </div>
-          </div> 
-
-          <div className={styles.items_general_item}>
-            <div>{t("user.setting.general.ai.extraction")}</div>
-            <div style={{ width: 500, marginTop: 8 }}>
-              <Radio.Group
-                size="large"
-                block
-                value={aiExtraction}
-                onChange={(e) => setAiExtraction(e.target.value)}
-              >
-                <Radio.Button value={"easy"}>
-                  {t("user.setting.general.ai.easy")}
-                </Radio.Button>
-                <Radio.Button value={"medium"}>
-                  {t("user.setting.general.ai.mid")}
-                </Radio.Button>
-                <Radio.Button value={"max"}>
-                  {t("user.setting.general.ai.max")}
-                </Radio.Button>
-              </Radio.Group>
-            </div>
-          </div>
-
-          <div className={styles.items_general_item}>
-            {isChanged && (
-              <Button
-                type="primary"
-                style={{ width: 500 }}
-                size="large"
-                onClick={saveSettings}
-              >
-                {t("user.setting.general.save")}
-              </Button>
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              marginTop: 8,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <Input.Password
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder={
+                t("user.setting.password.placeholder") || "New password"
+              }
+              style={{ width: 420 }}
+            />
+            {newPassword.trim().length > 0 && (
+              <div style={{ width: "100%" }}>
+                <Button
+                  type="primary"
+                  onClick={handleChangePassword}
+                  loading={changing}
+                >
+                  {t("user.setting.password.change_btn") || "修改"}
+                </Button>
+              </div>
             )}
           </div>
-        </div>*/}
+        </div>
+        {/* 修改用户密码 */}
 
         <div className={styles.items_delete}>
           <div className={styles.items_delete_title}>

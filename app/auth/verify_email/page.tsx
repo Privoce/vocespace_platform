@@ -1,11 +1,36 @@
 "use client";
 import { Button, Result } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const client = createClient();
+
+  // 尝试通过 Supabase 的 getUser 获取注册时传入的自定义 data（会存放在 user.user_metadata）
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await client.auth.getUser();
+        if (error) return;
+        const user = data?.user;
+        if (user && user.user_metadata) {
+          // 将 user_metadata 转换为查询参数并跳回登录页（或其他页面）
+          const params = new URLSearchParams();
+          Object.entries(user.user_metadata).forEach(([k, v]) => {
+            if (v !== undefined && v !== null) params.set(k, String(v));
+          });
+          const qs = params.toString();
+          const target = qs ? `/auth/login?${qs}` : "/auth/login";
+          router.replace(target);
+        }
+      } catch (e) {
+        // 忽略错误，让用户手动点击 Sign in
+      }
+    })();
+  }, [client, router]);
 
   const handleSignIn = () => {
     // 保留所有 URL 参数并传递给登录页面

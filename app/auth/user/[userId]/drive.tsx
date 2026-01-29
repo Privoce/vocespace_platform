@@ -51,7 +51,7 @@ export default function OnboardingDrive({
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(
-    user.user_metadata?.avatar_url
+    user.user_metadata?.avatar_url,
   );
   const [step, setStep] = useState(1);
   const searchParams = useSearchParams();
@@ -127,7 +127,7 @@ export default function OnboardingDrive({
 
       const success = await dbApi.userInfo.insert(
         client,
-        updateData as UserInfo
+        updateData as UserInfo,
       );
 
       if (success) {
@@ -168,7 +168,7 @@ export default function OnboardingDrive({
             // updateData.username,
             DEFAULT_USER_INFO(user.id, updateData.username),
             "vocespace",
-            spaceName
+            spaceName,
           );
 
           window.open(redirectUrl, "_self");
@@ -279,7 +279,8 @@ export default function OnboardingDrive({
             { min: 2, message: t("user.onboarding.usernameLength") },
             { max: 30, message: t("user.onboarding.usernameLength") },
             {
-              pattern: /^[a-zA-Z0-9\u4e00-\u9fa5_-]+$/,
+              // 允许空格，方便包含多个单词的姓名
+              pattern: /^[a-zA-Z0-9\u4e00-\u9fa5 _-]+$/,
               message: t("user.onboarding.usernamePattern"),
             },
           ]}
@@ -351,8 +352,8 @@ export default function OnboardingDrive({
             {step === 1
               ? t("user.onboarding.step1")
               : step === 2
-              ? t("user.onboarding.step2")
-              : t("user.onboarding.step3")}{" "}
+                ? t("user.onboarding.step2")
+                : t("user.onboarding.step3")}{" "}
             ({step}/3)
           </Text>
         </div>

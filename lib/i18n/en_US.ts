@@ -177,6 +177,15 @@ export default {
         "Usernames can only contain letters, numbers, Chinese characters, underscores, and hyphens, and cannot be repeated",
     },
     setting: {
+      username_change_btn: "Change Username",
+      password: {
+        change: "Change Password",
+        change_desc: "Enter a new password to update your account password.",
+        placeholder: "New Password",
+        success: "Password updated successfully",
+        fail: "Password update failed, please try again",
+        change_btn: "Update Password",
+      },
       general: {
         title: "Basic Settings",
         volume: "Volume",

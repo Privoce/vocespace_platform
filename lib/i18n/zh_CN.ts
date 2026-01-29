@@ -172,6 +172,15 @@ export default {
         "用户名只能包含字母、数字、中文、下划线和连字符且不可重复",
     },
     setting: {
+      username_change_btn: "修改用户名",
+      password: {
+        change: "修改密码",
+        change_desc: "输入新密码以更新账户密码。",
+        placeholder: "新密码",
+        success: "密码更新成功",
+        fail: "密码更新失败，请重试",
+        change_btn: "更新密码",
+      },
       general: {
         title: "基础设置",
         volume: "音量",

@@ -12,6 +12,7 @@ import {
   Skeleton,
   Result,
   Input,
+  Form,
 } from "antd";
 import {
   EditOutlined,
@@ -134,6 +135,8 @@ export function UserProfile({
   const { t } = useI18n();
   const [openPubSpace, setOpenPubSpace] = useState<TabKey[]>([]);
   const [descEditOpen, setDescEditOpen] = useState(false);
+  const [usernameEditOpen, setUsernameEditOpen] = useState(false);
+  const [usernameForm] = Form.useForm();
   const [linksEditOpen, setLinksEditOpen] = useState<boolean>(false);
   const [linkedin, setLinkedin] = useState(userInfo?.linkedin || "");
   const [github, setGithub] = useState(userInfo?.github || "");
@@ -146,18 +149,11 @@ export function UserProfile({
   const router = useRouter();
   const selfVocespaceUrl = useMemo(() => {
     if (user && userInfo?.username) {
-      vocespaceUrl(
-        {
-          ...userInfo,
-          id: user.id,
-        },
-        "vocespace"
-      ).then((url) => {
-        return url;
-      });
+      return vocespaceUrlVisit(userInfo.username);
     } else {
       return "";
     }
+    
   }, [user?.id, userInfo]);
 
   // 空间类型偏好图表配置
@@ -383,6 +379,41 @@ export function UserProfile({
     setDescEditOpen(true);
   };
 
+  const handleUsername = () => {
+    if (!isSelf) return;
+    setUsernameEditOpen(true);
+  };
+
+  // 当打开编辑用户名模态框时填充当前用户名
+  React.useEffect(() => {
+    if (usernameEditOpen) {
+      usernameForm.setFieldsValue({ username: userInfo?.username || "" });
+    }
+  }, [usernameEditOpen, userInfo, usernameForm]);
+
+  const saveUsername = async () => {
+    try {
+      const values = await usernameForm.validateFields();
+      const newUsername = (values.username || "").trim();
+      if (!newUsername) return;
+
+      const updateData: Partial<UserInfo> = { username: newUsername };
+      const ok = await updateUserInfo(updateData);
+      if (ok) {
+        messageApi.success(t("user.setting.saveSuccess"));
+        setUsernameEditOpen(false);
+        await flushUser();
+      } else {
+        messageApi.error(t("user.onboarding.usernameExists"));
+      }
+    } catch (error) {
+      // validation errors or update errors
+      if (error instanceof Error) {
+        messageApi.error(error.message);
+      }
+    }
+  };
+
   const saveLinks = async () => {
     try {
       const updateData: Partial<UserInfo> = {
@@ -482,7 +513,9 @@ export function UserProfile({
                 </EditAvatarBtn>
               </div>
               <div className={styles.profileInfo}>
-                <div className={styles.username}>{userInfo.username}</div>
+                <div className={styles.username} onClick={handleUsername}>
+                  {userInfo.username}
+                </div>
                 <div
                   className={styles.bio}
                   onClick={handleDesc}
@@ -516,6 +549,7 @@ export function UserProfile({
                             shape="circle"
                             icon={link.icon}
                             onClick={() => {
+                              console.warn("open link", link.url);
                               window.open(link.url!, "_blank");
                             }}
                           ></Button>
@@ -523,7 +557,7 @@ export function UserProfile({
                       </Tooltip>
                     ) : (
                       <></>
-                    )
+                    ),
                   )}
                 </div>
                 <div className={styles.metaInfo}>
@@ -668,6 +702,41 @@ export function UserProfile({
           }}
           style={{ resize: "none", marginBottom: 16 }}
         />
+      </Modal>
+      <Modal
+        open={usernameEditOpen}
+        onCancel={() => setUsernameEditOpen(false)}
+        title={t("user.setting.username")}
+        footer={null}
+      >
+        <Form form={usernameForm}>
+          <Form.Item
+            name="username"
+            label={t("user.onboarding.profile.username")}
+            rules={[
+              {
+                required: true,
+                message: t("user.onboarding.usernameRequired"),
+              },
+              { min: 2, message: t("user.onboarding.usernameLength") },
+              { max: 30, message: t("user.onboarding.usernameLength") },
+              {
+                // 允许空格，方便包含多个单词的姓名
+                pattern: /^[a-zA-Z0-9\u4e00-\u9fa5 _-]+$/,
+                message: t("user.onboarding.usernamePattern"),
+              },
+            ]}
+          >
+            <Input
+              size="large"
+              placeholder={t("user.onboarding.profile.usernamePlaceholder")}
+              maxLength={30}
+            />
+          </Form.Item>
+          <Button type="primary" onClick={saveUsername}>
+            {t("user.setting.username_change_btn")}
+          </Button>
+        </Form>
       </Modal>
       <Modal
         open={linksEditOpen}
