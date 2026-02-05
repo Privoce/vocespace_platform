@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { Input, Button, message } from "antd";
 import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/lib/i18n/i18n";
 
+export const dynamic = 'force-dynamic';
+
 export default function Page() {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -15,13 +16,24 @@ export default function Page() {
   const [email, setEmail] = useState("");
   const [msgApi, contextHolder] = message.useMessage();
   const { t } = useI18n();
-
-  const code = searchParams?.get("code") || "";
-  const accessToken = searchParams?.get("access_token") || "";
-  const error = searchParams?.get("error") || "";
-  const errorCode = searchParams?.get("error_code") || "";
-  const errorDescription = searchParams?.get("error_description") || "";
+  const [code, setCode] = useState("");
+  const [accessToken, setAccessToken] = useState("");
+  const [error, setError] = useState("");
+  const [errorCode, setErrorCode] = useState("");
+  const [errorDescription, setErrorDescription] = useState("");
   const [hasSessionFromUrl, setHasSessionFromUrl] = useState(false);
+
+  useEffect(() => {
+    // parse URL search params on client
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setCode(params.get("code") || "");
+      setAccessToken(params.get("access_token") || "");
+      setError(params.get("error") || "");
+      setErrorCode(params.get("error_code") || "");
+      setErrorDescription(params.get("error_description") || "");
+    }
+  }, []);
 
   useEffect(() => {
     // 显示URL中的错误信息
@@ -116,45 +128,47 @@ export default function Page() {
   };
 
   return (
-    <div style={{ maxWidth: 520, margin: "40px auto", padding: 20 }}>
-      {contextHolder}
-      <h2>{t("reset.new.title")}</h2>
-      {(code || accessToken) ? (
-        <div>
-          <p>{t("reset.new.detected")}</p>
-          <div style={{ marginBottom: 12 }}>
-            <Input.Password
-              placeholder={t("reset.new.newPasswordPlaceholder")}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+    <Suspense fallback={null}>
+      <div style={{ maxWidth: 520, margin: "40px auto", padding: 20 }}>
+        {contextHolder}
+        <h2>{t("reset.new.title")}</h2>
+        {(code || accessToken) ? (
+          <div>
+            <p>{t("reset.new.detected")}</p>
+            <div style={{ marginBottom: 12 }}>
+              <Input.Password
+                placeholder={t("reset.new.newPasswordPlaceholder")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <Input.Password
+                placeholder={t("reset.new.confirmPasswordPlaceholder")}
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+              />
+            </div>
+            <Button type="primary" onClick={submitNewPassword} loading={loading}>
+              {t("reset.new.submit")}
+            </Button>
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <Input.Password
-              placeholder={t("reset.new.confirmPasswordPlaceholder")}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-            />
+        ) : (
+          <div>
+            <p>{t("reset.new.enterEmailPrompt")}</p>
+            <div style={{ marginBottom: 12 }}>
+              <Input
+                value={email}
+                placeholder={t("reset.new.emailPlaceholder")}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <Button type="primary" onClick={sendResetEmail} loading={loading}>
+              {t("reset.new.sendResetEmail")}
+            </Button>
           </div>
-          <Button type="primary" onClick={submitNewPassword} loading={loading}>
-            {t("reset.new.submit")}
-          </Button>
-        </div>
-      ) : (
-        <div>
-          <p>{t("reset.new.enterEmailPrompt")}</p>
-          <div style={{ marginBottom: 12 }}>
-            <Input
-              value={email}
-              placeholder={t("reset.new.emailPlaceholder")}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <Button type="primary" onClick={sendResetEmail} loading={loading}>
-            {t("reset.new.sendResetEmail")}
-          </Button>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </Suspense>
   );
 }

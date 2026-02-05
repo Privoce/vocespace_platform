@@ -2,6 +2,8 @@ import { dbApi } from "@/lib/api/db";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const uid = request.nextUrl.searchParams.get("uid");
