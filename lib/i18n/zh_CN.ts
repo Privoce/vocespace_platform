@@ -35,6 +35,7 @@ export default {
     },
   },
   login: {
+    resetEmailSent: "重置邮件已发送，请查收邮件中的链接",
     confirmPassword: "确认密码",
     title: "登陆",
     welcome: "欢迎使用VoceSpace",
@@ -259,6 +260,25 @@ export default {
   error: {
     bucket: {
       fileNoExt: "文件缺少扩展名，无法上传",
+    },
+  },
+  reset: {
+    new: {
+      title: "重置密码",
+      detected: "检测到重置链接，设置新密码：",
+      newPasswordPlaceholder: "新密码",
+      confirmPasswordPlaceholder: "确认新密码",
+      submit: "提交",
+      sendResetEmail: "发送重置邮件",
+      enterEmailPrompt: "输入邮箱以接收重置密码邮件：",
+      emailPlaceholder: "邮箱",
+      resetEmailSent: "重置邮件已发送，请检查邮箱",
+      sendResetFailed: "发送重置邮件失败",
+      enterNewPassword: "请输入新密码",
+      passwordNotMatch: "两次输入的密码不一致",
+      resetSuccess: "密码已重置，请使用新密码登录",
+      expiredMessage: "重置链接已过期，请重新发送重置邮件",
+      enterEmailAddress: "请输入邮箱地址",
     },
   },
 };

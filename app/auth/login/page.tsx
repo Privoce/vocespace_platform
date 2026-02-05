@@ -375,7 +375,31 @@ function LoginForm({ searchParams }: LoginPageProps) {
               <div className={styles.login_form_input_title}>
                 <span>{t("login.password")}</span>
                 {!isSignUp && (
-                  <a href="/auth/forget-password" style={{ color: "#22ccee" }}>
+                  <a
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      const to = email.trim();
+                      if (!to) {
+                        messageApi.error(t("login.placeholder.email"));
+                        return;
+                      }
+                      try {
+                        const { error } =
+                          await client.auth.resetPasswordForEmail(to, {
+                            redirectTo: `${window.location.origin}/auth/forget-password`,
+                          });
+                        if (error) throw error;
+                        messageApi.success(t("login.resetEmailSent"));
+                      } catch (err) {
+                        messageApi.error(
+                          err instanceof Error
+                            ? err.message
+                            : t("login.resetEmailFail"),
+                        );
+                      }
+                    }}
+                    style={{ color: "#22ccee", cursor: "pointer" }}
+                  >
                     {t("login.forgetPwd")}
                   </a>
                 )}

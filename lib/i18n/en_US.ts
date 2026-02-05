@@ -268,4 +268,25 @@ export default {
       fileNoExt: "The file is missing an extension and cannot be uploaded",
     },
   },
+  reset: {
+    new: {
+      title: "Reset Password",
+      detected: "Reset link detected, set a new password:",
+      newPasswordPlaceholder: "New Password",
+      confirmPasswordPlaceholder: "Confirm New Password",
+      submit: "Submit",
+      sendResetEmail: "Send Reset Email",
+      enterEmailPrompt:
+        "Enter email address to receive the password reset email:",
+      emailPlaceholder: "Email address",
+      resetEmailSent: "Reset email has been sent, please check your email",
+      sendResetFailed: "Failed to send reset email",
+      enterNewPassword: "Please enter new password",
+      passwordNotMatch: "The two entered passwords do not match",
+      resetSuccess:
+        "Password has been reset, please log in with the new password",
+      expiredMessage: "Reset link has expired, please resend the reset email",
+      enterEmailAddress: "Please enter email address",
+    },
+  },
 };

@@ -5,12 +5,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
+  const type = request.nextUrl.searchParams.get("type"); // recovery, signup, etc.
   const spaceName = request.nextUrl.searchParams.get("spaceName");
   const from = request.nextUrl.searchParams.get("from");
   const redirectTo = request.nextUrl.searchParams.get("redirectTo");
   const origin = request.nextUrl.origin;
 
-  console.log("Callback received:", { code, spaceName, from, origin });
+  console.log("Callback received:", { code, type, spaceName, from, origin });
 
   if (code) {
     const supabase = await createClient();
@@ -24,6 +25,12 @@ export async function GET(request: NextRequest) {
     }
 
     if (data?.user) {
+      // 如果是密码重置流程，直接跳转到重置密码页面
+      if (type === "recovery") {
+        console.log("Password recovery flow detected, redirecting to forget-password page");
+        return NextResponse.redirect(`${origin}/auth/forget-password`);
+      }
+
       try {
         // 获取用户ID并重定向到用户页面
         const userId = data.user.id;
