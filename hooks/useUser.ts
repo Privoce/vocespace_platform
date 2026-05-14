@@ -6,6 +6,7 @@ import { UserInfo } from "@/lib/std/user";
 import { vocespace } from "@/lib/api/vocespace/space";
 import { Nullable } from "@/lib/std";
 import { Space } from "@/lib/std/space";
+import { useUserStore } from "@/app/store/user";
 
 export interface UseUserOptions {
   /**
@@ -53,7 +54,10 @@ export interface UseUserResult {
  */
 export function useUser(options: UseUserOptions = {}): UseUserResult {
   const [user, setUser] = useState<Nullable<User>>(null);
-  const [userInfo, setUserInfo] = useState<Nullable<UserInfo>>(null);
+
+  const userInfo = useUserStore((state) => state.userInfo);
+  const setUserInfo = useUserStore((state) => state.setUserInfo);
+  const mergeUserInfo = useUserStore((state) => state.mergeUserInfo);
   const [currentAuthUser, setCurrentAuthUser] = useState<Nullable<User>>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Nullable<string>>(null);
@@ -190,7 +194,7 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
       const response = await vocespace.createSpace(
         currentAuthUser.id,
         displayName,
-        spaceName
+        spaceName,
       );
 
       if (!response.ok) {
@@ -213,7 +217,8 @@ export function useUser(options: UseUserOptions = {}): UseUserResult {
     try {
       await dbApi.userInfo.update(client, currentAuthUser.id, updates);
       // 更新本地状态
-      setUserInfo((prev) => (prev ? { ...prev, ...updates } : null));
+      // setUserInfo((prev) => (prev ? { ...prev, ...updates } : null));
+      mergeUserInfo(updates);
       return true;
     } catch (error) {
       console.error("Error updating user info:", error);
@@ -287,7 +292,7 @@ export function useAuth() {
 
 export const getUsername = (
   user: Nullable<User>,
-  userInfo: Nullable<UserInfo>
+  userInfo: Nullable<UserInfo>,
 ): string => {
   if (!user) return "unknown";
   if (userInfo?.username) {

@@ -9,10 +9,18 @@ import {
   CalendarOutlined,
   DollarOutlined,
 } from "@ant-design/icons";
-import { Space, SpaceState, FrequencyInterval } from "@/lib/std/space";
+import {
+  Space,
+  SpaceState,
+  FrequencyInterval,
+  vocespaceUrl,
+  vocespaceUrlVisit,
+} from "@/lib/std/space";
 import styles from "@/styles/space_card.module.scss";
 import { useRouter } from "next/navigation";
 import { createSpaceName } from "@/lib/std";
+import { UserInfo } from "@/lib/std/user";
+import { useUserStore } from "@/app/store/user";
 
 export interface SpaceCardProps {
   space: Space;
@@ -26,6 +34,7 @@ export function SpaceCard({
   cardType = "default",
 }: SpaceCardProps) {
   const router = useRouter();
+  const userInfo = useUserStore((state) => state.userInfo);
 
   const formatFrequency = (frequency: any) => {
     switch (frequency.interval) {
@@ -67,14 +76,14 @@ export function SpaceCard({
     return `${minutes}分钟`;
   };
 
-  const handleJoinSpace = (e: React.MouseEvent) => {
+  const handleJoinSpace = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Handle join space logic
-    // window.open(url, "_blank");
-    // jump to space detail page
-    // router.push("/space/" + space.id);
     // 暂时使用直接跳转平台房间的方式
-    window.open(space.url, "_blank");
+    let url = vocespaceUrlVisit(space.name);
+    if (userInfo) {
+      url = await vocespaceUrl(userInfo, "vocespace", space.name);
+    }
+    window.open(url, "_blank");
   };
 
   const handleCardClick = () => {
@@ -89,9 +98,7 @@ export function SpaceCard({
         className={styles.spaceCard}
         styles={{ body: { padding: 0 } }}
         style={style}
-        onClick={() => {
-          window.open(space.url, "_blank");
-        }}
+        onClick={handleJoinSpace}
       >
         <div className={styles.spaceCard_edit}>
           <div className={styles.spaceCard_edit_imageSection}>
@@ -196,7 +203,9 @@ export function SpaceCard({
             <div className={styles.name}>{space.name}</div>
           </div>
 
-          <div className={styles.content_line_desc}>{space.desc || "no description"}</div>
+          <div className={styles.content_line_desc}>
+            {space.desc || "no description"}
+          </div>
 
           <div className={styles.content_line}>
             <div className={styles.flex_line}>

@@ -133,7 +133,7 @@ export function UserProfile({
   spaces,
 }: UserProfileProps) {
   const { t } = useI18n();
-  const [openPubSpace, setOpenPubSpace] = useState<TabKey[]>([]);
+  const [openPubSpace, setOpenPubSpace] = useState<TabKey[]>(["publishs"]);
   const [descEditOpen, setDescEditOpen] = useState(false);
   const [usernameEditOpen, setUsernameEditOpen] = useState(false);
   const [usernameForm] = Form.useForm();
@@ -153,7 +153,6 @@ export function UserProfile({
     } else {
       return "";
     }
-    
   }, [user?.id, userInfo]);
 
   // 空间类型偏好图表配置
