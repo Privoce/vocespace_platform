@@ -4,7 +4,7 @@ export default {
     cancel: "Cancel",
     uploading: "Uploading...",
     copyright: "© 2026 VoceSpace, Inc. All rights reserved.",
-    getUserInfoFail: "Failed to get user information",
+    getUserInfoFail: "Failed to get user information", //flag
   },
   widgets: {
     ai: {
@@ -21,14 +21,14 @@ export default {
       today_done: "Completed today",
       history: "Current list",
       warning: {
-        empty: "Todo cannot be empty",
+        empty: "To-do cannot be empty",
       },
       success: {
-        add: "Todo added successfully",
+        add: "To-do added successfully",
       },
       error: {
-        fetch: "Failed to fetch todo, please try again",
-        add: "Failed to add todo, please try again",
+        fetch: "Failed to fetch to-do, please try again",
+        add: "Failed to add to-do, please try again",
       },
     },
   },
@@ -42,9 +42,9 @@ export default {
     alreadyHaveAccount: "Already have an account?",
     loginNow: "Log in now",
     noAccount: "Don't have an account yet?",
-    createAccount: "Register one",
-    sideTitle: "VoceSpace is for Remote Teams",
-    sideSubtitle: "AI Worklog, Team spaces, Private Rooms",
+    createAccount: "Register",
+    sideTitle: "Thank you for helping make the internet awesome.", //flag to consider removing right-hand UI
+    sideSubtitle: "-",
     passwordNotMatch: "Passwords do not match",
     placeholder: {
       email: "Please enter your email address",
@@ -53,7 +53,7 @@ export default {
     },
     signin: "Login",
     signinFail: "Login failed",
-    googleSignInFail: "Google Sign-in failed",
+    googleSignInFail: "Google sign-in failed",
     signup: "Register",
     signupSuccess:
       "Registration successful, please check your email for verification",
@@ -69,26 +69,26 @@ export default {
     },
   },
   join: {
-    title: "Join Vocespace and get your own space!",
+    title: "Join VoceSpace and get your own space!",
     subTitle:
       "Let more like-minded people discover your space and communicate with you",
     signUpNow: "Register now",
   },
   share: {
-    title: "Share your Vocespace",
-    subTitle: "Copy the link below to analyze your own Vocespace space",
+    title: "Share your VoceSpace",
+    subTitle: "Copy the link below to share your VoceSpace",
     copy: "Copy link",
   },
   space: {
     pub: {
       intro:
         "Quickly create your space. You can edit and manage it at any time.",
-      title: "create a space",
+      title: "Create a space",
       public: {
         title: "Public space",
         pub: "Public",
         private: "Private",
-        desc: "Anyone can view and subscribe to this space",
+        desc: "Anyone can view and join this space",
       },
       name: "Space name (required)",
       desc: "Space description (optional)",
@@ -99,7 +99,7 @@ export default {
         url: "Please enter a space address",
       },
       validation: {
-        limit2: "Each user can only create two spaces at most",
+        limit2: "Each user can create up to two spaces",
         name: "Space name cannot be empty",
         url: "Space address cannot be empty",
         failed:
@@ -119,23 +119,23 @@ export default {
     },
     profile: {
       joinAt: "Joined at",
-      selfVocespace: "Personal Vocespace",
+      selfVocespace: "Personal VoceSpace",
       edit: "Edit Profile",
       mySpace: "My Space",
       publishs: "My Space",
       subscribes: "History",
-      ai: "AI Analysis & TODO",
+      ai: "AI Analysis & To-do",
       placeholder: {
         desc: "An awesome netizen.",
       },
       joinUs: {
-        title: "Join Vocespace",
-        user: "Join on Vocespace",
+        title: "Join VoceSpace",
+        user: "Join on VoceSpace",
       },
     },
     onboarding: {
       welcome: {
-        title: "Welcome to Vocespace! 🎉",
+        title: "Welcome to VoceSpace! 🎉",
         subtitle: "Let's take a few minutes to set up your profile",
         features: {
           connect: "Connect with like-minded people",
@@ -147,7 +147,7 @@ export default {
       profile: {
         title: "Set up your profile",
         subtitle: "Tell everyone a little about yourself",
-        avatar: "Avatar",
+        avatar: "Profile Picture",
         username: "Nickname (required)",
         desc: "About me (optional)",
         avatarHint: "Click to upload an avatar (optional)",
@@ -161,7 +161,7 @@ export default {
       success: {
         title: "Set up! 🎊",
         subtitle:
-          "Your profile is set up. Now you can start exploring Vocespace!",
+          "Your profile is set up. Now you can start exploring VoceSpace!",
         redirecting: "Redirecting to your profile...",
       },
       step1: "Welcome",
@@ -174,7 +174,7 @@ export default {
       usernameRequired: "Please enter a username",
       usernameLength: "Nickname length should be 2-20 characters",
       usernamePattern:
-        "Usernames can only contain letters, numbers, Chinese characters, underscores, and hyphens, and cannot be repeated",
+        "Usernames can only contain letters, numbers, underscores, and hyphens, and cannot be repeated",
     },
     setting: {
       username_change_btn: "Change Username",
@@ -189,21 +189,21 @@ export default {
       general: {
         title: "Basic Settings",
         volume: "Volume",
-        blur: "Video Blur",
-        screenBlur: "Screen Blur",
+        blur: "Camera Video Blur",
+        screenBlur: "Screen Share Blur",
         openShareAudio: "Enable Screen Sharing Audio",
         openPromptSound: "Enable New User Joining Notification Sound",
         open: "ON",
         close: "OFF",
         ai: {
           title: "AI Settings",
-          source: "AI Work Log Source Data",
-          max: "Max",
+          source: "AI Worklog Source Data",
+          max: "Max Detail",
           mid: "Medium",
-          easy: "Easy",
+          easy: "High-level",
           spent: "Time Spent",
-          todo: "Combined with ToDo",
-          extraction: "Extract Content Fineness",
+          todo: "Combined with To-Do",
+          extraction: "Content Extraction Level-of-Detail", //flag
         },
         save: "Save Settings",
         success: {
@@ -241,7 +241,7 @@ export default {
       saving: "Saving...",
       editAvatar: "Change Avatar",
       cropAvatar: "Crop Avatar",
-      avatarUpdateSuccess: "Avatar Updated Successfully",
+      avatarUpdateSuccess: "Avatar updated successfully",
       avatarUpdateError: "Avatar update failed",
       uploadError: "Upload failed, please try again",
       imageFormatError: "Only JPG/PNG format images are supported",
