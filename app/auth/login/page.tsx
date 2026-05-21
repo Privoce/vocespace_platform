@@ -366,6 +366,9 @@ function LoginForm({ searchParams }: LoginPageProps) {
               <Input
                 value={email}
                 size="large"
+                type="email"
+                name="email"
+                autoComplete="email"
                 placeholder={t("login.placeholder.email")}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -407,6 +410,8 @@ function LoginForm({ searchParams }: LoginPageProps) {
 
               <Input.Password
                 value={password}
+                name="password"
+                autoComplete={isSignUp ? "new-password" : "current-password"}
                 onChange={(e) => setPassword(e.target.value)}
                 size="large"
                 placeholder={t("login.placeholder.pwd")}
@@ -437,6 +442,8 @@ function LoginForm({ searchParams }: LoginPageProps) {
 
                   <Input.Password
                     value={confirmPassword}
+                    name="confirmPassword"
+                    autoComplete="new-password"
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     size="large"
                     placeholder={
